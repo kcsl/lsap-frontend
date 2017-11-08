@@ -8,4 +8,4 @@ git clean -xdfq
 git reset <old_version>
 git commit -am "upgrade to <new version>"
 git checkout -b diff_map_upgraded
-git rebase diff_map #possibly need to add options here to fix deletions
+git rebase -s recursive -X theirs diff_map
