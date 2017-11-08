@@ -1,0 +1,21 @@
+23664+23+/linux-3.19-rc1/drivers/infiniband/hw/cxgb3/iwch_qp.c :
+
+same for 3.17, 3.18. 
+in 3.19 the order order of nodes changes in a way that dosen't matter (swapped unlock and lock at same height in graph)
+
+[13603+39+/linux-3.19-rc1/drivers/isdn/divert/isdn_divert.c]
+
+same as above, this time the cfg changes node order, but no functional difference between them
+
+[19691+30+/linux-3.19-rc1/drivers/net/ethernet/intel/i40evf/i40e_adminq.c]
+
+missing cfg/efg for some reason.
+
+the offset changed between 3.18 and 3.19, but no important difference in matching pair graph
+
+[5961+26+/linux-3.19-rc1/drivers/video/backlight/backlight.c]
+
+same as first two
+
+
+
