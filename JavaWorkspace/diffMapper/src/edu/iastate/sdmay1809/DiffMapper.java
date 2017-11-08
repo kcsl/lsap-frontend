@@ -32,9 +32,9 @@ public class DiffMapper {
 		it.run(DIFF_TEST_DIR, false);
 
 		timings.add(System.nanoTime());
-		DiffMapper dm = new DiffMapper(false);
-		int changesApplied = dm.run("oldInstanceMap_full.json");
-		if(changesApplied < 0) {
+		DiffMapper dm = new DiffMapper(true);
+		int changesApplied = dm.run("oldInstanceMap_xxs_norm.json");
+		if (changesApplied < 0) {
 			System.err.println("[ERROR] could not map differences!");
 		} else {
 			System.out.println("Done! Applied " + changesApplied + " changes");
@@ -63,9 +63,9 @@ public class DiffMapper {
 
 		return result;
 	}
-	
+
 	private boolean allowPrintStatements = true;
-	
+
 	public DiffMapper(boolean allowPrintStatements) {
 		this.allowPrintStatements = allowPrintStatements;
 	}
@@ -131,7 +131,7 @@ public class DiffMapper {
 			println("Applied " + String.format("%3d", numChanges) + " changes to: " + fname);
 			changesApplied += numChanges;
 		}
-		
+
 		return changesApplied;
 	}
 
@@ -167,28 +167,29 @@ public class DiffMapper {
 			JSONObject instance = instances.getJSONObject(i);
 			long offset = instance.getLong("offset");
 			String content = instance.getString("metadata");
-			String whitespace;
+			String buffer;
 			byte[] whitespaceBuffer = new byte[40];
+			
 			if (i == 0) {
 				sourceChannel.transferTo(offset, (fileSize - offset), targetChannel);
 				sourceChannel.truncate(offset);
-				r.seek(offset - 40);
-				r.readFully(whitespaceBuffer, 0, 40);
-				whitespace = new String(whitespaceBuffer);
-//				whitespace = new String(whitespaceBuffer).replaceAll("[^\f\t\r\n]", " ");
-				r.writeBytes(content);
-				r.writeBytes(whitespace.substring(whitespace.lastIndexOf('\n') + 1));
 				targetChannel.position(0L);
+				r.seek(offset - 40);
 			} else {
 				long currOffset = r.getFilePointer();
 				sourceChannel.transferFrom(targetChannel, currOffset, (offset - lastOffset));
 				r.seek(currOffset + (offset - lastOffset) - 40);
-				r.readFully(whitespaceBuffer, 0, 40);
-				whitespace = new String(whitespaceBuffer);
-//				whitespace = new String(whitespaceBuffer).replaceAll("[^\f\t\r\n]", " ");
-				r.writeBytes(content);
-				r.writeBytes(whitespace.substring(whitespace.lastIndexOf('\n') + 1));
 			}
+			
+			r.readFully(whitespaceBuffer, 0, 40);
+			buffer = new String(whitespaceBuffer);
+			
+			r.seek(r.getFilePointer() - 40);
+			r.writeBytes(buffer.substring(0, buffer.lastIndexOf('\n') + 1));
+			r.writeBytes(buffer.substring(buffer.lastIndexOf('\n') + 1).replaceAll("[^\f\t\r\n]", " "));
+			r.writeBytes(content);
+			r.writeBytes(buffer.substring(buffer.lastIndexOf('\n') + 1));
+
 			lastOffset = offset;
 		}
 		sourceChannel.transferFrom(targetChannel, r.getFilePointer(), targetChannel.size() - targetChannel.position());
@@ -198,9 +199,9 @@ public class DiffMapper {
 		rtemp.close();
 		fbak.delete();
 	}
-	
+
 	public void println(String msg) {
-		if(allowPrintStatements) {
+		if (allowPrintStatements) {
 			System.out.println(msg);
 		}
 	}
