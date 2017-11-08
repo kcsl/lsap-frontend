@@ -65,14 +65,14 @@ index b604564dec5c..25abe64726e3 100644
  	if (retval)
  		return retval;
 diff --git a/drivers/media/rc/lirc_dev.c b/drivers/media/rc/lirc_dev.c
-index dc5cbffcd5a2..db0ac2b6d173 100644
+index dc5cbffcd5a2..1f0e8639ad58 100644
 --- a/drivers/media/rc/lirc_dev.c
 +++ b/drivers/media/rc/lirc_dev.c
 @@ -723,6 +723,7 @@ ssize_t lirc_dev_fop_read(struct file *file,
  			schedule();
  			set_current_state(TASK_INTERRUPTIBLE);
  
-+			if (/* 1ab60aa@@@DEADLOCK@@@16145@@@41@@@drivers/media/rc/lirc_dev.c@@@irctl_lock */
++			    /* 1ab60aa@@@DEADLOCK@@@16145@@@41@@@drivers/media/rc/lirc_dev.c@@@irctl_lock */
  			if (mutex_lock_interruptible(&ir->irctl_lock)) {
  				ret = -ERESTARTSYS;
  				remove_wait_queue(&ir->buf->wait_poll, &wait);
@@ -387,18 +387,18 @@ index b5e929f1bf82..28e9d62881d4 100644
  		hdw->cmd_buffer[0] = FX2CMD_GET_IR_CODE;
  		stat = pvr2_send_request(hdw,
 diff --git a/drivers/message/fusion/mptctl.c b/drivers/message/fusion/mptctl.c
-index b0a892a2bf1b..cc70ea9f7847 100644
+index b0a892a2bf1b..d99f06920657 100644
 --- a/drivers/message/fusion/mptctl.c
 +++ b/drivers/message/fusion/mptctl.c
 @@ -181,9 +181,11 @@ mptctl_syscall_down(MPT_ADAPTER *ioc, int nonblock)
  	int rc = 0;
  
  	if (nonblock) {
-+		if (/* 15b3b8f@@@DEADLOCK@@@6731@@@38@@@drivers/message/fusion/mptctl.c@@@mutex */
++		    /* 15b3b8f@@@DEADLOCK@@@6731@@@38@@@drivers/message/fusion/mptctl.c@@@mutex */
  		if (!mutex_trylock(&ioc->ioctl_cmds.mutex))
  			rc = -EAGAIN;
  	} else {
-+		if (/* 1f93823@@@DEADLOCK@@@6804@@@48@@@drivers/message/fusion/mptctl.c@@@mutex */
++		    /* 1f93823@@@DEADLOCK@@@6804@@@48@@@drivers/message/fusion/mptctl.c@@@mutex */
  		if (mutex_lock_interruptible(&ioc->ioctl_cmds.mutex))
  			rc = -ERESTARTSYS;
  	}
@@ -439,14 +439,14 @@ index 93111fa8d282..0d2ca78ac0f6 100644
  	mutex_lock(&peer->lock);
  
 diff --git a/drivers/platform/goldfish/goldfish_pipe.c b/drivers/platform/goldfish/goldfish_pipe.c
-index d9a09d9637d9..48fd29b8e22b 100644
+index d9a09d9637d9..458b943d6f30 100644
 --- a/drivers/platform/goldfish/goldfish_pipe.c
 +++ b/drivers/platform/goldfish/goldfish_pipe.c
 @@ -386,6 +386,7 @@ static ssize_t goldfish_pipe_read_write(struct file *filp, char __user *buffer,
  		}
  
  		/* Try to re-acquire the lock */
-+		if (/* 123615a@@@DEADLOCK@@@11902@@@37@@@drivers/platform/goldfish/goldfish_pipe.c@@@lock */
++		    /* 123615a@@@DEADLOCK@@@11902@@@37@@@drivers/platform/goldfish/goldfish_pipe.c@@@lock */
  		if (mutex_lock_interruptible(&pipe->lock))
  			return -ERESTARTSYS;
  
@@ -530,18 +530,6 @@ index efa2faf080d7..ecdbfb5e5da6 100644
  	mutex_lock(&lli->lli_readdir_mutex);
  	page = ll_dir_page_locate(dir, &lhash, &start, &end);
  	if (IS_ERR(page)) {
-diff --git a/drivers/staging/lustre/lustre/obdclass/local_storage.c b/drivers/staging/lustre/lustre/obdclass/local_storage.c
-index 78190225ac7a..e20eb7b0e593 100644
---- a/drivers/staging/lustre/lustre/obdclass/local_storage.c
-+++ b/drivers/staging/lustre/lustre/obdclass/local_storage.c
-@@ -755,6 +755,7 @@ int local_oid_storage_init(const struct lu_env *env, struct dt_device *dev,
- 	if (IS_ERR(ls))
- 		return PTR_ERR(ls);
- 
-+	/* 12b61f@@@DEADLOCK@@@19396@@@30@@@drivers/staging/lustre/lustre/obdclass/local_storage.c@@@ls_los_mutex */
- 	mutex_lock(&ls->ls_los_mutex);
- 	*los = dt_los_find(ls, fid_seq(first_fid));
- 	if (*los != NULL)
 diff --git a/drivers/tty/moxa.c b/drivers/tty/moxa.c
 index 1deaca4674e4..916547e493a0 100644
 --- a/drivers/tty/moxa.c
