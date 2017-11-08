@@ -1,0 +1,11 @@
+git checkout <old_version>
+git clean -xdfq
+git checkout -b diff_map
+# RUN TOOL HERE
+git commit -am "add metadata"
+git checkout <new_version>
+git clean -xdfq
+git reset <old_version>
+git commit -am "upgrade to <new version>"
+git checkout -b diff_map_upgraded
+git rebase diff_map #possibly need to add options here to fix deletions
