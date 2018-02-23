@@ -33,7 +33,7 @@ public class DiffMapper {
 
 		timings.add(System.nanoTime());
 		DiffMapper dm = new DiffMapper(true);
-		int changesApplied = dm.run("oldInstanceMap_xxs_norm.json");
+		int changesApplied = dm.run("oldInstanceMap.json");
 		if (changesApplied < 0) {
 			System.err.println("[ERROR] could not map differences!");
 		} else {
@@ -105,8 +105,8 @@ public class DiffMapper {
 				+ " */\n";
 		int commentLength = comment.length();
 
-		JSONObject metaData = new JSONObject().put("metadata", comment).put("offset", offset).put("length",
-				commentLength);
+		JSONObject metaData = new JSONObject().put("metadata", comment).put("offset", offset)
+				.put("length", commentLength).put("metaLength", length).put("metaStatus", status);
 		JSONArray fname;
 		try {
 			fname = new JSONArray();
@@ -147,6 +147,12 @@ public class DiffMapper {
 				if (tmp.getInt("offset") < min.getInt("offset")) {
 					min = tmp;
 					minIdx = i;
+				} else if (tmp.getInt("offset") == min.getInt("offset")
+						&& tmp.getInt("metaLength") == min.getInt("metaLength")
+						&& tmp.getString("metaStatus").equals(min.getString("metaStatus"))) {
+					// Duplicate detected -- remove it
+					array.remove(i);
+					i--;
 				}
 			}
 			sorted.put(array.remove(minIdx));
@@ -169,7 +175,7 @@ public class DiffMapper {
 			String content = instance.getString("metadata");
 			String buffer;
 			byte[] whitespaceBuffer = new byte[40];
-			
+
 			if (i == 0) {
 				sourceChannel.transferTo(offset, (fileSize - offset), targetChannel);
 				sourceChannel.truncate(offset);
@@ -180,10 +186,10 @@ public class DiffMapper {
 				sourceChannel.transferFrom(targetChannel, currOffset, (offset - lastOffset));
 				r.seek(currOffset + (offset - lastOffset) - 40);
 			}
-			
+
 			r.readFully(whitespaceBuffer, 0, 40);
 			buffer = new String(whitespaceBuffer);
-			
+
 			r.seek(r.getFilePointer() - 40);
 			r.writeBytes(buffer.substring(0, buffer.lastIndexOf('\n') + 1));
 			r.writeBytes(buffer.substring(buffer.lastIndexOf('\n') + 1).replaceAll("[^\f\t\r\n]", " "));
