@@ -119,7 +119,6 @@ public class DiffMapper {
 
 	public int applyChanges(JSONObject changes) throws JSONException, IOException {
 		int changesApplied = 0;
-		@SuppressWarnings("unchecked")
 		Iterator<String> iter = changes.keys();
 		while (iter.hasNext()) {
 			String fname = iter.next();
