@@ -14,19 +14,19 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class DiffLinker {
-
-	public static String OLD_TAG = "v3.17-rc1";
-	public static String NEW_TAG = "v3.18-rc1";
-	public static String DIFF_TEST_DIR = "/Volumes/dhanwada_cs/";
-	public static String KERNEL_DIR = "/Volumes/dhanwada_cs/kernel/";
-	public static String RESULT_DIR = "/Volumes/dhanwada_cs/sdmay18-09/linux-kernel-" + OLD_TAG.substring(1) + "/";
-	public static String[] TYPES = { "mutex", "spin" };
-
 	public static void main(String[] args) throws JSONException, IOException {
 		ArrayList<Long> timings = new ArrayList<Long>();
+		
+		DiffConfig config = DiffConfig.builder()
+			.setOldTag("v3.17-rc1")
+			.setNewTag("v3.18-rc1")
+			.setDiffTestDir("/Volumes/dhanwada_cs/")
+			.setKernelDir("/Volumes/dhanwada_cs/kernel/")
+			.setResultDir("/Volumes/dhanwada_cs/sdmay18-09/linux-kernel-3.17-rc1/")
+			.build();
 
 		timings.add(System.nanoTime());
-		DiffLinker dl = new DiffLinker(true, 3);
+		DiffLinker dl = new DiffLinker(config, true, 3);
 		int instancesLinked = dl.run("newInstanceMap.json");
 		if (instancesLinked < 0) {
 			System.err.println("[ERROR] could not link instances!");
@@ -58,16 +58,18 @@ public class DiffLinker {
 		return result;
 	}
 
+	private DiffConfig config;
 	private boolean allowPrintStatements = true;
 	private int lineSearchThreshold = 3;
 
-	public DiffLinker(boolean allowPrintStatements, int lineSearchThreshold) {
+	public DiffLinker(DiffConfig config, boolean allowPrintStatements, int lineSearchThreshold) {
 		this.allowPrintStatements = allowPrintStatements;
 		this.lineSearchThreshold = lineSearchThreshold;
+		this.config = config;
 	}
 
 	public int run(String newMapFilename) throws JSONException, IOException {
-		if (!setCurrentDirectory(KERNEL_DIR)) {
+		if (!setCurrentDirectory(config.KERNEL_DIR)) {
 			println("Couldn't get the kernel dir");
 			return -1;
 		}
@@ -75,7 +77,7 @@ public class DiffLinker {
 		int instancesLinked = 0;
 		Charset utf8 = Charset.forName("UTF-8");
 		println("Parsing new instance map...");
-		Path newInstance = Paths.get(DIFF_TEST_DIR, newMapFilename);
+		Path newInstance = Paths.get(config.DIFF_TEST_DIR, newMapFilename);
 		String newInstanceContent = String.join("\n", Files.readAllLines(newInstance, utf8));
 		JSONArray newMap = new JSONArray(newInstanceContent);
 		

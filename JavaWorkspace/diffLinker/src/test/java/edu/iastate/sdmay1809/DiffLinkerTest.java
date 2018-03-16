@@ -8,7 +8,8 @@ public class DiffLinkerTest extends TestCase {
 	}
 	
 	public void testInit() throws Exception {
-		DiffLinker dl = new DiffLinker(false, 3);
+		DiffConfig config = DiffConfig.builder().build();
+		DiffLinker dl = new DiffLinker(config, false, 3);
 		assertTrue(dl != null);
 	}
 }
