@@ -23,6 +23,7 @@ public class DiffLinker {
 			.setDiffTestDir("/Volumes/dhanwada_cs/")
 			.setKernelDir("/Volumes/dhanwada_cs/kernel/")
 			.setResultDir("/Volumes/dhanwada_cs/sdmay18-09/linux-kernel-3.17-rc1/")
+			.setTypes(new String[] {"mutex", "spin"})
 			.build();
 
 		timings.add(System.nanoTime());

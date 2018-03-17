@@ -16,23 +16,20 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class DiffMapper {
-
-	public static String OLD_TAG = "v3.17-rc1";
-	public static String NEW_TAG = "v3.18-rc1";
-	public static String DIFF_TEST_DIR = "/Volumes/dhanwada_cs/";
-	public static String KERNEL_DIR = "/Volumes/dhanwada_cs/kernel/";
-	public static String RESULT_DIR = "/Volumes/dhanwada_cs/sdmay18-09/linux-kernel-" + OLD_TAG.substring(1) + "/";
-	public static String[] TYPES = { "mutex", "spin" };
-
 	public static void main(String[] args) throws JSONException, IOException {
 		ArrayList<Long> timings = new ArrayList<Long>();
 
-		timings.add(System.nanoTime());
-		InstanceTracker it = new InstanceTracker(RESULT_DIR);
-		it.run(DIFF_TEST_DIR, false);
+		DiffConfig config = DiffConfig.builder().setOldTag("v3.17-rc1").setNewTag("v3.18-rc1")
+				.setDiffTestDir("/Volumes/dhanwada_cs/").setKernelDir("/Volumes/dhanwada_cs/kernel/")
+				.setResultDir("/Volumes/dhanwada_cs/sdmay18-09/linux-kernel-3.17-rc1/")
+				.setTypes(new String[] { "mutex", "spin" }).build();
 
 		timings.add(System.nanoTime());
-		DiffMapper dm = new DiffMapper(true);
+		InstanceTracker it = new InstanceTracker(config.RESULT_DIR);
+		it.run(config.DIFF_TEST_DIR, false);
+
+		timings.add(System.nanoTime());
+		DiffMapper dm = new DiffMapper(config, true);
 		int changesApplied = dm.run("oldInstanceMap.json");
 		if (changesApplied < 0) {
 			System.err.println("[ERROR] could not map differences!");
@@ -65,19 +62,21 @@ public class DiffMapper {
 	}
 
 	private boolean allowPrintStatements = true;
+	private DiffConfig config;
 
-	public DiffMapper(boolean allowPrintStatements) {
+	public DiffMapper(DiffConfig config, boolean allowPrintStatements) {
 		this.allowPrintStatements = allowPrintStatements;
+		this.config = config;
 	}
 
 	public int run(String inputMapFilename) throws JSONException, IOException {
-		if (!setCurrentDirectory(KERNEL_DIR)) {
+		if (!setCurrentDirectory(config.KERNEL_DIR)) {
 			println("Couldn't get the kernel dir");
 			return -1;
 		}
 
 		println("Parsing instance map...");
-		Path oldInstance = Paths.get(DIFF_TEST_DIR, inputMapFilename);
+		Path oldInstance = Paths.get(config.DIFF_TEST_DIR, inputMapFilename);
 		Charset utf8 = Charset.forName("UTF-8");
 		String oldInstanceContent = String.join("\n", Files.readAllLines(oldInstance, utf8));
 		JSONArray arr = new JSONArray(oldInstanceContent);
@@ -125,7 +124,7 @@ public class DiffMapper {
 			JSONArray sorted = sort(changes.getJSONArray(fname));
 			int numChanges = sorted.length();
 
-			insert(KERNEL_DIR + fname, sorted);
+			insert(config.KERNEL_DIR + fname, sorted);
 
 			println("Applied " + String.format("%3d", numChanges) + " changes to: " + fname);
 			changesApplied += numChanges;

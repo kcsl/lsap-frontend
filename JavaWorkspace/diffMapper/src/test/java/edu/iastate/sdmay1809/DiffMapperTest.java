@@ -1,14 +1,14 @@
 package edu.iastate.sdmay1809;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
 
-public class DiffMapperTest extends TestCase {
-	public DiffMapperTest(String name) {
-		super(name);
-	}
+import org.junit.Test;
+
+public class DiffMapperTest {
 	
-	public void testInit() throws Exception {
-		DiffMapper dm = new DiffMapper(false);
+	@Test
+	public void testInit() {
+		DiffMapper dm = new DiffMapper(DiffConfig.builder().build(), false);
 		assertTrue(dm != null);
 	}
 }
