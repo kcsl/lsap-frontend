@@ -8,7 +8,7 @@ import org.junit.Test;
 
 import edu.iastate.sdmay1809.DiffConfig.DiffConfigBuilder;
 
-public class DiffConfigTest {
+public class DiffConfigBuilderTest {
 	
 	DiffConfigBuilder builder;
 	
