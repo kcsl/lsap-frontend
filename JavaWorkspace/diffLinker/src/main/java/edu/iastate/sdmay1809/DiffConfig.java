@@ -17,6 +17,19 @@ public class DiffConfig {
 		private String RESULT_DIR = "/Volumes/dhanwada_cs/sdmay18-09/linux-kernel-" + OLD_TAG.substring(1) + "/";
 		private String[] TYPES = { "mutex", "spin" };
 		
+		DiffConfigBuilder() {
+			// default constructor
+		}
+		
+		DiffConfigBuilder(DiffConfigBuilder base) {
+			this.OLD_TAG = base.OLD_TAG;
+			this.NEW_TAG = base.NEW_TAG;
+			this.DIFF_TEST_DIR = base.DIFF_TEST_DIR;
+			this.KERNEL_DIR = base.KERNEL_DIR;
+			this.RESULT_DIR = base.RESULT_DIR;
+			this.TYPES = base.TYPES;
+		}
+		
 		public DiffConfig build() {
 			return new DiffConfig(this);
 		}
@@ -63,5 +76,9 @@ public class DiffConfig {
 	
 	public static DiffConfigBuilder builder() {
 		return new DiffConfigBuilder();
+	}
+	
+	public static DiffConfigBuilder builder(DiffConfigBuilder base) {
+		return new DiffConfigBuilder(base);
 	}
 }
