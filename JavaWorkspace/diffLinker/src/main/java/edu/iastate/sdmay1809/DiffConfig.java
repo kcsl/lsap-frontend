@@ -6,8 +6,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 public class DiffConfig {
@@ -109,6 +109,7 @@ public class DiffConfig {
 		String[] keys = { "old_tag", "new_tag", "diff_test_dir", "kernel_dir", "result_dir", "types" };
 		String[] values = new String[5];
 		String[] types_val;
+		JSONObject configObject;
 
 		fileName = Utils.coalesce(fileName, "config.json");
 		cwd = System.getProperty("user.dir");
@@ -117,12 +118,14 @@ public class DiffConfig {
 		configFileContent = "{}";
 		try {
 			configFileContent = String.join("\n", Files.readAllLines(configFilePath, utf8));
+			configObject = new JSONObject(configFileContent);
 		} catch (IOException e) {
 			System.err.println("WARN: DiffConfig file could not be read, using default values");
 			return new DiffConfigBuilder();
+		} catch (JSONException e) {
+			System.err.println("WARN: DiffConfig file was not a valid JSON object, using default values");
+			return new DiffConfigBuilder();
 		}
-
-		JSONObject configObject = new JSONObject(configFileContent);
 
 		// Loop through all the String values and get them from their keys
 		// If an exception is thrown reading the string, set it to null so the
@@ -136,12 +139,13 @@ public class DiffConfig {
 		}
 
 		try {
-			// Get a json array for the "types" key, convert it to a stream to
-			// perform
-			// String conversion and collect the values to a list, then convert
-			// the list to an array
-			types_val = (String[]) configObject.getJSONArray(keys[5]).toList().stream()
-					.map(object -> Objects.toString(object, null)).collect(Collectors.toList()).toArray();
+			// Get a json array for the "types" key and convert it to a String array
+			Object[] types_objs = configObject.getJSONArray(keys[5]).toList().toArray();
+			types_val = new String[types_objs.length];
+			
+			for(int i = 0; i < types_objs.length; i++) {
+				types_val[i] = Objects.toString(types_objs[i], null);
+			}
 		} catch (Exception e) {
 			types_val = null;
 		}
