@@ -11,6 +11,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import org.apache.commons.cli.Option;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -18,6 +19,9 @@ import org.json.JSONObject;
 public class DiffMapper {
 	public static void main(String[] args) throws JSONException, IOException {
 		ArrayList<Long> timings = new ArrayList<Long>();
+
+		Option.builder("c").longOpt("config-file").hasArg().numberOfArgs(1).argName("Config File")
+				.desc("The JSON configuration file to use").build();
 
 		DiffConfig config = DiffConfig.builder().setOldTag("v3.17-rc1").setNewTag("v3.18-rc1")
 				.setDiffTestDir("/Volumes/dhanwada_cs/").setKernelDir("/Volumes/dhanwada_cs/kernel/")
