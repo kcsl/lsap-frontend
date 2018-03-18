@@ -1,4 +1,4 @@
-package unitTesting;
+package edu.iastate.sdmay1809;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,8 +10,6 @@ import com.rometools.rome.feed.synd.SyndFeed;
 import com.rometools.rome.io.FeedException;
 import com.rometools.rome.io.SyndFeedInput;
 import com.rometools.rome.io.XmlReader;
-
-import rsstesting.KernelRssFeed;
 
 public class KernelRssFeedTest {
 

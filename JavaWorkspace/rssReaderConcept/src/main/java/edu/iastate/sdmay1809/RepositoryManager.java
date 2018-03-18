@@ -1,4 +1,4 @@
-package rsstesting;
+package edu.iastate.sdmay1809;
 
 import java.io.File;
 import java.io.IOException;
