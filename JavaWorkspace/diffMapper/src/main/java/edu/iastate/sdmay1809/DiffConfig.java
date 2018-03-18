@@ -189,7 +189,7 @@ public class DiffConfig {
 
 		if (cmd.hasOption("h")) {
 			HelpFormatter helpMenu = new HelpFormatter();
-			helpMenu.printHelp("java -jar DiffMapper.jar [OPTIONS]", options);
+			helpMenu.printHelp("java -jar <jarfile> [OPTIONS]", options);
 			System.exit(0);
 		}
 

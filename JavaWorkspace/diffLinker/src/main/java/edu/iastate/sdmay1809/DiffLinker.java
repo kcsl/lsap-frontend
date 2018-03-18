@@ -17,14 +17,7 @@ public class DiffLinker {
 	public static void main(String[] args) throws JSONException, IOException {
 		ArrayList<Long> timings = new ArrayList<Long>();
 		
-		DiffConfig config = DiffConfig.builder()
-			.setOldTag("v3.17-rc1")
-			.setNewTag("v3.18-rc1")
-			.setDiffTestDir("/Volumes/dhanwada_cs/")
-			.setKernelDir("/Volumes/dhanwada_cs/kernel/")
-			.setResultDir("/Volumes/dhanwada_cs/sdmay18-09/linux-kernel-3.17-rc1/")
-			.setTypes(new String[] {"mutex", "spin"})
-			.build();
+		DiffConfig config = DiffConfig.builder(args).build();
 
 		timings.add(System.nanoTime());
 		DiffLinker dl = new DiffLinker(config, true, 3);
