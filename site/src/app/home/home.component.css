@@ -1,0 +1,23 @@
+#flex-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#flex-box-item {
+    max-width: 50%;
+}
+
+#clock {
+    text-align: center;
+}
+
+#logo > img {
+    width: auto\9;
+    height: auto;
+    max-width: 100%;
+    max-height: 100%;
+    vertical-align: middle;
+    border: 0;
+    -ms-interpolation-mode: bicubic;
+}

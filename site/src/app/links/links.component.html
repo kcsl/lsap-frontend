@@ -1,0 +1,9 @@
+  <div class="col">
+    <section class="row">
+      <ng-container *ngFor="let l of filteredLinks;">
+        <div class="col">
+          <app-link-card [link]="l"></app-link-card>
+        </div>
+      </ng-container>
+    </section>
+  </div>
