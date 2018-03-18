@@ -1,11 +1,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>diffMapper</groupId>
-	<artifactId>diffMapper</artifactId>
+	<groupId>diffLinker</groupId>
+	<artifactId>diffLinker</artifactId>
 	<version>0.1.0</version>
-	<name>DiffMapper</name>
-	<description>Maps differences of linux kernel between versions</description>
+	<name>DiffLinker</name>
+	<description>Link Results of previous runs together</description>
 	<build>
 		<sourceDirectory>src/main/java</sourceDirectory>
 		<resources>
@@ -63,7 +63,7 @@
 						<manifest>
 							<addClasspath>true</addClasspath>
 							<classpathPrefix>${project.build.finalName}.lib/</classpathPrefix>
-							<mainClass>edu.iastate.sdmay1809.DiffMapper</mainClass>
+							<mainClass>edu.iastate.sdmay1809.DiffLinker</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
@@ -82,7 +82,7 @@
 						<configuration>
 							<archive>
 								<manifest>
-									<mainClass>edu.iastate.sdmay1809.DiffMapper</mainClass>
+									<mainClass>edu.iastate.sdmay1809.DiffLinker</mainClass>
 								</manifest>
 							</archive>
 							<descriptorRefs>

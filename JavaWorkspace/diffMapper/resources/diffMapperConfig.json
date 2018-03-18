@@ -1,0 +1,8 @@
+{
+  "old_tag":"file_old_tag",
+  "new_tag":"file_new_tag",
+  "diff_test_dir":"file_diff_test_dir",
+  "kernel_dir":"file_kernel_dir",
+  "result_dir":"file_result_dir",
+  "types":["file_type1","file_type2","file_type3","file_type4"]
+}
