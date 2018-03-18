@@ -110,5 +110,8 @@
 	</dependencies>
 	<groupId>rssReader</groupId>
 	<version>0.1.0</version>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
 </project>
 
