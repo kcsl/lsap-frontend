@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>diffLinker</groupId>
 	<artifactId>diffLinker</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.1.0</version>
 	<name>DiffLinker</name>
 	<description>Link Results of previous runs together</description>
 	<build>
@@ -112,6 +112,12 @@
 			<groupId>commons-cli</groupId>
 			<artifactId>commons-cli</artifactId>
 			<version>1.4</version>
+		</dependency>
+		<dependency>
+			<groupId>com.github.stefanbirkner</groupId>
+			<artifactId>system-rules</artifactId>
+			<version>1.17.1</version>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 	<properties>
