@@ -5,8 +5,17 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Objects;
+import java.util.Properties;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -153,5 +162,75 @@ public class DiffConfig {
 		// Return a DiffConfigBuilder using the values from the config file.
 		return new DiffConfigBuilder().setOldTag(values[0]).setNewTag(values[1]).setDiffTestDir(values[2])
 				.setKernelDir(values[3]).setResultDir(values[4]).setTypes(types_val);
+	}
+	
+	public static DiffConfigBuilder builder(String[] args) {
+		Options options = new Options();
+		Option configFileOption = Option.builder("c").longOpt("config-file").hasArg().numberOfArgs(1).argName("file")
+				.desc("The JSON configuration file to use").build();
+		Option helpMenuOption = Option.builder("h").longOpt("help").hasArg(false).desc("Display this help menu")
+				.build();
+		Option propertyOption = Option.builder("D").argName("property=value").hasArgs().valueSeparator().numberOfArgs(2)
+				.desc("use value for given property").build();
+		Option dryRunOption = Option.builder("n").longOpt("dry-run").hasArg(false)
+				.desc("See a summary of what the DiffMapper will do. No action will be performed.").build();
+		options.addOption(configFileOption);
+		options.addOption(propertyOption);
+		options.addOption(dryRunOption);
+		options.addOption(helpMenuOption);
+		CommandLineParser parser = new DefaultParser();
+		CommandLine cmd = null;
+		try {
+			cmd = parser.parse(options, args);
+		} catch (ParseException e) {
+			System.err.println("[ERROR]: " + e.getMessage());
+			System.exit(0);
+		}
+
+		if (cmd.hasOption("h")) {
+			HelpFormatter helpMenu = new HelpFormatter();
+			helpMenu.printHelp("java -jar DiffMapper.jar [OPTIONS]", options);
+			System.exit(0);
+		}
+
+		Properties cliProps = cmd.getOptionProperties("D");
+		DiffConfigBuilder configBuilder = DiffConfig.builder();
+
+		if (cmd.hasOption("c")) {
+			String configFilename = cmd.getOptionValue("c");
+			configBuilder = DiffConfig.builder(configFilename);
+		}
+
+		ArrayList<String> cliTypes = new ArrayList<String>();
+		for (int i = 0; cliProps.getProperty("types." + i) != null; i++) {
+			cliTypes.add(cliProps.getProperty("types." + i));
+		}
+		String[] cliTypesArray = new String[cliTypes.size()];
+		cliTypes.toArray(cliTypesArray);
+
+		DiffConfig config = configBuilder.setOldTag(cliProps.getProperty("old_tag"))
+				.setNewTag(cliProps.getProperty("new_tag")).setDiffTestDir(cliProps.getProperty("diff_test_dir"))
+				.setKernelDir(cliProps.getProperty("kernel_dir")).setResultDir(cliProps.getProperty("result_dir"))
+				.setTypes(cliTypesArray.length > 0 ? cliTypesArray : null).build();
+
+		if (cmd.hasOption("n")) {
+			String typesString = "[" + config.TYPES[0];
+			for (int i = 1; i < config.TYPES.length; i++) {
+				typesString += ", " + config.TYPES[i];
+			}
+			typesString += "]";
+
+			System.out.println("Config File: " + Utils.coalesce(cmd.getOptionValue("c"), "N/A"));
+			System.out.println("DiffMapper Configuration");
+			System.out.println("old_tag: " + config.OLD_TAG);
+			System.out.println("new_tag: " + config.NEW_TAG);
+			System.out.println("diff_test_dir: " + config.DIFF_TEST_DIR);
+			System.out.println("kernel_dir: " + config.KERNEL_DIR);
+			System.out.println("result_dir: " + config.RESULT_DIR);
+			System.out.println("types: " + typesString);
+			System.exit(0);
+		}
+
+		return configBuilder;
 	}
 }
