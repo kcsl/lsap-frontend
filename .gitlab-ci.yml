@@ -3,5 +3,6 @@ image: maven:3.5.2-jdk-8-alpine
 job1:
   script:
     - (cd JavaWorkspace/diffMapper; mvn install -B)
-    - (cd JavaWorkspace/diffLinker;mvn install -B)
+    - (cd JavaWorkspace/diffLinker; mvn install -B)
+    - (cd JavaWorkspace/rssReaderConcept; mvn install -B)
 
