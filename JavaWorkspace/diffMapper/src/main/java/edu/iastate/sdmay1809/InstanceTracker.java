@@ -16,31 +16,31 @@ public class InstanceTracker {
 		this.sourceDirectory = sourceDirectory;
 	}
 
-	public void run(String outputDirectory, boolean outputCheckOverride) {
+	public boolean run(String outputDirectory, boolean outputCheckOverride) {
 		JSONArray instanceMap = new JSONArray();
 		File[] instances = getInstances();
 		String outputJSONFile;
 		FileWriter fw = null;
-		
-		if(outputDirectory.endsWith("/")) {
+
+		if (outputDirectory.endsWith("/")) {
 			outputJSONFile = outputDirectory + "oldInstanceMap.json";
 		} else {
 			outputJSONFile = outputDirectory + "/oldInstanceMap.json";
 		}
-		
+
 		File check = new File(outputJSONFile);
-		
+
 		// Don't run if file exists and override is false
-		if(check.exists() && !outputCheckOverride) {
+		if (check.exists() && !outputCheckOverride) {
 			System.out.println("Skipping instance tracking since the file already exists!");
-			return;
+			return false;
 		}
-		
+
 		for (File f : instances) {
 			try {
 				JSONObject instance = parseEntry(f.getName());
 				instanceMap.put(instance);
-			} catch(JSONException je) {
+			} catch (JSONException je) {
 				System.err.println("[ERROR] : Threw exception when parsing " + f.getName());
 			}
 		}
@@ -51,12 +51,12 @@ public class InstanceTracker {
 			fw = new FileWriter(new File(outputJSONFile), false);
 			instanceMap.write(fw);
 			fw.close();
-		} catch(IOException io) {
+		} catch (IOException io) {
 			System.err.println("[FATAL] : Could not create oldInstanceMap.json in " + outputDirectory);
-		} catch(JSONException je) {
+		} catch (JSONException je) {
 			System.err.println("[FATAL] : Could not write instanceMap to " + outputJSONFile);
 		} finally {
-			if(fw != null) {
+			if (fw != null) {
 				try {
 					fw.close();
 				} catch (IOException e) {
@@ -65,7 +65,7 @@ public class InstanceTracker {
 			}
 		}
 
-		return;
+		return true;
 	}
 
 	private File[] getInstances() {
