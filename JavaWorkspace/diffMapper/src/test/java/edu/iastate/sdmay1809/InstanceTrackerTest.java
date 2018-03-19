@@ -96,21 +96,30 @@ public class InstanceTrackerTest {
 			JSONArray instances = new JSONArray(content);
 			assertEquals(2, instances.length());
 
+			JSONObject mutexInstance, spinInstance;
 			JSONObject instance1 = instances.getJSONObject(0);
-			assertEquals("source_mutex.c", instance1.getString("filename"));
-			assertEquals(42, instance1.getInt("offset"));
-			assertEquals(24, instance1.getInt("length"));
-			assertEquals("mutex_instance", instance1.getString("name"));
-			assertEquals("ffa462", instance1.getString("id"));
-			assertEquals("UNPAIRED", instance1.getString("status"));
-
 			JSONObject instance2 = instances.getJSONObject(1);
-			assertEquals("source_spin.c", instance2.getString("filename"));
-			assertEquals(43, instance2.getInt("offset"));
-			assertEquals(34, instance2.getInt("length"));
-			assertEquals("spin_instance", instance2.getString("name"));
-			assertEquals("ffa463", instance2.getString("id"));
-			assertEquals("PAIRED", instance2.getString("status"));
+			if(instance1.getString("id").equals("ffa462")) {
+				mutexInstance = instance1;
+				spinInstance = instance2;
+			} else {
+				mutexInstance = instance2;
+				spinInstance = instance1;
+			}
+
+			assertEquals("source_mutex.c", mutexInstance.getString("filename"));
+			assertEquals(42, mutexInstance.getInt("offset"));
+			assertEquals(24, mutexInstance.getInt("length"));
+			assertEquals("mutex_instance", mutexInstance.getString("name"));
+			assertEquals("ffa462", mutexInstance.getString("id"));
+			assertEquals("UNPAIRED", mutexInstance.getString("status"));
+
+			assertEquals("source_spin.c", spinInstance.getString("filename"));
+			assertEquals(43, spinInstance.getInt("offset"));
+			assertEquals(34, spinInstance.getInt("length"));
+			assertEquals("spin_instance", spinInstance.getString("name"));
+			assertEquals("ffa463", spinInstance.getString("id"));
+			assertEquals("PAIRED", spinInstance.getString("status"));
 		} catch (IOException e) {
 			e.printStackTrace();
 			fail("Couldn't get oldInstanceMap.json");
