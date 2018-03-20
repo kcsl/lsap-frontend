@@ -3,9 +3,11 @@ package edu.iastate.sdmay1809;
 import java.io.File;
 import java.io.IOException;
 
-import org.junit.Assert;
 import org.junit.BeforeClass;
+import org.junit.Assert;
 import org.junit.Test;
+
+
 import com.rometools.rome.feed.synd.SyndFeed;
 import com.rometools.rome.io.FeedException;
 import com.rometools.rome.io.SyndFeedInput;
