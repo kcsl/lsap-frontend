@@ -68,6 +68,35 @@ public class InstanceTrackerTest {
 			fail("Couldn't Perform JSON Operation!");
 		}
 	}
+	
+	@Test
+	public void testRunSingleInstanceWithSlashInDir() {
+		pathToTest = Paths.get(System.getProperty("user.dir"), "resources", "testing", "InstanceTracker",
+				"singleInstance");
+		Path pathToInstanceMap = Paths.get(pathToTest.toString(), "oldInstanceMap.json");
+		String resultsDir = Paths.get(pathToTest.toString(), "results").toString();
+		InstanceTracker it = new InstanceTracker(resultsDir);
+		it.run(pathToTest.toString() + "/", false);
+		try {
+			String content = String.join("", Files.readAllLines(pathToInstanceMap));
+			JSONArray instances = new JSONArray(content);
+			assertEquals(1, instances.length());
+
+			JSONObject instance = instances.getJSONObject(0);
+			assertEquals("source.c", instance.getString("filename"));
+			assertEquals(42, instance.getInt("offset"));
+			assertEquals(24, instance.getInt("length"));
+			assertEquals("instance_name", instance.getString("name"));
+			assertEquals("ffa462", instance.getString("id"));
+			assertEquals("UNPAIRED", instance.getString("status"));
+		} catch (IOException e) {
+			e.printStackTrace();
+			fail("Couldn't get oldInstanceMap.json");
+		} catch (JSONException e) {
+			e.printStackTrace();
+			fail("Couldn't Perform JSON Operation!");
+		}
+	}
 
 	@Test
 	public void testRunCheckOverride() {
@@ -75,11 +104,13 @@ public class InstanceTrackerTest {
 				"singleInstance");
 		String resultsDir = Paths.get(pathToTest.toString(), "results").toString();
 		InstanceTracker it = new InstanceTracker(resultsDir);
-		boolean run1 = it.run(pathToTest.toString(), true);
+		boolean run1 = it.run(pathToTest.toString(), false);
 		boolean run2 = it.run(pathToTest.toString(), false);
+		boolean run3 = it.run(pathToTest.toString(), true);
 
 		assertEquals(true, run1);
 		assertEquals(false, run2);
+		assertEquals(true, run3);
 	}
 
 	@Test
@@ -167,5 +198,37 @@ public class InstanceTrackerTest {
 			e.printStackTrace();
 			fail("Couldn't Perform JSON Operation!");
 		}
+	}
+	
+	@Test
+	public void testRunParseEntryFiltersCorrectly() {
+		pathToTest = Paths.get(System.getProperty("user.dir"), "resources", "testing", "InstanceTracker",
+				"badInstance");
+		Path pathToInstanceMap = Paths.get(pathToTest.toString(), "oldInstanceMap.json");
+		String resultsDir = Paths.get(pathToTest.toString(), "results").toString();
+		InstanceTracker it = new InstanceTracker(resultsDir);
+		boolean result = it.run(pathToTest.toString(), false);
+		assertTrue(result);
+		try {
+			String content = String.join("", Files.readAllLines(pathToInstanceMap));
+			JSONArray instances = new JSONArray(content);
+			assertEquals(0, instances.length());
+		} catch (IOException e) {
+			e.printStackTrace();
+			fail("Couldn't get oldInstanceMap.json");
+		} catch (JSONException e) {
+			e.printStackTrace();
+			fail("Couldn't Perform JSON Operation!");
+		}
+	}
+	
+	@Test
+	public void testRunFailsWithIOException() {
+		pathToTest = Paths.get(System.getProperty("user.dir"), "resources", "testing", "InstanceTracker",
+				"fileWriteFail");
+		String resultsDir = Paths.get(pathToTest.toString(), "results").toString();
+		InstanceTracker it = new InstanceTracker(resultsDir);
+		boolean result = it.run(pathToTest.toString(), true);
+		assertFalse(result);
 	}
 }
