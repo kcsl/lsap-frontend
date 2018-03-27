@@ -3,12 +3,21 @@ package edu.iastate.sdmay1809;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.*;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 import edu.iastate.sdmay1809.DiffConfig.DiffConfigBuilder;
 
 public class DiffConfigBuilderTest {
+	@Rule
+	public TemporaryFolder testFolder = new TemporaryFolder();
 	
 	DiffConfigBuilder builder;
 	
@@ -44,6 +53,14 @@ public class DiffConfigBuilderTest {
 		assertEquals(base.KERNEL_DIR, config.KERNEL_DIR);
 		assertEquals(base.RESULT_DIR, config.RESULT_DIR);
 		assertArrayEquals(base.TYPES, config.TYPES);
+	}
+	
+	@Test
+	public void builderConstructsWithSlashUserDirEnding() {
+		String userDir = System.getProperty("user.dir");
+		System.setProperty("user.dir", "test/");
+		assertThat(DiffConfig.builder(), instanceOf(DiffConfigBuilder.class));
+		System.setProperty("user.dir", userDir);
 	}
 	
 	@Test
@@ -195,6 +212,22 @@ public class DiffConfigBuilderTest {
 	}
 	
 	@Test
+	public void builderFile() throws IOException {
+		String fullPath = setUpConfigFile("\"old_tag\": \"my_old_tag\",\"new_tag\": \"my_new_tag\","
+				+ "\"diff_test_dir\": \"my_diff_test_dir\"," + "\"kernel_dir\": \"my_kernel_dir\","
+				+ "\"result_dir\": \"my_result_dir\"," + "\"types\": [\"type1\", \"type2\"]\n}\n");
+		DiffConfig base = DiffConfig.builder().build();
+		DiffConfig file = DiffConfig.builder(fullPath).build();
+		
+		assertEquals(base.OLD_TAG, file.OLD_TAG);
+		assertEquals(base.NEW_TAG, file.NEW_TAG);
+		assertEquals(base.DIFF_TEST_DIR, file.DIFF_TEST_DIR);
+		assertEquals(base.KERNEL_DIR, file.KERNEL_DIR);
+		assertEquals(base.RESULT_DIR, file.RESULT_DIR);
+		assertArrayEquals(base.TYPES, file.TYPES);
+	}
+	
+	@Test
 	public void buildTest() {
 		DiffConfig config = builder
 		.setOldTag("not_a_default_old_tag")
@@ -211,5 +244,18 @@ public class DiffConfigBuilderTest {
 		assertEquals("not_a_kernel_dir", config.KERNEL_DIR);
 		assertEquals("not_a_default_result_dir", config.RESULT_DIR);
 		assertArrayEquals(new String[] {"not", "a", "default", "type", "list"}, config.TYPES);
+	}
+	
+	private String setUpConfigFile(String content) throws IOException {
+		String cwd = System.getProperty("user.dir");
+		String rewind = cwd.replaceAll("(?:\\/(?:\\w|-)+)", "../");
+		File f = testFolder.newFile();
+		String fullPath = rewind + f.getAbsolutePath().substring(1);
+
+		BufferedWriter bw = new BufferedWriter(new FileWriter(f));
+		bw.write(content);
+		bw.close();
+
+		return fullPath;
 	}
 }

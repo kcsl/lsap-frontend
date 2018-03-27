@@ -1,10 +1,25 @@
 package edu.iastate.sdmay1809;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.*;
 
 import org.junit.Test;
 
 public class UtilsTest {
+	
+	@Test
+	public void utilsInit() {
+		Utils utils = new Utils();
+		assertNotNull(utils);
+		assertThat(utils, instanceOf(Utils.class));
+	}
+	
+	@Test
+	public void coalesceTestChecksForNull() {
+		Object nullCheck = Utils.coalesce((Object[]) null);
+		
+		assertNull(nullCheck);
+	}
 
 	@Test
 	public void coalesceTestWorksWithInteger() {
