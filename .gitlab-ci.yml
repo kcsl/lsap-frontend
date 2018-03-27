@@ -2,6 +2,6 @@ image: maven:3.5.2-jdk-8-alpine
 
 job1:
   script:
-    - (cd JavaWorkspace/diffMapper; mvn install -B)
+    - (cd JavaWorkspace/diffMapper; mvn install -B && cat target/site/jacoco/index.html)
     - (cd JavaWorkspace/diffLinker;mvn install -B)
 
