@@ -10,5 +10,5 @@ DiffLinker:
     
 RssReader:
   script:
-    - (cd JavaWorkspace/rssReaderConcept; mvn install -B)
+    - (cd JavaWorkspace/rssReaderConcept; mvn install -B && cat target/site/jacoco/index.html)
 
