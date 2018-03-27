@@ -1,4 +1,4 @@
-image: maven:3.5.2-jdk-8-alpine
+image: maven:alpine
 
 DiffMapper:
   script:
@@ -7,4 +7,8 @@ DiffMapper:
 DiffLinker:
   script:
     - (cd JavaWorkspace/diffLinker; mvn install -B && cat target/site/jacoco/index.html)
+    
+RssReader:
+  script:
+    - (cd JavaWorkspace/rssReaderConcept; mvn install -B)
 
