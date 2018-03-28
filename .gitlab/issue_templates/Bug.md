@@ -15,6 +15,9 @@
 - List of steps
 - To Reproduce the bug
 
+## Possible Fixes
+(If you can, link to lines of code that need to be changed, or a series of steps you think might fix the underlying cause of the bug)
+
 ## Environment
 ### Affected Projects (with versions)
 (list the projects that are affected by this bug)
@@ -25,4 +28,6 @@
 - Maven Version (if applicable):
 - Node JS Version (if applicable):
 - NPM Version (if applicable): 
+
+/cc @dhanwada @bmweno @cm113 @mwall
 
