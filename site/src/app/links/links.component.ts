@@ -1,39 +1,60 @@
-import { InstanceObject } from '../interfaces/instance';
-import { ActivatedRoute } from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import { LinksService } from '../services/links.service';
 import {Component, Input, OnInit} from '@angular/core';
+import {Links} from '../interfaces/links';
+import 'rxjs/add/operator/switchMap';
 
 @Component({
   selector: 'app-links-component',
   templateUrl: './links.component.html',
-  styleUrls: ['./links.component.css']
+  styleUrls: ['./links.component.css'],
 })
 export class LinksComponent implements OnInit {
-  links: InstanceObject[] = [];
-  filteredLinks: InstanceObject[] = [];
+
   driver: string;
 
+  links: Links[] = [];
+  filteredLinks: Links[];
+
   @Input('version') version;
+  @Input('searchTerm') searchTerm;
 
   constructor(
-    private router: ActivatedRoute,
+    private router: Router,
+    private route: ActivatedRoute,
     private linksService: LinksService
   ) { }
 
-  ngOnInit() {
-    this.linksService.getAll(this.version).snapshotChanges().subscribe(links => {
-      links.forEach(element => {
-        this.links.push(element.payload.val());
-      });
+  async populateLinks() {
+      // await this.linksService.getVersion(this.version);
+      await this.linksService.getAll(this.version).snapshotChanges()
+          .map(links => {
 
-      this.router.queryParamMap.subscribe(params => {
+            links.forEach(function (data) {
+              console.log(data);
 
-        this.driver = params.get('driver');
+              });
 
-        this.filteredLinks = (this.driver) ?
-          this.links.filter(p => p.driver === this.driver) :
-          this.links;
-      });
+              // this.links = links;
+              // this.filteredLinks = links;
+              // return this.route.queryParamMap;
+          });
+          // .subscribe(params => {
+          // });
+  }
+
+  async ngOnInit() {
+      console.log('running links');
+      console.log(this.version, this.searchTerm);
+    await this.populateLinks();
+  }
+
+  search($event) {
+    console.log($event.target.value);
+    const searchTerm = $event.target.value;
+    this.filteredLinks = this.links.filter((data) => {
+        return data.title.toUpperCase().includes(searchTerm.toUpperCase())
+            || data.driver.toUpperCase().includes(searchTerm.toUpperCase());
     });
   }
 }

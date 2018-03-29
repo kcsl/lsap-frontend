@@ -6,12 +6,12 @@ export class LinksService {
 
   constructor(private db: AngularFireDatabase) { }
 
-  getAll(version) {
-    return this.db.list(`links/${version}`);
-  }
+    getAll(version) {
+        return this.db.list('/links/' + version, ref => ref.orderByChild('title'));
+    }
 
-  get(version, linkId) {
-    return this.db.object(`links/${version}/${linkId}`).snapshotChanges();
-  }
+    get(version, linkId) {
+      return this.db.object(`links/${version}/${linkId}`).snapshotChanges();
+    }
 
 }

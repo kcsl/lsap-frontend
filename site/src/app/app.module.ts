@@ -18,22 +18,22 @@ import { CustomFormsModule } from 'ng2-validation';
 
 import { AppComponent } from './app.component';
 import { AppNavbarComponent } from './navbar/app-navbar.component';
-import { HomeComponent } from './home/home.component';
 import { LinksComponent } from './links/links.component';
 import { LoginComponent } from './login/login.component';
 import { FilterComponent } from './links/links-filter/filter.component';
 import { LinkCardComponent } from './link-card/link-card.component';
+import { HomeComponent } from './home/home.component';
 
 
 @NgModule({
   declarations: [
     AppComponent,
     AppNavbarComponent,
-    HomeComponent,
     LinksComponent,
     LoginComponent,
     FilterComponent,
-    LinkCardComponent
+    LinkCardComponent,
+    HomeComponent,
   ],
   imports: [
     BrowserModule,
@@ -49,9 +49,8 @@ import { LinkCardComponent } from './link-card/link-card.component';
         component: HomeComponent
       },
       {
-        path: 'links',
-        component: LinksComponent,
-
+        path: 'v/:version',
+        component: LinksComponent
       },
       {
         path: 'login',

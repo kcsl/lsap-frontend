@@ -13,27 +13,41 @@ export class AppNavbarComponent implements OnInit {
   public isAdmin;
   versions: String[] = [];
   version;
+  searchTerm;
   filter: string;
   constructor(public auth: AuthService,
               private navbarService: NavbarService,
               private router: ActivatedRoute) { }
 
-  ngOnInit() {
+  async ngOnInit() {
+    // this.version = this.selectedVersion();
     this.isAdmin = this.auth.appUser;
-    this.navbarService.getAll().snapshotChanges().subscribe(v => {
+    await this.navbarService.getAll().snapshotChanges().subscribe(v => {
         v.forEach(element => {
             this.versions.push(element.payload.val());
         });
+        console.log('running nav');
+        console.log(this.version);
+        if (this.version == null) {
+            this.version = this.versions[0];
+            console.log(this.version);
+        }
     });
   }
 
-    get selectedVersion() {
-      return this.versions;
-    }
+  get selectedVersion() {
+    return this.version;
+  }
 
-    set selectedVersion(value) {
+  search($event) {
+    console.log($event.target.value);
+    this.searchTerm = $event.target.value;
+  }
+
+  updateVersion(value) {
+      console.log(value);
       this.version = value;
-    }
+  }
 
   logout() {
     this.auth.logout();

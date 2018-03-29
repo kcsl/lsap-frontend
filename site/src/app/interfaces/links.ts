@@ -1,4 +1,4 @@
-export interface InstanceObject {
+export interface Links {
     title: string;
     driver: string;
 }

@@ -3,12 +3,17 @@
     <div class="navbar-header" style="top: 2%; position: absolute;">
       <a class="navbar-brand" href="/">L-SAP</a>
 
-      <select id="version" [(ngModel)]="selectedVersion" required>
+      <select id="version" [(ngModel)]="version" (ngModelChange)="updateVersion(version)" required>
         <option *ngFor="let v of versions">{{ v }}</option>
       </select>
     </div>
     <div class="col">
+      <div class="input-group mb-3 mr-0 ml-0">
+        <input id='search' type="text" class="form-control" placeholder="Search" aria-label="Username" aria-describedby="basic-addon1" (input)="search($event)"
+               ng-model="values">
+      </div>
       <app-filter [filter]="filter"></app-filter>
     </div>
   </div>
 </nav>
+<app-links-component [searchTerm]="searchTerm" [version]="version"></app-links-component>
