@@ -1,5 +1,8 @@
 package edu.iastate.sdmay1809;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.reflect.Array;
 
 public class Utils {
@@ -42,5 +45,23 @@ public class Utils {
 			System.arraycopy(b, 0, c, aLen, bLen);
 			return c;
 		}
+	}
+	
+	public static String execute(String[] commands) throws IOException, InterruptedException {
+		StringBuilder sb = new StringBuilder();
+		String line = null;
+		
+		Runtime rt = Runtime.getRuntime();
+		Process pr = rt.exec(commands);
+		BufferedReader input = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+		
+		while((line = input.readLine()) != null) {
+			sb.append(line + "\n");
+		}
+		
+		int exitValue = pr.waitFor();
+		sb.append("\nProcess exited with value " + exitValue + "\n");
+		
+		return sb.toString();
 	}
 }
