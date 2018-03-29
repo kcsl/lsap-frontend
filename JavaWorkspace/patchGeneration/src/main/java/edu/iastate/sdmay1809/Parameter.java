@@ -1,4 +1,4 @@
-package patchGeneration;
+package edu.iastate.sdmay1809;
 
 public class Parameter
 {
