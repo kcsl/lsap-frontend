@@ -5,6 +5,9 @@ linux-kernel-3.17-rc1/
 linux-kernel-3.18-rc1/
 linux-kernel-3.19-rc1/
 
+## Submodule Ignores
+JavaWorkspace/diffMapper/resources/testing/DiffMapper/runSingleInstance/kernel
+
 ## Eclipse Workspace Ignores
 
 ### Basic Files

@@ -1,0 +1,4 @@
+[submodule "kernel"]
+	path = JavaWorkspace/diffMapper/resources/testing/DiffMapper/runSingleInstance/kernel
+	url = ./JavaWorkspace/diffMapper/resources/testing/DiffMapper/runSingleInstance/kernel/
+	ignore = all
