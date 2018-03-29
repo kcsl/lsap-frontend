@@ -17,10 +17,8 @@ public class FunctionTest {
 	@Before
 	public void setUp()
 	{
-		exampleFunction = "int aFunction(int parameter1, struct mutex *lock) {";
-		otherExampleFunction = "void function2(struct mutex *lock) {";
-		function = new Function(exampleFunction);
-		otherFunction = new Function(otherExampleFunction);
+		function = new Function("int aFunction(int parameter1, struct mutex *lock) {");
+		otherFunction = new Function("void function2(struct mutex *lock) {");
 	}
 	
 	@Test
@@ -67,8 +65,8 @@ public class FunctionTest {
 	{
 		ArrayList<Function> functions = new ArrayList<Function>();
 		
-		functions.add(new Function(exampleFunction));
-		functions.add(new Function(otherExampleFunction));
+		functions.add(function);
+		functions.add(otherFunction);
 		functions.add(new Function("int anotherFunction() {"));
 		
 		assertTrue(Function.contains(functions, "aFunction"));

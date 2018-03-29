@@ -83,6 +83,9 @@ public class Macro implements Comparable<Macro> {
 		String parameters = "";
 		String bodyParameters = "";
 		
+		// If there's no body for the macro, return null
+		if (macroBody == null) return null;
+		
 		// Loop through the longer parameter list
 		for (int i = 0; i < Math.max(params.size(), macroBody.getParameters().size()); i++)
 		{
