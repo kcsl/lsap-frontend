@@ -40,6 +40,8 @@ public class DiffMapper {
 			println("Couldn't get the kernel dir");
 			return -1;
 		}
+		
+		performGitSetup();
 
 		println("Parsing instance map...");
 		Path oldInstance = Paths.get(config.DIFF_TEST_DIR, inputMapFilename);
@@ -55,7 +57,11 @@ public class DiffMapper {
 		}
 
 		println("Applying changes...");
-		return applyChanges(changes);
+		int retVal = applyChanges(changes);
+		
+		performGitCleanup();
+		
+		return retVal;
 	}
 
 	public void trackMetaData(JSONObject changes, JSONObject object) throws JSONException, IOException {
@@ -169,8 +175,100 @@ public class DiffMapper {
 		rtemp.close();
 		fbak.delete();
 	}
+	
+	public void performGitSetup() {
+		File kernel_dir = new File(config.KERNEL_DIR);
+		
+		// git checkout <old_tag>
+		execGitCheckoutTag(config.OLD_TAG, kernel_dir);
+		
+		// git clean -xdfq
+		execGitClean(kernel_dir);
+		
+		// git checkout -b diff_map
+		execGitCreateBranch("diff_map", kernel_dir);
+	}
+	
+	public void performGitCleanup() {
+		File kernel_dir = new File(config.KERNEL_DIR);
+		
+		// git commit -am "add metadata"
+		execGitCommitAll("add metadata", kernel_dir);
+		
+		// git checkout <new_tag>
+		execGitCheckoutTag(config.NEW_TAG, kernel_dir);
+		
+		// git clean -xdfq
+		execGitClean(kernel_dir);
+		
+		// git reset <old_version>
+		execGitReset(config.OLD_TAG, kernel_dir);
+		
+		// git commit -am "upgrade to <new version>"
+		execGitCommitAll("upgrade to " + config.NEW_TAG, kernel_dir);
+		
+		// git checkout -b diff_map_upgraded
+		execGitCreateBranch("diff_map_upgraded", kernel_dir);
+		
+		// git rebase -s recursive -X theirs diff_map 
+		execGitRebase("diff_map", kernel_dir);
+	}
+	
+	public void execGitCheckoutTag(String tag, File dir) {
+		try {
+			println(Utils.execute(new String[] {"git", "checkout", tag}, dir));
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public void execGitClean(File dir) {
+		try {
+			println(Utils.execute(new String[] {"git", "clean", "-xdfq"}, dir));
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public void execGitCreateBranch(String branchName, File dir) {
+		try {
+			println(Utils.execute(new String[] {"git", "checkout", "-b", branchName}, dir));
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public void execGitReset(String commit, File dir) {
+		try {
+			println(Utils.execute(new String[] {"git", "reset", commit}, dir));
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public void execGitCommitAll(String message, File dir) {
+		try {
+			println(Utils.execute(new String[] {"git", "commit", "-am", message}, dir));
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public void execGitRebase(String base, File dir) {
+		try {
+			println(Utils.execute(new String[] {"git", "rebase", "-s", "recursive", "-X", "theirs", base}, dir));
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 
-	public void println(String msg) {
+	private void println(String msg) {
 		if (allowPrintStatements) {
 			System.out.println(msg);
 		}

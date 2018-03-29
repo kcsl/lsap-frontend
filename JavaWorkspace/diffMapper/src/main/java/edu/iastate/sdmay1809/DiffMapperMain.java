@@ -10,7 +10,7 @@ public class DiffMapperMain {
 		ArrayList<Long> timings = new ArrayList<Long>();
 
 		DiffConfig config = DiffConfig.builder(args).build();
-
+		
 		timings.add(System.nanoTime());
 		InstanceTracker it = new InstanceTracker(config.RESULT_DIR);
 		it.run(config.DIFF_TEST_DIR, false);
