@@ -20,10 +20,10 @@ public class DiffMapper {
 		File directory; // Desired current working directory
 
 		directory = new File(directory_name).getAbsoluteFile();
-		if (directory.exists() || directory.mkdirs()) {
+		if(directory.isDirectory() || directory.mkdirs()) {
 			result = (System.setProperty("user.dir", directory.getAbsolutePath()) != null);
 		}
-
+		
 		return result;
 	}
 
@@ -36,11 +36,6 @@ public class DiffMapper {
 	}
 
 	public int run(String inputMapFilename) throws JSONException, IOException {
-		if (!setCurrentDirectory(config.KERNEL_DIR)) {
-			println("Couldn't get the kernel dir");
-			return -1;
-		}
-		
 		performGitSetup();
 
 		println("Parsing instance map...");
@@ -64,7 +59,7 @@ public class DiffMapper {
 		return retVal;
 	}
 
-	public void trackMetaData(JSONObject changes, JSONObject object) throws JSONException, IOException {
+	private void trackMetaData(JSONObject changes, JSONObject object) throws JSONException, IOException {
 		String fileName = object.getString("filename");
 		String name = object.getString("name");
 		String status = object.getString("status");
@@ -88,7 +83,7 @@ public class DiffMapper {
 		changes.getJSONArray(fileName).put(metaData);
 	}
 
-	public int applyChanges(JSONObject changes) throws JSONException, IOException {
+	private int applyChanges(JSONObject changes) throws JSONException, IOException {
 		int changesApplied = 0;
 		Iterator<String> iter = changes.keys();
 		while (iter.hasNext()) {
@@ -105,7 +100,7 @@ public class DiffMapper {
 		return changesApplied;
 	}
 
-	public JSONArray sort(JSONArray array) throws JSONException {
+	private JSONArray sort(JSONArray array) throws JSONException {
 		JSONArray sorted = new JSONArray();
 
 		while (array.length() > 0) {
@@ -131,7 +126,7 @@ public class DiffMapper {
 		return sorted;
 	}
 
-	public void insert(String filename, JSONArray instances) throws JSONException, IOException {
+	private void insert(String filename, JSONArray instances) throws JSONException, IOException {
 		File fbak = new File(filename + "~");
 		RandomAccessFile r = new RandomAccessFile(new File(filename), "rw");
 		RandomAccessFile rtemp = new RandomAccessFile(fbak, "rw");
@@ -176,7 +171,7 @@ public class DiffMapper {
 		fbak.delete();
 	}
 	
-	public void performGitSetup() {
+	private void performGitSetup() {
 		File kernel_dir = new File(config.KERNEL_DIR);
 		
 		// git checkout <old_tag>
@@ -189,7 +184,7 @@ public class DiffMapper {
 		execGitCreateBranch("diff_map", kernel_dir);
 	}
 	
-	public void performGitCleanup() {
+	private void performGitCleanup() {
 		File kernel_dir = new File(config.KERNEL_DIR);
 		
 		// git commit -am "add metadata"
@@ -214,7 +209,7 @@ public class DiffMapper {
 		execGitRebase("diff_map", kernel_dir);
 	}
 	
-	public void execGitCheckoutTag(String tag, File dir) {
+	private void execGitCheckoutTag(String tag, File dir) {
 		try {
 			println(Utils.execute(new String[] {"git", "checkout", tag}, dir));
 		} catch (Exception e) {
@@ -223,7 +218,7 @@ public class DiffMapper {
 		}
 	}
 	
-	public void execGitClean(File dir) {
+	private void execGitClean(File dir) {
 		try {
 			println(Utils.execute(new String[] {"git", "clean", "-xdfq"}, dir));
 		} catch (Exception e) {
@@ -232,7 +227,7 @@ public class DiffMapper {
 		}
 	}
 	
-	public void execGitCreateBranch(String branchName, File dir) {
+	private void execGitCreateBranch(String branchName, File dir) {
 		try {
 			println(Utils.execute(new String[] {"git", "checkout", "-b", branchName}, dir));
 		} catch (Exception e) {
@@ -241,7 +236,7 @@ public class DiffMapper {
 		}
 	}
 	
-	public void execGitReset(String commit, File dir) {
+	private void execGitReset(String commit, File dir) {
 		try {
 			println(Utils.execute(new String[] {"git", "reset", commit}, dir));
 		} catch (Exception e) {
@@ -250,7 +245,7 @@ public class DiffMapper {
 		}
 	}
 	
-	public void execGitCommitAll(String message, File dir) {
+	private void execGitCommitAll(String message, File dir) {
 		try {
 			println(Utils.execute(new String[] {"git", "commit", "-am", message}, dir));
 		} catch (Exception e) {
@@ -259,7 +254,7 @@ public class DiffMapper {
 		}
 	}
 	
-	public void execGitRebase(String base, File dir) {
+	private void execGitRebase(String base, File dir) {
 		try {
 			println(Utils.execute(new String[] {"git", "rebase", "-s", "recursive", "-X", "theirs", base}, dir));
 		} catch (Exception e) {

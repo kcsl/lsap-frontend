@@ -1,7 +1,10 @@
 package edu.iastate.sdmay1809;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.*;
+
+import java.io.IOException;
 
 import org.junit.Test;
 
@@ -117,5 +120,12 @@ public class UtilsTest {
 		assertArrayEquals(expected4, test4);
 		assertArrayEquals(expected5, test5);
 		assertNull(test6);
+	}
+	
+	@Test
+	public void executeCompletesCorrectly() throws IOException, InterruptedException {
+		String execOutput = Utils.execute(new String[] {"pwd"}, null);
+		
+		assertThat(execOutput, containsString("Process exited with value 0"));
 	}
 }
