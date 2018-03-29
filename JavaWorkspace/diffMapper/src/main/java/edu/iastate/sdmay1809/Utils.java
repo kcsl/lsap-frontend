@@ -1,6 +1,7 @@
 package edu.iastate.sdmay1809;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Array;
@@ -47,12 +48,12 @@ public class Utils {
 		}
 	}
 	
-	public static String execute(String[] commands) throws IOException, InterruptedException {
+	public static String execute(String[] commands, File dir) throws IOException, InterruptedException {
 		StringBuilder sb = new StringBuilder();
 		String line = null;
 		
 		Runtime rt = Runtime.getRuntime();
-		Process pr = rt.exec(commands);
+		Process pr = rt.exec(commands, null, dir);
 		BufferedReader input = new BufferedReader(new InputStreamReader(pr.getInputStream()));
 		
 		while((line = input.readLine()) != null) {
