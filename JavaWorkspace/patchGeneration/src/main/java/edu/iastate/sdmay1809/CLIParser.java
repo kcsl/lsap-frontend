@@ -66,6 +66,6 @@ public class CLIParser {
 	
 	public String getDVal()
 	{
-		return line.getOptionValue("debug", "PatcherDebug.txt");
+		return line.getOptionValue("debug", "resources/PatcherDebug.txt");
 	}
 }

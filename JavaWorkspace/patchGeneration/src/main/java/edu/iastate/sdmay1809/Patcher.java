@@ -19,8 +19,10 @@ public class Patcher
 	private static ArrayList<Macro> macros;
 	
 	// Collections of criteria for whether or not to accept a particular function or macro into the patch
-	private static ArrayList<Criteria> functionCriteria;
-	private static ArrayList<Criteria> macroCriteria;
+	private static ArrayList<Criteria> mutexFunctionCriteria;
+	private static ArrayList<Criteria> mutexMacroCriteria;
+	private static ArrayList<Criteria> spinFunctionCriteria;
+	private static ArrayList<Criteria> spinMacroCriteria;
 	
 	// Lists of files to check for mutex and spin locking functions and macros
 	private static ArrayList<String> mutexPaths;
@@ -48,6 +50,9 @@ public class Patcher
 	 */
 	public static void main(String[] args) throws IOException, ParseException
 	{
+		// Read the patcher .ini file
+		IniReader ini = new IniReader("resources/patcher.ini");
+		
 		// Initialize and parse the command line arguments
 		parser = new CLIParser(args);
 		
@@ -57,7 +62,10 @@ public class Patcher
 		doDebug = parser.dProvided();
 		debugPath = parser.getDVal();
 		verbose = parser.vProvided();
-				
+					
+		verbose = true;
+		doDebug = true;
+		
 		if (verbose)
 		{
 			System.out.println("Verbose output is ON.\n");
@@ -71,45 +79,60 @@ public class Patcher
 		macros = new ArrayList<Macro>();
 		
 		// Initialize the lists of paths
-		mutexPaths = new ArrayList<String>();
-		spinPaths = new ArrayList<String>();
-		
-		// Load the lists of paths
-		mutexPaths.add("include/linux/mutex.h");
-		
-		spinPaths.add("include/linux/spinlock.h");
-		spinPaths.add("include/linux/spinlock_api_smp.h");
+		mutexPaths = ini.getMutexPaths();
+		spinPaths = ini.getSpinPaths();
 		
 		// Initialize the lists of criteria for function/macro selection
-		functionCriteria = new ArrayList<Criteria>();
-		macroCriteria = new ArrayList<Criteria>();
+		mutexFunctionCriteria = ini.getMutexFunctionCriteria();
+		mutexMacroCriteria = ini.getMutexMacroCriteria();
+		spinFunctionCriteria = ini.getSpinFunctionCriteria();
+		spinMacroCriteria = ini.getSpinMacroCriteria();
 		
-		// List the function criteria for mutex locks
-		functionCriteria.add(new Criteria("mutex", true));
-		functionCriteria.add(new Criteria("lock", true));
-		functionCriteria.add(new Criteria("mutex_lock_io_nested", false));
-				
-		// List the macro criteria for mutex locks
-		macroCriteria.add(new Criteria("mutex", true));
-		macroCriteria.add(new Criteria("lock", true));
-
 		// Print mutex locking function and macro criteria if in verbose mode
 		if (verbose)
 		{
-			System.out.println("Mutex Lock Function Criteria:");
+			System.out.println("Mutex Lock Files:");
 			
-			for (Criteria c : functionCriteria)
+			for (String s : mutexPaths)
+			{
+				System.out.println("\t" + s);
+			}
+			
+			System.out.println("\nMutex Lock Function Criteria:");
+			
+			for (Criteria c : mutexFunctionCriteria)
 			{
 				System.out.println("\t" + c.getNameComponent() + ": " + c.mustHave());
 			}
 			
 			System.out.println("\nMutex Lock Macro Criteria:");
 			
-			for (Criteria c : macroCriteria)
+			for (Criteria c : mutexMacroCriteria)
+			{
+				System.out.println("\t" + c.getNameComponent() + ": " + c.mustHave());
+			}
+
+			System.out.println("\nSpin Lock Files:");
+			
+			for (String s : spinPaths)
+			{
+				System.out.println("\t" + s);
+			}
+			
+			System.out.println("\nSpin Lock Function Criteria:");
+			
+			for (Criteria c : spinFunctionCriteria)
 			{
 				System.out.println("\t" + c.getNameComponent() + ": " + c.mustHave());
 			}
 			
+			System.out.println("\nSpin Lock Macro Criteria:");
+			
+			for (Criteria c : spinMacroCriteria)
+			{
+				System.out.println("\t" + c.getNameComponent() + ": " + c.mustHave());
+			}
+
 			System.out.println();
 		}
 		
@@ -119,44 +142,6 @@ public class Patcher
 		// Initialize the lists of functions and macros
 		functions = new ArrayList<Function>();
 		macros = new ArrayList<Macro>();
-		
-		// Initialize the lists of criteria for function/macro selection
-		functionCriteria = new ArrayList<Criteria>();
-		macroCriteria = new ArrayList<Criteria>();
-		
-		// List the function criteria for spinlocks
-		
-		// List the macro criteria for spinlocks
-		macroCriteria.add(new Criteria("lock", true));
-		macroCriteria.add(new Criteria("_is_", false));
-		macroCriteria.add(new Criteria("_can_", false));
-		macroCriteria.add(new Criteria("_before_", false));
-		macroCriteria.add(new Criteria("assert", false));
-		macroCriteria.add(new Criteria("init", false));
-		macroCriteria.add(new Criteria("_raw_spin_unlock_bh", false));
-		macroCriteria.add(new Criteria("_raw_spin_unlock_irq", false));
-		macroCriteria.add(new Criteria("_raw_spin_unlock_irqrestore", false));
-		macroCriteria.add(new Criteria("attribute", false));
-		
-		// Print spin locking function and macro criteria if in verbose mode
-		if (verbose)
-		{
-			System.out.println("Spin Lock Function Criteria:");
-			
-			for (Criteria c : functionCriteria)
-			{
-				System.out.println("\t" + c.getNameComponent() + ": " + c.mustHave());
-			}
-			
-			System.out.println("\nSpin Lock Macro Criteria:");
-			
-			for (Criteria c : macroCriteria)
-			{
-				System.out.println("\t" + c.getNameComponent() + ": " + c.mustHave());
-			}
-			
-			System.out.println();
-		}
 
 		// Generate the LSAP Spin Lock file
 		generateLSAPSpinlockFile();
@@ -194,7 +179,7 @@ public class Patcher
 				String line = s.nextLine();
 				
 				// Only bother with analysis if the line is a locking function
-				if (isLockingFunction(line))
+				if (isLockingFunction(line, mutexFunctionCriteria))
 				{
 					// Some functions span multiple lines. This adds the next line.
 					// If a function with multiple lines (more than 2) is found, this will need to be reworked
@@ -209,7 +194,7 @@ public class Patcher
 				}
 	
 				// We also want to analyze the line if it's a locking macro
-				else if (isLockingMacro(line)) 
+				else if (isLockingMacro(line, mutexMacroCriteria)) 
 				{
 					// Macros only span one line. Add the locking macro to our collection if it doesn't exist
 					Macro m = new Macro(line);
@@ -354,7 +339,7 @@ public class Patcher
 				String line = s.nextLine();
 				
 				// We want to analyze the line if it's a locking macro
-				if (isLockingMacro(line)) 
+				if (isLockingMacro(line, spinMacroCriteria)) 
 				{
 					// Macros only span one line. Add the locking macro to our collection if it doesn't exist
 					Macro m = new Macro(line);
@@ -446,7 +431,7 @@ public class Patcher
 		return functionName.trim();
 	}
 	
-	private static boolean isLockingFunction(String line)
+	private static boolean isLockingFunction(String line, ArrayList<Criteria> criteria)
 	{
 		// All locking functions must (obviously) be functions
 		if (!isFunction(line)) return false;		
@@ -455,7 +440,7 @@ public class Patcher
 		String functionName = getFunctionName(line);
 		
 		// Check each of the defined criteria for functions. If all criteria are met, return true
-		for (Criteria c : functionCriteria)
+		for (Criteria c : criteria)
 		{
 			if (functionName.contains(c.getNameComponent()) != c.mustHave())
 			{
@@ -466,7 +451,7 @@ public class Patcher
 		return true;
 	}
 	
-	private static boolean isLockingMacro(String line)
+	private static boolean isLockingMacro(String line, ArrayList<Criteria> criteria)
 	{
 		// All locking macros are preprocessor macro definitions
 		if (!isPreprocDefineMacro(line)) return false;
@@ -475,7 +460,7 @@ public class Patcher
 		String macroName = getFunctionName(line);
 		
 		// Check each of the defined criteria for macros. If all criteria are met, return true
-		for (Criteria c : macroCriteria)
+		for (Criteria c : criteria)
 		{
 			if (macroName.contains(c.getNameComponent()) != c.mustHave())
 			{

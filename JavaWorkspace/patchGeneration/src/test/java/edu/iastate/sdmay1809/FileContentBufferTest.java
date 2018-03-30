@@ -19,7 +19,7 @@ public class FileContentBufferTest {
 	@Before
 	public void setUp()
 	{
-		path = "FileContentBufferTest.txt";
+		path = "resources/FileContentBufferTest.txt";
 		fcb = new FileContentBuffer(path);
 	}
 	
