@@ -1,14 +1,17 @@
 package edu.iastate.sdmay1809;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Scanner;
 
+import org.apache.commons.cli.ParseException;
+
 public class Patcher 
 {
-	private static final String pathToKernelDirectory = "";
+	private static String pathToKernelDirectory;
 	private static FileContentBuffer fcb;
 
 	// Collections of functions and macros for a given patched header file
@@ -19,9 +22,18 @@ public class Patcher
 	private static ArrayList<Criteria> functionCriteria;
 	private static ArrayList<Criteria> macroCriteria;
 	
-	// Print to text file or header file
-	private static final boolean DEBUG = true;															// REMOVE UPON COMPLETION
-
+	// Lists of files to check for mutex and spin locking functions and macros
+	private static ArrayList<String> mutexPaths;
+	private static ArrayList<String> spinPaths;
+	
+	// Debugging variables
+	private static boolean doDebug;
+	private static String debugPath;
+	private static boolean verbose;
+	
+	// Instance of a command line argument parser
+	private static CLIParser parser;
+	
 	/**
 	 * This main method generates the patch for a given version of the linux kernel located at
 	 * the path specified in the pathToKernelDirectory constant variable.
@@ -32,12 +44,41 @@ public class Patcher
 	 * 
 	 * 		LSAP_SPINLOCK:
 	 * 			Comment out original function implementation
+	 * @throws ParseException 
 	 */
-	public static void main(String[] args) throws IOException
+	public static void main(String[] args) throws IOException, ParseException
 	{
+		// Initialize and parse the command line arguments
+		parser = new CLIParser(args);
+		
+		// Initialize CLI arguments
+		pathToKernelDirectory = parser.getKPVal();
+		if (pathToKernelDirectory.length() > 0 && pathToKernelDirectory.charAt(pathToKernelDirectory.length() - 1) != '/') pathToKernelDirectory += "/";
+		doDebug = parser.dProvided();
+		debugPath = parser.getDVal();
+		verbose = parser.vProvided();
+				
+		if (verbose)
+		{
+			System.out.println("Verbose output is ON.\n");
+			System.out.println("Patcher information:");
+			System.out.println("\tPath to kernel: " + (pathToKernelDirectory.length() > 0 ? pathToKernelDirectory : "."));
+			System.out.println("\tDebugging: " + (doDebug ? "ON\n\t\tDebug file: " + debugPath : "OFF") + "\n");
+		}
+		
 		// Initialize the lists of functions and macros
 		functions = new ArrayList<Function>();
 		macros = new ArrayList<Macro>();
+		
+		// Initialize the lists of paths
+		mutexPaths = new ArrayList<String>();
+		spinPaths = new ArrayList<String>();
+		
+		// Load the lists of paths
+		mutexPaths.add("include/linux/mutex.h");
+		
+		spinPaths.add("include/linux/spinlock.h");
+		spinPaths.add("include/linux/spinlock_api_smp.h");
 		
 		// Initialize the lists of criteria for function/macro selection
 		functionCriteria = new ArrayList<Criteria>();
@@ -47,22 +88,32 @@ public class Patcher
 		functionCriteria.add(new Criteria("mutex", true));
 		functionCriteria.add(new Criteria("lock", true));
 		functionCriteria.add(new Criteria("mutex_lock_io_nested", false));
-		
+				
 		// List the macro criteria for mutex locks
 		macroCriteria.add(new Criteria("mutex", true));
 		macroCriteria.add(new Criteria("lock", true));
 
-		if (DEBUG)
+		// Print mutex locking function and macro criteria if in verbose mode
+		if (verbose)
 		{
-			System.out.println(""																		);
-			System.out.println(""																		);
-			System.out.println("/**************************************************************/"		);
-			System.out.println("// MUTEX LOCK"															);
-			System.out.println("/**************************************************************/"		);
-			System.out.println(""																		);
-			System.out.println(""																		);
+			System.out.println("Mutex Lock Function Criteria:");
+			
+			for (Criteria c : functionCriteria)
+			{
+				System.out.println("\t" + c.getNameComponent() + ": " + c.mustHave());
+			}
+			
+			System.out.println("\nMutex Lock Macro Criteria:");
+			
+			for (Criteria c : macroCriteria)
+			{
+				System.out.println("\t" + c.getNameComponent() + ": " + c.mustHave());
+			}
+			
+			System.out.println();
 		}
 		
+		// Generate the LSAP Mutex Lock file
 		generateLSAPMutexLockFile();
 
 		// Initialize the lists of functions and macros
@@ -87,17 +138,27 @@ public class Patcher
 		macroCriteria.add(new Criteria("_raw_spin_unlock_irqrestore", false));
 		macroCriteria.add(new Criteria("attribute", false));
 		
-		if (DEBUG)
+		// Print spin locking function and macro criteria if in verbose mode
+		if (verbose)
 		{
-			System.out.println(""																		);
-			System.out.println(""																		);
-			System.out.println("/**************************************************************/"		);
-			System.out.println("// SPIN LOCK"															);
-			System.out.println("/**************************************************************/"		);
-			System.out.println(""																		);
-			System.out.println(""																		);
+			System.out.println("Spin Lock Function Criteria:");
+			
+			for (Criteria c : functionCriteria)
+			{
+				System.out.println("\t" + c.getNameComponent() + ": " + c.mustHave());
+			}
+			
+			System.out.println("\nSpin Lock Macro Criteria:");
+			
+			for (Criteria c : macroCriteria)
+			{
+				System.out.println("\t" + c.getNameComponent() + ": " + c.mustHave());
+			}
+			
+			System.out.println();
 		}
 
+		// Generate the LSAP Spin Lock file
 		generateLSAPSpinlockFile();
 	}
 	
@@ -107,50 +168,74 @@ public class Patcher
 	private static void generateLSAPMutexLockFile() throws IOException
 	{
 		// Set the location of the file to write (basically decide if we're writing to a text or header file)
-		if (DEBUG)																						// REMOVE UPON COMPLETION
-			fcb = new FileContentBuffer(pathToKernelDirectory + "include/linux/lsap_mutex_lock.txt");	// REMOVE UPON COMPLETION
-		else																							// REMOVE UPON COMPLETION
+		if (doDebug)
+			fcb = new FileContentBuffer(debugPath);
+		else
 			fcb = new FileContentBuffer(pathToKernelDirectory + "include/linux/lsap_mutex_lock.h");
 			
-		// Start scanning through the unpatched mutex.h header file
-		Scanner s = new Scanner(new File(pathToKernelDirectory + "include/linux/mutex.h"));
-				
-		while (s.hasNextLine())
-		{
-			String line = s.nextLine();
+		for (String path : mutexPaths)
+		{		
+			// Start scanning through the unpatched mutex file
+			Scanner s;
 			
-			// Only bother with analysis if the line is a locking function
-			if (isLockingFunction(line))
+			try
 			{
-				// Some functions span multiple lines. This adds the next line.
-				// If a function with multiple lines (more than 2) is found, this will need to be reworked
-				if (!line.contains(");") && s.hasNextLine())
+				s = new Scanner(new File(pathToKernelDirectory + path));
+			}
+			
+			catch(FileNotFoundException e)
+			{
+				System.out.println("ERROR: Could not locate file \"" + path + "\". Skipping it.");
+				continue;
+			}
+						
+			while (s.hasNextLine())
+			{
+				String line = s.nextLine();
+				
+				// Only bother with analysis if the line is a locking function
+				if (isLockingFunction(line))
 				{
-					line += s.nextLine().trim();
+					// Some functions span multiple lines. This adds the next line.
+					// If a function with multiple lines (more than 2) is found, this will need to be reworked
+					if (!line.contains(");") && s.hasNextLine())
+					{
+						line += s.nextLine().trim();
+					}
+									
+					// Create a new function and add it to our collection if it doesn't exist
+					Function f = new Function(line);
+					if (!Function.contains(functions, f.getName())) functions.add(f);
 				}
-								
-				// Create a new function and add it to our collection if it doesn't exist
-				Function f = new Function(line);
-				if (!Function.contains(functions, f.getName())) functions.add(f);
+	
+				// We also want to analyze the line if it's a locking macro
+				else if (isLockingMacro(line)) 
+				{
+					// Macros only span one line. Add the locking macro to our collection if it doesn't exist
+					Macro m = new Macro(line);
+					if (!Macro.contains(macros, m.getName())) macros.add(m);
+				}
 			}
-
-			// We also want to analyze the line if it's a locking macro
-			else if (isLockingMacro(line)) 
-			{
-				// Macros only span one line. Add the locking macro to our collection if it doesn't exist
-				Macro m = new Macro(line);
-				if (!Macro.contains(macros, m.getName())) macros.add(m);
-			}
+			
+			// We've scanned the entire file, so close the scanner
+			s.close();
 		}
 		
-		// We've scanned the entire file, so close the scanner
-		s.close();
+		if (verbose)
+		{
+			System.out.println("Some macros and functions have the same name. Removing duplicates:");
+		}
 		
 		// If there are functions and macros with the same name, we want to use the macro, so remove the function
 		for (int i = 0; i < functions.size(); i++)
 		{
 			if (Macro.contains(macros, functions.get(i).getName()))
 			{
+				if (verbose)
+				{
+					System.out.println("\t" + functions.get(i).getName());					
+				}
+				
 				functions.remove(functions.get(i--));
 			}
 		}
@@ -176,7 +261,30 @@ public class Patcher
 		Collections.sort(functions);
 		Collections.sort(macros);
 		
+		if (verbose)
+		{
+			System.out.println("\nMutex Locking Functions Matching Criteria:");
+			
+			for (Function f : functions)
+			{
+				System.out.println("\t" + f.getName());
+			}
+			
+			System.out.println("\nMutex Locking Macros Matching Criteria:");
+			
+			for (Macro m : macros)
+			{
+				System.out.println("\t" + m.getName());
+			}
+			
+			System.out.println();
+		}
+		
 		// Generate the headings for the patched header file
+		fcb.writeln("/**************************************************************/"		);
+		fcb.writeln("// MUTEX LOCK"															);
+		fcb.writeln("/**************************************************************/"		);
+		fcb.writeln( "" 																	);
 		fcb.writeln( "#ifndef __LINUX_L_SAP_MUTEX_H"										);
 		fcb.writeln( "#define __LINUX_L_SAP_MUTEX_H"										);
 		fcb.writeln( "#include <linux/spinlock_types.h>"									);
@@ -202,19 +310,19 @@ public class Patcher
 		// End the patched header file
 		fcb.writeln( ""																		);
 		fcb.writeln( "#endif /* __LINUX_L_SAP_MUTEX_H */"									);
+		fcb.writeln( ""																		);
 		
 		// Print the contents of the patched header file to the header file itself
-		fcb.print(DEBUG);		
+		if (!doDebug) fcb.print();		
 	}
 	
 	/**
 	 *  Generate the header file source code for lsap_spinlock.h
+	 * @throws IOException 
 	 */
 	private static void generateLSAPSpinlockFile() throws IOException
 	{
-		if (DEBUG)																						// REMOVE UPON COMPLETION
-			fcb = new FileContentBuffer(pathToKernelDirectory + "include/linux/lsap_spinlock.txt");		// REMOVE UPON COMPLETION
-		else																							// REMOVE UPON COMPLETION
+		if (!doDebug)
 			fcb = new FileContentBuffer(pathToKernelDirectory + "include/linux/lsap_spinlock.h");
 		
 		Function lock = new Function("void __raw_spin_lock(void *lock)");
@@ -225,14 +333,22 @@ public class Patcher
 		functions.add(trylock);
 		functions.add(unlock);
 		
-		for (int i = 0; i < 2; i++)
+		for (String path : spinPaths)
 		{
-			// Start scanning through the unpatched mutex.h header file
 			Scanner s;
 			
-			if (i == 0) s = new Scanner(new File(pathToKernelDirectory + "include/linux/spinlock.h"));
-			else s = new Scanner(new File(pathToKernelDirectory + "include/linux/spinlock_api_smp.h"));
-
+			// Start scanning through the unpatched spinlock header file. Skip if we can't find it
+			try
+			{
+				s = new Scanner(new File(pathToKernelDirectory + path));
+			}
+			
+			catch(FileNotFoundException e)
+			{
+				System.out.println("ERROR: Could not locate file \"" + path + "\". Skipping it.");
+				continue;
+			}
+			
 			while (s.hasNextLine())
 			{
 				String line = s.nextLine();
@@ -260,14 +376,14 @@ public class Patcher
 		Collections.sort(functions);
 		Collections.sort(macros);
 		
-		fcb.writeln( "#ifndef __LINUX_L_SAP_SPINLOCK_H"										);
-		fcb.writeln( "#define __LINUX_L_SAP_SPINLOCK_H"										);
-		fcb.writeln( "#include <linux/spinlock_types.h>"									);
-		fcb.writeln( ""																		);
-		fcb.writeln( ""																		);
 		fcb.writeln("/**************************************************************/"		);
 		fcb.writeln("// SPIN LOCK"															);
 		fcb.writeln("/**************************************************************/"		);
+		fcb.writeln( "" 																	);
+		fcb.writeln( "#ifndef __LINUX_L_SAP_SPINLOCK_H"										);
+		fcb.writeln( "#define __LINUX_L_SAP_SPINLOCK_H"										);
+		fcb.writeln( "#include <linux/spinlock_types.h>"									);
+		fcb.writeln( "" 																	);
 
 		for (Function f : functions)
 		{
@@ -284,8 +400,9 @@ public class Patcher
 		
 		fcb.writeln( "" 																	);
 		fcb.writeln( "#endif /* __LINUX_L_SAP_SPINLOCK_H */" 								);
+		fcb.writeln( ""																		);
 
-		fcb.print(DEBUG);
+		fcb.print(doDebug);
 	}
 	
 	private static boolean isFunction(String line)
