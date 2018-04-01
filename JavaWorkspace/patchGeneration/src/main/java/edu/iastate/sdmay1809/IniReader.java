@@ -1,99 +1,153 @@
 package edu.iastate.sdmay1809;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
+import java.io.FileNotFoundException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Scanner;
+import java.util.Set;
 
-import org.ini4j.Ini;
-import org.ini4j.InvalidFileFormatException;
-
-public class IniReader {
-	private ArrayList<Criteria> mutexFunctionCriteria;
-	private ArrayList<Criteria> mutexMacroCriteria;
-	private ArrayList<Criteria> spinFunctionCriteria;
-	private ArrayList<Criteria> spinMacroCriteria;
-	private ArrayList<String> mutexPaths;
-	private ArrayList<String> spinPaths;
+public class IniReader 
+{
+	private Map<String, Set<String>> sections;
 	
-	public IniReader(String path) throws InvalidFileFormatException, IOException
+	private static final String mutexPaths = "MutexPaths";
+	private static final String spinPaths = "SpinPaths";
+	private static final String mutexFunctionCriteria = "MutexFunctionCriteria";
+	private static final String mutexMacroCriteria = "MutexMacroCriteria";
+	private static final String spinFunctionCriteria = "SpinFunctionCriteria";
+	private static final String spinMacroCriteria = "SpinMacroCriteria";
+	
+	public IniReader(String path) throws FileNotFoundException
 	{
-		mutexFunctionCriteria = new ArrayList<Criteria>();
-		mutexMacroCriteria = new ArrayList<Criteria>();
-		spinFunctionCriteria = new ArrayList<Criteria>();
-		spinMacroCriteria = new ArrayList<Criteria>();
-		mutexPaths = new ArrayList<String>();
-		spinPaths = new ArrayList<String>();
+		Scanner s = new Scanner(new File(path));
+		String line = "";
+		String nextLine = "";
+		String option = "";
 		
-		Ini ini = new Ini(new File(path));
+		sections = new HashMap<String, Set<String>>();
 		
-		for (String sectionName : ini.keySet())
+		while (s.hasNextLine())
 		{
-			for (String option : ini.get(sectionName).keySet())
-			{			
-				Criteria c = null;
+			line = (nextLine.length() > 0) ? nextLine : s.nextLine();
+			
+			if (line.matches("\\[\\w+\\]"))
+			{
+				Set<String> options = new HashSet<String>();
 				
-				if (sectionName.contains("Criteria")) c = new Criteria(option, ini.get(sectionName, option, boolean.class));
-
-				switch (sectionName)
+				while(true)
 				{
-					case "MutexFunctionCriteria":
-						mutexFunctionCriteria.add(c);
-						break;
+					if (!s.hasNextLine()) break;
 					
-					case "MutexMacroCriteria":
-						mutexMacroCriteria.add(c);
-						break;
+					option = s.nextLine();
 					
-					case "SpinFunctionCriteria":
-						spinFunctionCriteria.add(c);
-						break;
-					
-					case "SpinMacroCriteria":
-						spinMacroCriteria.add(c);
-						break;
-					
-					case "MutexPaths":
-						if (ini.get(sectionName, option, boolean.class)) mutexPaths.add(option);
-						break;
-					
-					case "SpinPaths":
-						if (ini.get(sectionName, option, boolean.class)) spinPaths.add(option);
-						break;
-					
-					default:;
+					if (option.matches("\\[\\w+\\]")) break;
+					if (option.length() > 0) options.add(option);
 				}
+				
+				sections.put(line.replace("[", "").replace("]", ""), options);
+			}
+			
+			nextLine = option;
+		}
+		
+		s.close();
+	}
+	
+	public Set<String> getMutexPaths()
+	{
+		if (sections.containsKey(mutexPaths)) return sections.get(mutexPaths);
+		return null;
+	}
+	
+	public Set<String> getSpinPaths()
+	{
+		if (sections.containsKey(spinPaths)) return sections.get(spinPaths);
+		return null;
+	}
+	
+	public Set<Criteria> getMutexFunctionCriteria()
+	{
+		Set<Criteria> criteria = null;
+		
+		if (sections.containsKey(mutexFunctionCriteria))
+		{
+			criteria = new HashSet<Criteria>();
+			
+			for (String option : sections.get(mutexFunctionCriteria))
+			{
+				if (!option.contains("=")) continue;
+				
+				String[] optionParts = option.split("=", 2);
+				
+				criteria.add(new Criteria(optionParts[0], optionParts[1].equals("true")));
 			}
 		}
+		
+		return criteria;
 	}
 	
-	public ArrayList<Criteria> getMutexFunctionCriteria()
+	public Set<Criteria> getMutexMacroCriteria()
 	{
-		return mutexFunctionCriteria;
+		Set<Criteria> criteria = null;
+		
+		if (sections.containsKey(mutexMacroCriteria))
+		{
+			criteria = new HashSet<Criteria>();
+			
+			for (String option : sections.get(mutexMacroCriteria))
+			{
+				if (!option.contains("=")) continue;
+				
+				String[] optionParts = option.split("=", 2);
+				
+				criteria.add(new Criteria(optionParts[0], optionParts[1].equals("true")));
+			}
+		}
+		
+		return criteria;
 	}
-
-	public ArrayList<Criteria> getMutexMacroCriteria()
+	
+	public Set<Criteria> getSpinFunctionCriteria()
 	{
-		return mutexMacroCriteria;
+		Set<Criteria> criteria = null;
+		
+		if (sections.containsKey(spinFunctionCriteria))
+		{
+			criteria = new HashSet<Criteria>();
+			
+			for (String option : sections.get(spinFunctionCriteria))
+			{
+				if (!option.contains("=")) continue;
+				
+				String[] optionParts = option.split("=", 2);
+				
+				criteria.add(new Criteria(optionParts[0], optionParts[1].equals("true")));
+			}
+		}
+		
+		return criteria;
 	}
-
-	public ArrayList<Criteria> getSpinFunctionCriteria()
+	
+	public Set<Criteria> getSpinMacroCriteria()
 	{
-		return spinFunctionCriteria;
+		Set<Criteria> criteria = null;
+		
+		if (sections.containsKey(spinMacroCriteria))
+		{
+			criteria = new HashSet<Criteria>();
+			
+			for (String option : sections.get(spinMacroCriteria))
+			{
+				if (!option.contains("=")) continue;
+				
+				String[] optionParts = option.split("=", 2);
+				
+				criteria.add(new Criteria(optionParts[0], optionParts[1].equals("true")));
+			}
+		}
+		
+		return criteria;
 	}
-
-	public ArrayList<Criteria> getSpinMacroCriteria()
-	{
-		return spinMacroCriteria;
-	}
-
-	public ArrayList<String> getMutexPaths()
-	{
-		return mutexPaths;
-	}
-
-	public ArrayList<String> getSpinPaths()
-	{
-		return spinPaths;
-	}
-
 }

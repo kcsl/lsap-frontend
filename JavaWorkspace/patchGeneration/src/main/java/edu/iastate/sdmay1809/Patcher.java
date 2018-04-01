@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Scanner;
+import java.util.Set;
 
 import org.apache.commons.cli.ParseException;
 
@@ -19,14 +20,14 @@ public class Patcher
 	private static ArrayList<Macro> macros;
 	
 	// Collections of criteria for whether or not to accept a particular function or macro into the patch
-	private static ArrayList<Criteria> mutexFunctionCriteria;
-	private static ArrayList<Criteria> mutexMacroCriteria;
-	private static ArrayList<Criteria> spinFunctionCriteria;
-	private static ArrayList<Criteria> spinMacroCriteria;
+	private static Set<Criteria> mutexFunctionCriteria;
+	private static Set<Criteria> mutexMacroCriteria;
+	private static Set<Criteria> spinFunctionCriteria;
+	private static Set<Criteria> spinMacroCriteria;
 	
 	// Lists of files to check for mutex and spin locking functions and macros
-	private static ArrayList<String> mutexPaths;
-	private static ArrayList<String> spinPaths;
+	private static Set<String> mutexPaths;
+	private static Set<String> spinPaths;
 	
 	// Debugging variables
 	private static boolean doDebug;
@@ -431,7 +432,7 @@ public class Patcher
 		return functionName.trim();
 	}
 	
-	private static boolean isLockingFunction(String line, ArrayList<Criteria> criteria)
+	private static boolean isLockingFunction(String line, Set<Criteria> criteria)
 	{
 		// All locking functions must (obviously) be functions
 		if (!isFunction(line)) return false;		
@@ -451,7 +452,7 @@ public class Patcher
 		return true;
 	}
 	
-	private static boolean isLockingMacro(String line, ArrayList<Criteria> criteria)
+	private static boolean isLockingMacro(String line, Set<Criteria> criteria)
 	{
 		// All locking macros are preprocessor macro definitions
 		if (!isPreprocDefineMacro(line)) return false;
