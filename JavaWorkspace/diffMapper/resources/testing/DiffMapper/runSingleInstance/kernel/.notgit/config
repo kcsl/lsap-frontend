@@ -1,0 +1,9 @@
+[core]
+	repositoryformatversion = 0
+	filemode = true
+	bare = false
+	logallrefupdates = true
+	ignorecase = true
+	precomposeunicode = true
+[remote "origin"]
+	url = gitlab_dhanwada:sd/sdmay18-09.git/JavaWorkspace/diffMapper/resources/testing/DiffMapper/runSingleInstance/kernel
