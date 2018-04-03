@@ -25,7 +25,7 @@ public class DiffMapperTest {
 	public void testRunSingleInstance() throws JSONException, IOException, InterruptedException {
 		// Git Setup!
 		String testKernelDir = Paths.get("resources", "testing", "DiffMapper", "runSingleInstance", "kernel").toString();
-		Utils.execute(new String[] {"cp", "-R", ".notgit", ".git"}, new File(testKernelDir));
+		Utils.execute(new String[] {"cp", "-R", "../.notgit", ".git"}, new File(testKernelDir));
 		
 		
 		String configFile = Paths.get("resources", "testing", "DiffMapper", "runSingleInstance", "config.json").toString();
