@@ -5,7 +5,7 @@ import { AdminAuthGuard } from './guards/admin-auth.guard';
 import { UserService } from './services/user.service';
 import { AuthGuard } from './guards/auth-guard';
 import { AuthService } from './services/auth.service';
-import {NavbarService} from './services/navbar.service';
+import { NavbarService } from './services/navbar.service';
 import { RouterModule } from '@angular/router';
 import { environment } from './../environments/environment';
 import { BrowserModule } from '@angular/platform-browser';

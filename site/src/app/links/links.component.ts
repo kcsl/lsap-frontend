@@ -1,7 +1,7 @@
 import {ActivatedRoute, Router} from '@angular/router';
 import { LinksService } from '../services/links.service';
 import {Component, Input, OnInit} from '@angular/core';
-import {Links} from '../interfaces/links';
+import {Links} from '../models/links';
 import 'rxjs/add/operator/switchMap';
 
 @Component({
@@ -11,8 +11,7 @@ import 'rxjs/add/operator/switchMap';
 })
 export class LinksComponent implements OnInit {
 
-  driver: string;
-
+  file_list: string[] = [];
   links: Links[] = [];
   filteredLinks: Links[];
 
@@ -26,35 +25,25 @@ export class LinksComponent implements OnInit {
   ) { }
 
   async populateLinks() {
-      // await this.linksService.getVersion(this.version);
-      await this.linksService.getAll(this.version).snapshotChanges()
-          .map(links => {
-
-            links.forEach(function (data) {
-              console.log(data);
-
+      await this.linksService.populate(this.stripChars(this.version)) // this will get the version w/ no special chars
+          .snapshotChanges()
+          .subscribe(params => { // object instance
+              params.map(data => { // object data for instance
+                  this.links.push(data.payload.val());
+                  console.log(data.payload.val());
               });
-
-              // this.links = links;
-              // this.filteredLinks = links;
-              // return this.route.queryParamMap;
-          });
-          // .subscribe(params => {
-          // });
+              this.filteredLinks = this.links; // set filtered links to all links initially
+          }).unsubscribe();
   }
 
   async ngOnInit() {
-      console.log('running links');
-      console.log(this.version, this.searchTerm);
-    await this.populateLinks();
+      if (this.version !== undefined) {
+          console.log(this.version);
+          await this.populateLinks();
+      }
   }
 
-  search($event) {
-    console.log($event.target.value);
-    const searchTerm = $event.target.value;
-    this.filteredLinks = this.links.filter((data) => {
-        return data.title.toUpperCase().includes(searchTerm.toUpperCase())
-            || data.driver.toUpperCase().includes(searchTerm.toUpperCase());
-    });
+  stripChars(input) {
+      return input.replace(/[^0-9a-z]/gi, '').toString();
   }
 }

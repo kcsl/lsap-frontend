@@ -26,11 +26,8 @@ export class AppNavbarComponent implements OnInit {
         v.forEach(element => {
             this.versions.push(element.payload.val());
         });
-        console.log('running nav');
-        console.log(this.version);
         if (this.version == null) {
             this.version = this.versions[0];
-            console.log(this.version);
         }
     });
   }
