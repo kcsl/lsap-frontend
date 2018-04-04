@@ -15,10 +15,10 @@ public class ConfigWriter {
 	private String result_dir;
 	private ArrayList<String> types;
 	
-	public ConfigWriter(String old_tag, String new_tag) {
+	public ConfigWriter(String old_tag, String new_tag, String writelocation) {
 		this.old_tag = old_tag;
 		this.new_tag = new_tag;
-		String ws = System.getProperty("user.home") + "/Workspace";
+		String ws = writelocation;
 		location = ws + "/DiffConfig.json";
 		diff_test_dir = ws;
 		kernel_dir = ws;
@@ -37,5 +37,6 @@ public class ConfigWriter {
 			.put("types", types);
 		FileWriter fw = new FileWriter(location);
 		obj.write(fw);
+		fw.close();
 	}
 }
