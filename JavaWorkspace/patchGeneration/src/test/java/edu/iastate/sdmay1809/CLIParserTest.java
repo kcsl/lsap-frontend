@@ -119,7 +119,7 @@ public class CLIParserTest {
 		parser = new CLIParser(args);
 		assertTrue(parser.dProvided());
 		assertTrue(parser.kpProvided());
-		assertEquals(parser.getDVal(), "PatcherDebug.txt");
+		assertEquals(parser.getDVal(), "resources/PatcherDebug.txt");
 		assertEquals(parser.getKPVal(), "");
 	}	
 	
