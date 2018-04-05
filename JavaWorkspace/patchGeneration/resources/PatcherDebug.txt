@@ -1,0 +1,70 @@
+/**************************************************************/
+// MUTEX LOCK
+/**************************************************************/
+
+#ifndef __LINUX_L_SAP_MUTEX_H
+#define __LINUX_L_SAP_MUTEX_H
+#include <linux/spinlock_types.h>
+
+// Definition for "mutex" related functions with empty bodies.
+static inline void _mutex_lock_nest_lock(struct mutex *lock, struct lockdep_map *nest_lock){}
+static inline int atomic_dec_and_mutex_lock(atomic_t *cnt, struct mutex *lock){return 0;}
+static inline int mutex_lock_interruptible_nested(struct mutex *lock, unsigned int subclass){return 0;}
+static inline int mutex_lock_killable_nested(struct mutex *lock, unsigned int subclass){return 0;}
+static inline void mutex_lock_nested(struct mutex *lock, unsigned int subclass){}
+static inline int mutex_trylock(struct mutex *lock){return 0;}
+static inline void mutex_unlock(struct mutex *lock){}
+
+// Define a macro wrapper for extra functions for query unification.
+#define mutex_lock(lock) mutex_lock_nested(lock, 0)
+#define mutex_lock_interruptible(lock) mutex_lock_interruptible_nested(lock, 0)
+#define mutex_lock_io(lock) mutex_lock_nested(lock, 0)
+#define mutex_lock_killable(lock) mutex_lock_killable_nested(lock, 0)
+#define mutex_lock_nest_lock(lock, nest_lock) _mutex_lock_nest_lock(lock, &(nest_lock)->dep_map)
+
+#endif /* __LINUX_L_SAP_MUTEX_H */
+
+/**************************************************************/
+// SPIN LOCK
+/**************************************************************/
+
+#ifndef __LINUX_L_SAP_SPINLOCK_H
+#define __LINUX_L_SAP_SPINLOCK_H
+#include <linux/spinlock_types.h>
+
+static inline void __raw_spin_lock(void *lock){}
+static inline int __raw_spin_trylock(void *lock){return 0;}
+static inline void __raw_spin_unlock(void *lock){}
+
+// Define a macro wrapper for extra functions for query unification.
+#define _raw_spin_lock(lock) __raw_spin_lock(lock)
+#define _raw_spin_lock_bh(lock) __raw_spin_lock(lock)
+#define _raw_spin_lock_irq(lock) __raw_spin_lock(lock)
+#define _raw_spin_lock_irqsave(lock) __raw_spin_lock(lock)
+#define _raw_spin_trylock(lock) __raw_spin_trylock(lock)
+#define _raw_spin_trylock_bh(lock) __raw_spin_trylock(lock)
+#define _raw_spin_unlock(lock) __raw_spin_unlock(lock)
+#define atomic_dec_and_lock(atomic, lock) __raw_spin_lock(lock)
+#define do_raw_spin_lock_flags(lock, flags) __raw_spin_lock(lock)
+#define raw_spin_lock(lock) __raw_spin_lock(lock)
+#define raw_spin_lock_bh(lock) __raw_spin_lock(lock)
+#define raw_spin_lock_irq(lock) __raw_spin_lock(lock)
+#define raw_spin_lock_irqsave(lock, flags) __raw_spin_lock(lock)
+#define raw_spin_lock_irqsave_nested(lock, flags, subclass) __raw_spin_lock(lock)
+#define raw_spin_trylock(lock) __raw_spin_trylock(lock)
+#define raw_spin_trylock_bh(lock) __raw_spin_trylock(lock)
+#define raw_spin_trylock_irq(lock) __raw_spin_trylock(lock)
+#define raw_spin_trylock_irqsave(lock, flags) __raw_spin_trylock(lock)
+#define raw_spin_unlock(lock) __raw_spin_unlock(lock)
+#define raw_spin_unlock_bh(lock) __raw_spin_unlock(lock)
+#define raw_spin_unlock_irq(lock) __raw_spin_unlock(lock)
+#define raw_spin_unlock_irqrestore(lock, flags) __raw_spin_unlock(lock)
+#define raw_spin_unlock_wait(lock) __raw_spin_unlock(lock)
+#define spin_lock_irqsave(lock, flags) __raw_spin_lock(lock)
+#define spin_lock_irqsave_nested(lock, flags, subclass) __raw_spin_lock(lock)
+#define spin_lock_nest_lock(lock, nest_lock) __raw_spin_lock(lock)
+#define spin_lock_nested(lock, subclass) __raw_spin_lock(lock)
+#define spin_trylock_irqsave(lock, flags) __raw_spin_trylock(lock)
+
+#endif /* __LINUX_L_SAP_SPINLOCK_H */
+

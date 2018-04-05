@@ -1,4 +1,4 @@
-package patchGeneration;
+package edu.iastate.sdmay1809;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -83,6 +83,9 @@ public class Macro implements Comparable<Macro> {
 		String parameters = "";
 		String bodyParameters = "";
 		
+		// If there's no body for the macro, return null
+		if (macroBody == null) return null;
+		
 		// Loop through the longer parameter list
 		for (int i = 0; i < Math.max(params.size(), macroBody.getParameters().size()); i++)
 		{
@@ -137,6 +140,11 @@ public class Macro implements Comparable<Macro> {
 					{
 						bodyParameters += "0";
 					}
+					
+					else
+					{
+						bodyParameters += "NULL";
+					}
 				}
 			}
 		}
@@ -148,5 +156,14 @@ public class Macro implements Comparable<Macro> {
 	@Override
 	public int compareTo(Macro m) {
 		return macroName.compareTo(m.macroName);
+	}
+	
+	@Override
+	public boolean equals(Object o)
+	{
+		if (o == this) return true;
+		if (o.getClass() != Macro.class) return false;
+		
+		return this.getName().equals(((Macro) o).getName());
 	}
 }

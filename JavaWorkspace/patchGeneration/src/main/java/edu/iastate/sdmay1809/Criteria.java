@@ -1,4 +1,4 @@
-package patchGeneration;
+package edu.iastate.sdmay1809;
 
 /**
  * This class defines criteria for macro or function selection. Criteria are defined as:
