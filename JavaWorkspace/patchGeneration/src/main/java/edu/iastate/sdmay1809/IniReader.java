@@ -12,13 +12,6 @@ public class IniReader
 {
 	private Map<String, Set<String>> sections;
 	
-	private static final String mutexPaths = "MutexPaths";
-	private static final String spinPaths = "SpinPaths";
-	private static final String mutexFunctionCriteria = "MutexFunctionCriteria";
-	private static final String mutexMacroCriteria = "MutexMacroCriteria";
-	private static final String spinFunctionCriteria = "SpinFunctionCriteria";
-	private static final String spinMacroCriteria = "SpinMacroCriteria";
-	
 	public IniReader(String path) throws FileNotFoundException
 	{
 		Scanner s = new Scanner(new File(path));
@@ -54,28 +47,22 @@ public class IniReader
 		
 		s.close();
 	}
-	
-	public Set<String> getMutexPaths()
+		
+	public Set<String> getPaths(String tag)
 	{
-		if (sections.containsKey(mutexPaths)) return sections.get(mutexPaths);
+		if (sections.containsKey(tag)) return sections.get(tag);
 		return null;
 	}
 	
-	public Set<String> getSpinPaths()
-	{
-		if (sections.containsKey(spinPaths)) return sections.get(spinPaths);
-		return null;
-	}
-	
-	public Set<Criteria> getMutexFunctionCriteria()
+	public Set<Criteria> getCriteria(String tag)
 	{
 		Set<Criteria> criteria = null;
 		
-		if (sections.containsKey(mutexFunctionCriteria))
+		if (sections.containsKey(tag))
 		{
 			criteria = new HashSet<Criteria>();
 			
-			for (String option : sections.get(mutexFunctionCriteria))
+			for (String option : sections.get(tag))
 			{
 				if (!option.contains("=")) continue;
 				
@@ -88,66 +75,4 @@ public class IniReader
 		return criteria;
 	}
 	
-	public Set<Criteria> getMutexMacroCriteria()
-	{
-		Set<Criteria> criteria = null;
-		
-		if (sections.containsKey(mutexMacroCriteria))
-		{
-			criteria = new HashSet<Criteria>();
-			
-			for (String option : sections.get(mutexMacroCriteria))
-			{
-				if (!option.contains("=")) continue;
-				
-				String[] optionParts = option.split("=", 2);
-				
-				criteria.add(new Criteria(optionParts[0], optionParts[1].equals("true")));
-			}
-		}
-		
-		return criteria;
-	}
-	
-	public Set<Criteria> getSpinFunctionCriteria()
-	{
-		Set<Criteria> criteria = null;
-		
-		if (sections.containsKey(spinFunctionCriteria))
-		{
-			criteria = new HashSet<Criteria>();
-			
-			for (String option : sections.get(spinFunctionCriteria))
-			{
-				if (!option.contains("=")) continue;
-				
-				String[] optionParts = option.split("=", 2);
-				
-				criteria.add(new Criteria(optionParts[0], optionParts[1].equals("true")));
-			}
-		}
-		
-		return criteria;
-	}
-	
-	public Set<Criteria> getSpinMacroCriteria()
-	{
-		Set<Criteria> criteria = null;
-		
-		if (sections.containsKey(spinMacroCriteria))
-		{
-			criteria = new HashSet<Criteria>();
-			
-			for (String option : sections.get(spinMacroCriteria))
-			{
-				if (!option.contains("=")) continue;
-				
-				String[] optionParts = option.split("=", 2);
-				
-				criteria.add(new Criteria(optionParts[0], optionParts[1].equals("true")));
-			}
-		}
-		
-		return criteria;
-	}
 }

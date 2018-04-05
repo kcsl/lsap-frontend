@@ -119,8 +119,8 @@ public class CLIParserTest {
 		parser = new CLIParser(args);
 		assertTrue(parser.dProvided());
 		assertTrue(parser.kpProvided());
-		assertEquals(parser.getDVal(), "resources/PatcherDebug.txt");
-		assertEquals(parser.getKPVal(), "");
+		assertEquals(parser.getDVal(), "resources/PatcherDebug/");
+		assertEquals(parser.getKPVal(), "./");
 	}	
 	
 	@Test

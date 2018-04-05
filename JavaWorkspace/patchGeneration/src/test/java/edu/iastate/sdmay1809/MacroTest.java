@@ -58,13 +58,19 @@ public class MacroTest {
 	public void macroPrintAsDefine()
 	{
 		macro.setMacroBody(new Function("int func(struct mutex *lock, int otherParam) {"));
-		otherMacro.setMacroBody(new Function("int func(struct mutex *lock) {"));
+		otherMacro.setMacroBody(new Function("int func(struct mutex *lock, int otherParam) {"));
 		
 		assertEquals(macro.printAsDefine(), "#define aMacro(lock, otherParam) func(lock, otherParam)");
-		assertEquals(otherMacro.printAsDefine(), "#define macro2(lock) func(lock)");
+		assertEquals(otherMacro.printAsDefine(), "#define macro2(lock) func(lock, 0)");
 		
-		macro.setMacroBody(null);
-		otherMacro.setMacroBody(null);
+		macro = new Macro("#define aMacro(atomic, lock) body(lock)");
+		macro.setMacroBody(new Function("int func(struct mutex *lock) {"));
+		otherMacro.setMacroBody(new Function("int func(struct lockdep_map *lock, struct mutex *lock2) {"));
+
+		assertEquals(macro.printAsDefine(), "#define aMacro(atomic, lock) func(lock)");
+		assertEquals(otherMacro.printAsDefine(), "#define macro2(lock) func(&(lock)->dep_map, NULL)");
+		
+		setUp();
 		
 		assertEquals(macro.printAsDefine(), null);
 		assertEquals(otherMacro.printAsDefine(), null);
@@ -93,5 +99,13 @@ public class MacroTest {
 	{
 		assertTrue(macro.compareTo(otherMacro) < 0);
 		assertTrue(otherMacro.compareTo(macro) > 0);
+	}
+	
+	@Test
+	public void macroEquals()
+	{
+		assertTrue(macro.equals(macro));
+		assertTrue(macro.equals(new Macro("#define aMacro(lock, otherParam) body(lock)")));
+		assertFalse(macro.equals(new Criteria("something", false)));
 	}
 }

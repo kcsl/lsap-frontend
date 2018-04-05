@@ -140,6 +140,11 @@ public class Macro implements Comparable<Macro> {
 					{
 						bodyParameters += "0";
 					}
+					
+					else
+					{
+						bodyParameters += "NULL";
+					}
 				}
 			}
 		}
@@ -151,5 +156,14 @@ public class Macro implements Comparable<Macro> {
 	@Override
 	public int compareTo(Macro m) {
 		return macroName.compareTo(m.macroName);
+	}
+	
+	@Override
+	public boolean equals(Object o)
+	{
+		if (o == this) return true;
+		if (o.getClass() != Macro.class) return false;
+		
+		return this.getName().equals(((Macro) o).getName());
 	}
 }

@@ -61,11 +61,11 @@ public class CLIParser {
 	
 	public String getKPVal()
 	{
-		return line.getOptionValue("kernel-path", "");
+		return line.getOptionValue("kernel-path", "./").trim();
 	}
 	
 	public String getDVal()
 	{
-		return line.getOptionValue("debug", "resources/PatcherDebug.txt");
+		return line.getOptionValue("debug", "resources/PatcherDebug/").trim();
 	}
 }

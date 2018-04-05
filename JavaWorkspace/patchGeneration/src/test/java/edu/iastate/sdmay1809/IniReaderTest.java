@@ -19,24 +19,24 @@ public class IniReaderTest {
 	}
 	
 	@Test
-	public void iniReaderConstructor() throws FileNotFoundException
+	public void iniReaderConstructor()
 	{
 		assertThat(ini, instanceOf(IniReader.class));
 	}
 	
 	@Test
-	public void iniReaderGetMutexPaths() throws FileNotFoundException
+	public void iniReaderGetMutexPaths()
 	{
-		Set<String> paths = ini.getMutexPaths();
+		Set<String> paths = ini.getPaths("MutexPaths");
 		
 		assertEquals(paths.size(), 1);
 		assertTrue(paths.contains("include/linux/mutex.h"));
 	}
 	
 	@Test
-	public void iniReaderGetSpinPaths() throws FileNotFoundException
+	public void iniReaderGetSpinPaths()
 	{
-		Set<String> paths = ini.getSpinPaths();
+		Set<String> paths = ini.getPaths("SpinPaths");
 		
 		assertEquals(paths.size(), 2);
 		assertTrue(paths.contains("include/linux/spinlock.h"));
@@ -44,9 +44,47 @@ public class IniReaderTest {
 	}
 	
 	@Test
+	public void iniReaderGetNullPaths()
+	{
+		Set<String> paths = ini.getPaths("SomeUndefinedTag");
+		
+		assertEquals(paths, null);
+	}
+	
+	@Test
+	public void iniReaderGetMalformattedPaths()
+	{
+		Set<String> paths = ini.getPaths("MutexFunctionCriteria");
+		
+		assertFalse(paths == null);
+		assertEquals(paths.size(), 3);
+		
+		assertTrue(paths.contains("mutex=true"));
+		assertTrue(paths.contains("lock=true"));
+		assertTrue(paths.contains("mutex_lock_io_nested=false"));
+	}
+	
+	@Test
+	public void iniReaderGetMalformattedCriteria()
+	{
+		Set<Criteria> criteria = ini.getCriteria("MutexPaths");
+		
+		assertFalse(criteria == null);
+		assertEquals(criteria.size(), 0);
+	}
+	
+	@Test
+	public void iniReaderGetNullCriteria()
+	{
+		Set<Criteria> criteria = ini.getCriteria("SomeUndefinedTag");
+		
+		assertEquals(criteria, null);
+	}
+	
+	@Test
 	public void iniReaderGetMutexFunctionCriteria()
 	{
-		Set<Criteria> criteria = ini.getMutexFunctionCriteria();
+		Set<Criteria> criteria = ini.getCriteria("MutexFunctionCriteria");
 		
 		assertEquals(criteria.size(), 3);
 
@@ -72,7 +110,7 @@ public class IniReaderTest {
 	@Test
 	public void iniReaderGetMutexMacroCriteria()
 	{
-		Set<Criteria> criteria = ini.getMutexMacroCriteria();
+		Set<Criteria> criteria = ini.getCriteria("MutexMacroCriteria");
 		
 		assertEquals(criteria.size(), 2);
 		
@@ -94,7 +132,7 @@ public class IniReaderTest {
 	@Test
 	public void iniReaderGetSpinFunctionCriteria()
 	{
-		Set<Criteria> criteria = ini.getSpinFunctionCriteria();
+		Set<Criteria> criteria = ini.getCriteria("SpinFunctionCriteria");
 		
 		assertEquals(criteria.size(), 3);
 		
@@ -120,7 +158,7 @@ public class IniReaderTest {
 	@Test
 	public void iniReaderSpinMacroCriteria()
 	{
-		Set<Criteria> criteria = ini.getSpinMacroCriteria();
+		Set<Criteria> criteria = ini.getCriteria("SpinMacroCriteria");
 		
 		assertEquals(criteria.size(), 2);
 		

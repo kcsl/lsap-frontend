@@ -16,14 +16,14 @@ static inline int mutex_trylock(struct mutex *lock){return 0;}
 static inline void mutex_unlock(struct mutex *lock){}
 
 // Define a macro wrapper for extra functions for query unification.
-#define # define mutex_lock_interruptible_nested(lock, subclass) mutex_trylock(lock)
-#define # define mutex_lock_io_nested(lock, subclass) mutex_trylock(lock)
-#define # define mutex_lock_killable_nested(lock, subclass) mutex_trylock(lock)
-#define # define mutex_lock_nest_lock(lock, nest_lock) mutex_trylock(lock)
-#define # define mutex_lock_nested(lock, subclass) mutex_trylock(lock)
-#define mutex_lock(lock) atomic_dec_and_mutex_lock(lock, NULL)
+#define # define mutex_lock_interruptible_nested(lock, subclass) mutex_unlock(lock)
+#define # define mutex_lock_io_nested(lock, subclass) mutex_unlock(lock)
+#define # define mutex_lock_killable_nested(lock, subclass) mutex_unlock(lock)
+#define # define mutex_lock_nest_lock(lock, nest_lock) mutex_unlock(lock)
+#define # define mutex_lock_nested(lock, subclass) mutex_unlock(lock)
+#define mutex_lock(lock) mutex_lock_interruptible_nested(lock, 0)
 #define mutex_lock_interruptible(lock) mutex_lock_interruptible_nested(lock, 0)
-#define mutex_lock_io(lock) mutex_trylock(lock)
+#define mutex_lock_io(lock) mutex_unlock(lock)
 #define mutex_lock_killable(lock) mutex_lock_killable_nested(lock, 0)
 #define mutex_lock_nest_lock(lock, nest_lock) _mutex_lock_nest_lock(lock, &(nest_lock)->dep_map)
 

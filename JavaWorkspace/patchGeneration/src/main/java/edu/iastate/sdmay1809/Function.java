@@ -113,4 +113,13 @@ public class Function implements Comparable<Function>
 	public int compareTo(Function f) {
 		return functionName.compareTo(f.functionName);
 	}
+	
+	@Override
+	public boolean equals(Object o)
+	{
+		if (o == this) return true;
+		if (o.getClass() != Function.class) return false;
+		
+		return this.getName().equals(((Function)o).getName());
+	}
 }

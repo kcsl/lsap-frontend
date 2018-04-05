@@ -18,7 +18,7 @@ public class FunctionTest {
 	public void setUp()
 	{
 		function = new Function("int aFunction(int parameter1, struct mutex *lock) {");
-		otherFunction = new Function("void function2(struct mutex *lock) {");
+		otherFunction = new Function("extern __must_check void function2(struct mutex *lock) {");
 	}
 	
 	@Test
@@ -45,6 +45,9 @@ public class FunctionTest {
 	@Test
 	public void functionParameters()
 	{
+		assertEquals(function.getParameter(-1), null);
+		assertEquals(function.getParameter(2), null);
+		
 		assertEquals(function.getParameter(0).getType(), "int");
 		assertEquals(function.getParameter(0).getName(), "parameter1");
 		
@@ -90,5 +93,13 @@ public class FunctionTest {
 	{
 		assertEquals(function.convertToStaticInline(), "static inline int aFunction(int parameter1, struct mutex *lock){return 0;}");
 		assertEquals(otherFunction.convertToStaticInline(), "static inline void function2(struct mutex *lock){}");
+	}
+	
+	@Test
+	public void functionEquals()
+	{
+		assertTrue(function.equals(function));
+		assertTrue(function.equals(new Function("int aFunction(int parameter1, struct mutex *lock) {")));
+		assertFalse(function.equals(new Criteria("something", true)));
 	}
 }
