@@ -15,7 +15,7 @@ public class IniReaderTest {
 	@Before
 	public void setUp() throws FileNotFoundException
 	{
-		ini = new IniReader("resources/IniReaderTest.ini");
+		ini = new IniReader("resources/iniReaderTest.ini");
 	}
 	
 	@Test
