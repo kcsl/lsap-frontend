@@ -5,7 +5,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 public class InstanceTracker {
@@ -19,7 +18,6 @@ public class InstanceTracker {
 	public boolean run(String outputDirectory, boolean outputCheckOverride) {
 		File[] instances = getInstances();
 		String outputJSONFile;
-		FileWriter fw = null;
 		boolean retVal = true;
 
 		if (outputDirectory.endsWith("/")) {
