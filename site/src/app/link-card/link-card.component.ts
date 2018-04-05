@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import {Component, Input} from '@angular/core';
 
 @Component({
   selector: 'app-link-card',
@@ -6,6 +6,13 @@ import { Component, Input } from '@angular/core';
   styleUrls: ['./link-card.component.css']
 })
 export class LinkCardComponent {
-  @Input('link') link;
+  @Input('linkObject') linkObject;
   constructor() { }
+
+  getStyle() {
+    return this.linkObject.status === 'paired' ? '#5FAD56' :
+            this.linkObject.status === 'deadlock' ? '#706C61' :
+            this.linkObject.status === 'partial' ? '#F2C14E' :
+            '#A72608';
+  }
 }

@@ -1,4 +1,4 @@
-import {LinksService } from './services/links.service';
+import { LinksService } from './services/links.service';
 import { FormsModule } from '@angular/forms';
 import { FilterService } from './services/filter.service';
 import { AdminAuthGuard } from './guards/admin-auth.guard';
@@ -23,6 +23,8 @@ import { LoginComponent } from './login/login.component';
 import { FilterComponent } from './links/links-filter/filter.component';
 import { LinkCardComponent } from './link-card/link-card.component';
 import { HomeComponent } from './home/home.component';
+import { LinksPageComponent } from './links/links-page/links-page.component';
+import {AngularFireStorageModule} from 'angularfire2/storage';
 
 
 @NgModule({
@@ -34,11 +36,13 @@ import { HomeComponent } from './home/home.component';
     FilterComponent,
     LinkCardComponent,
     HomeComponent,
+    LinksPageComponent,
   ],
   imports: [
     BrowserModule,
     AngularFireModule.initializeApp(environment.firebase),
     AngularFireDatabaseModule,
+    AngularFireStorageModule,
     AngularFireAuthModule,
     FormsModule,
     CustomFormsModule,
