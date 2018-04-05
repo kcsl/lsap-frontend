@@ -6,7 +6,7 @@
       All Drivers
     </a>
     <a class="list-group-item list-group-item-action"
-      routerLink="/v"
+      routerLink="/v/{{version}}/"
       [queryParams]="{filter: f.key}"
       [class.active]="filters === filters.key"
       *ngFor="let f of filters | async">

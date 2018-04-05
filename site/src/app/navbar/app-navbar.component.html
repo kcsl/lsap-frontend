@@ -12,11 +12,14 @@
         <input id='search' type="text" class="form-control" placeholder="Search" aria-label="Username" aria-describedby="basic-addon1" (input)="search($event)"
                ng-model="values">
       </div>
-      <app-filter [filter]="filter"></app-filter>
+      <div *ngIf="version">
+        <app-filter [filter]="filter" [version]="selectedVersion"></app-filter>
+      </div>
     </div>
   </div>
 </nav>
+<!-- on version change this needs to resend the version -->
 <div *ngIf="version">
-  <app-links-component [searchTerm]="searchTerm" [version]="version"></app-links-component>
+  <app-links-component [searchTerm]="searchTerm" [version]="selectedVersion"></app-links-component>
 </div>
 

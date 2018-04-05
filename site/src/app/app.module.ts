@@ -53,7 +53,7 @@ import {AngularFireStorageModule} from 'angularfire2/storage';
         component: HomeComponent
       },
       {
-        path: 'v/:version',
+        path: 'v/:versionStripped',
         component: LinksComponent
       },
       {
