@@ -40,36 +40,46 @@ public class Patcher
 	private Options options;
 	private CommandLine line;
 	
-	public Patcher(String iniPath, String[] cliArgs) throws IOException, ParseException
-	{
-		parseCLI(cliArgs);
-		
+	public Patcher(String iniPath) throws IOException, ParseException
+	{		
 		// Read the patcher .ini file
 		ini = new IniReader(iniPath);		
-		
-		// Initialize CLI arguments
-		pathToKernelDirectory = line.getOptionValue("kernel-path", "./").trim();
-		pathToKernelDirectory += (pathToKernelDirectory.charAt(pathToKernelDirectory.length() - 1) != '/') ? "/" : "";
-		doDebug = line.hasOption('d');
-		debugPath = line.getOptionValue("debug", "resources/PatcherDebug/").trim();
-		debugPath += (debugPath.charAt(debugPath.length() - 1) != '/') ? "/" : "";
-		verbose = line.hasOption('v');
 				
+		// Initialize the lists of functions and macros
+		functions = new ArrayList<Function>();
+		macros = new ArrayList<Macro>();				
+	}
+	
+	/**
+	 * This main method generates the patch for a given version of the linux kernel located at
+	 * the path specified in the pathToKernelDirectory constant variable.
+	 * 
+	 * TODO:
+	 * 		LSAP_MUTEX_LOCK:
+	 * 			Comment out original function implementation
+	 * 
+	 * 		LSAP_SPINLOCK:
+	 * 			Comment out original function implementation
+	 * @throws IOException 
+	 * @throws ParseException 
+	 */
+	public void patch(String[] cliArgs) throws IOException, ParseException
+	{
+		parseArgs(cliArgs);
+
+		if (line.hasOption('h'))
+		{
+			HelpFormatter formatter = new HelpFormatter();
+			formatter.printHelp("patcher", "Options available", options, "", true);
+			return;
+		}
+						
 		if (verbose)
 		{
 			System.out.println("Verbose output is ON.\n");
 			System.out.println("Patcher information:");
 			System.out.println("\tPath to kernel: " + pathToKernelDirectory);
 			System.out.println("\tDebugging: " + (doDebug ? "ON\n\t\tDebug file: " + debugPath : "OFF") + "\n");
-		}
-		
-		// Initialize the lists of functions and macros
-		functions = new ArrayList<Function>();
-		macros = new ArrayList<Macro>();
-						
-		// Print mutex locking function and macro criteria if in verbose mode
-		if (verbose)
-		{
 			System.out.println("Mutex Lock Files:");
 			
 			for (String s : ini.getPaths("MutexPaths"))
@@ -114,29 +124,6 @@ public class Patcher
 
 			System.out.println();
 		}		
-	}
-	
-	/**
-	 * This main method generates the patch for a given version of the linux kernel located at
-	 * the path specified in the pathToKernelDirectory constant variable.
-	 * 
-	 * TODO:
-	 * 		LSAP_MUTEX_LOCK:
-	 * 			Comment out original function implementation
-	 * 
-	 * 		LSAP_SPINLOCK:
-	 * 			Comment out original function implementation
-	 * @throws IOException 
-	 * @throws ParseException 
-	 */
-	public void patch() throws IOException
-	{
-		if (line.hasOption('h'))
-		{
-			HelpFormatter formatter = new HelpFormatter();
-			formatter.printHelp("patcher", "Options available", options, "", true);
-			return;
-		}
 		
 		// Generate the LSAP Mutex Lock file
 		generateLSAPMutexLockFile();
@@ -475,7 +462,7 @@ public class Patcher
 		return true;
 	}
 	
-	public void parseCLI(String[] args) throws ParseException
+	public void parseArgs(String[] args) throws ParseException
 	{
 		parser = new DefaultParser();
 		options = new Options();
@@ -498,5 +485,18 @@ public class Patcher
 		options.addOption("h", "help", false, "Prints additional help");
 		
 		line = parser.parse(options, args);		
+		
+		// Initialize CLI arguments
+		pathToKernelDirectory = line.getOptionValue("kernel-path", "./").trim();
+		pathToKernelDirectory += (pathToKernelDirectory.charAt(pathToKernelDirectory.length() - 1) != '/') ? "/" : "";
+		doDebug = line.hasOption('d');
+		debugPath = line.getOptionValue("debug", "resources/PatcherDebug/").trim();
+		debugPath += (debugPath.charAt(debugPath.length() - 1) != '/') ? "/" : "";
+		verbose = line.hasOption('v');
+	}
+	
+	public CommandLine getCommandLine()
+	{
+		return line;
 	}
 }
