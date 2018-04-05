@@ -23,7 +23,7 @@ public class FileContentBufferTest {
 	@Before
 	public void setUp()
 	{
-		path = "resources/FileContentBufferTest.txt";
+		path = "resources/testing/FileContentBufferTest.txt";
 		fcb = new FileContentBuffer(path);
 		outContent = new ByteArrayOutputStream();
 		System.setOut(new PrintStream(outContent));

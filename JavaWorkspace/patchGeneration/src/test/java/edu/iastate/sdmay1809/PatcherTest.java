@@ -31,13 +31,13 @@ public class PatcherTest {
 		System.setOut(new PrintStream(outContent));
 		
 		String[] args = "-v --kernel-path somepath".split("\\s");
-		patcher = new Patcher("resources/iniReaderTest.ini", args);
+		patcher = new Patcher("resources/testing/iniReaderTest.ini", args);
 		
 		args = "-kp somepath/ -d resources/somepath.txt -v".split("\\s");
-		patcher = new Patcher("resources/iniReaderTest.ini", args);
+		patcher = new Patcher("resources/testing/iniReaderTest.ini", args);
 		
 		args = "-v -d resources/PatcherDebugTest.txt".split("\\s");
-		patcher = new Patcher("resources/patcherTest.ini", args);
+		patcher = new Patcher("resources/testing/patcherTest.ini", args);
 		
 		assertTrue(outContent.toString().length() > 0);
 	}
@@ -161,17 +161,17 @@ public class PatcherTest {
 		System.setOut(new PrintStream(outContent = new ByteArrayOutputStream()));
 		assertTrue(outContent.toString().length() == 0);
 
-		Files.deleteIfExists(Paths.get("resources/lsap_mutex_lock.txt"));
+		Files.deleteIfExists(Paths.get("resources/testing/lsap_mutex_lock.txt"));
 		
-		patcher = new Patcher("resources/patcherTest.ini", "-v -d resources/".split("\\s"));		
+		patcher = new Patcher("resources/testing/patcherTest.ini", "-v -d resources/testing/".split("\\s"));		
 		patcher.generateLSAPMutexLockFile();
 		
 		assertTrue(outContent.toString().length() > 0);
-		assertTrue(Files.exists(Paths.get("resources/lsap_mutex_lock.txt")));
+		assertTrue(Files.exists(Paths.get("resources/testing/lsap_mutex_lock.txt")));
 		
 		Files.deleteIfExists(Paths.get("include/linux/lsap_mutex_lock.h"));		
 
-		patcher = new Patcher("resources/patcherTest.ini", "".split("\\s"));
+		patcher = new Patcher("resources/testing/patcherTest.ini", "".split("\\s"));
 		patcher.generateLSAPMutexLockFile();
 		
 		assertTrue(Files.exists(Paths.get("include/linux/lsap_mutex_lock.h")));
@@ -185,15 +185,15 @@ public class PatcherTest {
 
 		Files.deleteIfExists(Paths.get("resources/lsap_spinlock.txt"));
 		
-		patcher = new Patcher("resources/patcherTest.ini", "-v -d resources/".split("\\s"));		
+		patcher = new Patcher("resources/testing/patcherTest.ini", "-v -d resources/testing/".split("\\s"));		
 		patcher.generateLSAPSpinlockFile();
 		
 		assertTrue(outContent.toString().length() > 0);
-		assertTrue(Files.exists(Paths.get("resources/lsap_spinlock.txt")));
+		assertTrue(Files.exists(Paths.get("resources/testing/lsap_spinlock.txt")));
 		
 		Files.deleteIfExists(Paths.get("include/linux/lsap_spinlock.h"));		
 
-		patcher = new Patcher("resources/patcherTest.ini", "".split("\\s"));
+		patcher = new Patcher("resources/testing/patcherTest.ini", "".split("\\s"));
 		patcher.generateLSAPSpinlockFile();
 		
 		assertTrue(Files.exists(Paths.get("include/linux/lsap_spinlock.h")));
@@ -205,24 +205,36 @@ public class PatcherTest {
 		System.setOut(new PrintStream(outContent = new ByteArrayOutputStream()));
 		assertTrue(outContent.toString().length() == 0);
 
-		Files.deleteIfExists(Paths.get("resources/lsap_spinlock.txt"));
-		Files.deleteIfExists(Paths.get("resources/lsap_mutex_lock.txt"));
+		Files.deleteIfExists(Paths.get("resources/testing/lsap_spinlock.txt"));
+		Files.deleteIfExists(Paths.get("resources/testing/lsap_mutex_lock.txt"));
 		
-		patcher = new Patcher("resources/patcherTest.ini", "-v -d resources/".split("\\s"));		
+		patcher = new Patcher("resources/testing/patcherTest.ini", "-v -d resources/testing/".split("\\s"));		
 		patcher.patch();
 		
 		assertTrue(outContent.toString().length() > 0);
-		assertTrue(Files.exists(Paths.get("resources/lsap_spinlock.txt")));
-		assertTrue(Files.exists(Paths.get("resources/lsap_mutex_lock.txt")));
+		assertTrue(Files.exists(Paths.get("resources/testing/lsap_spinlock.txt")));
+		assertTrue(Files.exists(Paths.get("resources/testing/lsap_mutex_lock.txt")));
 		
 		Files.deleteIfExists(Paths.get("include/linux/lsap_spinlock.h"));		
 		Files.deleteIfExists(Paths.get("include/linux/lsap_mutex_lock.h"));
 
-		patcher = new Patcher("resources/patcherTest.ini", "".split("\\s"));
+		patcher = new Patcher("resources/testing/patcherTest.ini", "".split("\\s"));
 		patcher.patch();
 		
 		assertTrue(Files.exists(Paths.get("include/linux/lsap_spinlock.h")));
 		assertTrue(Files.exists(Paths.get("include/linux/lsap_mutex_lock.h")));
+	}
+	
+	@Test
+	public void patcherHelp() throws IOException, ParseException
+	{
+		System.setOut(new PrintStream(outContent = new ByteArrayOutputStream()));
+		assertTrue(outContent.toString().length() == 0);
+
+		patcher = new Patcher("resources/testing/patcherTest.ini", "-h".split("\\s"));		
+		patcher.patch();
+		
+		assertTrue(outContent.toString().length() > 0);
 	}
 
 	@After

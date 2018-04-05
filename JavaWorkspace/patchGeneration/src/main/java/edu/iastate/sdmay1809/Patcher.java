@@ -10,6 +10,12 @@ import java.util.Iterator;
 import java.util.Scanner;
 import java.util.Set;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
 public class Patcher 
@@ -27,23 +33,27 @@ public class Patcher
 	private boolean verbose;
 		
 	// The iniReader
-	IniReader ini;
+	private IniReader ini;
+	
+	// CLI Parsing
+	private CommandLineParser parser;
+	private Options options;
+	private CommandLine line;
 	
 	public Patcher(String iniPath, String[] cliArgs) throws IOException, ParseException
 	{
-		// Read the patcher .ini file
-		ini = new IniReader(iniPath);
+		parseCLI(cliArgs);
 		
-		// Initialize and parse the command line arguments
-		CLIParser parser = new CLIParser(cliArgs);
+		// Read the patcher .ini file
+		ini = new IniReader(iniPath);		
 		
 		// Initialize CLI arguments
-		pathToKernelDirectory = parser.getKPVal();
+		pathToKernelDirectory = line.getOptionValue("kernel-path", "./").trim();
 		pathToKernelDirectory += (pathToKernelDirectory.charAt(pathToKernelDirectory.length() - 1) != '/') ? "/" : "";
-		doDebug = parser.dProvided();
-		debugPath = parser.getDVal();
+		doDebug = line.hasOption('d');
+		debugPath = line.getOptionValue("debug", "resources/PatcherDebug/").trim();
 		debugPath += (debugPath.charAt(debugPath.length() - 1) != '/') ? "/" : "";
-		verbose = parser.vProvided();
+		verbose = line.hasOption('v');
 				
 		if (verbose)
 		{
@@ -121,6 +131,13 @@ public class Patcher
 	 */
 	public void patch() throws IOException
 	{
+		if (line.hasOption('h'))
+		{
+			HelpFormatter formatter = new HelpFormatter();
+			formatter.printHelp("patcher", "Options available", options, "", true);
+			return;
+		}
+		
 		// Generate the LSAP Mutex Lock file
 		generateLSAPMutexLockFile();
 
@@ -456,5 +473,30 @@ public class Patcher
 		}
 		
 		return true;
+	}
+	
+	public void parseCLI(String[] args) throws ParseException
+	{
+		parser = new DefaultParser();
+		options = new Options();
+		
+		options.addOption("v", "verbose", false, "Print additional information to the console");
+		options.addOption(Option.builder("kp")
+								.longOpt("kernel-path")
+								.optionalArg(true)
+								.numberOfArgs(1)
+								.argName("path")
+								.desc("The path to the root directory of the kernel being patched. By default, it is the current directory (\".\")")
+								.build());
+		options.addOption(Option.builder("d")
+								.longOpt("debug")
+								.optionalArg(true)
+								.numberOfArgs(1)
+								.argName("path")
+								.desc("The file in which to store the patched header file output. By default, it is \"./PatcherDebug.txt\"")
+								.build());
+		options.addOption("h", "help", false, "Prints additional help");
+		
+		line = parser.parse(options, args);		
 	}
 }
