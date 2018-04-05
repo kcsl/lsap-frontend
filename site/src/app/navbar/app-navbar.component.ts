@@ -10,30 +10,42 @@ import { NavbarService } from '../services/navbar.service';
 })
 export class AppNavbarComponent implements OnInit {
 
-  public isAdmin;
   versions: String[] = [];
   version;
+  versionStripped;
+  searchTerm;
   filter: string;
   constructor(public auth: AuthService,
-              private navbarService: NavbarService,
-              private router: ActivatedRoute) { }
+              private navbarService: NavbarService) { }
 
-  ngOnInit() {
-    this.isAdmin = this.auth.appUser;
-    this.navbarService.getAll().snapshotChanges().subscribe(v => {
+  static stripChars(input) {
+      return input.replace(/[^0-9a-z]/gi, '').toString();
+  }
+
+  async ngOnInit() {
+    await this.navbarService.getAllVersions().snapshotChanges().subscribe(v => {
         v.forEach(element => {
             this.versions.push(element.payload.val());
         });
+        if (this.version == null) {
+            this.version = this.versions[0];
+            this.versionStripped = AppNavbarComponent.stripChars(this.version);
+        }
     });
   }
 
-    get selectedVersion() {
-      return this.versions;
-    }
+  get selectedVersion() {
+    return this.versionStripped;
+  }
 
-    set selectedVersion(value) {
+  search($event) {
+    this.searchTerm = $event.target.value;
+  }
+
+  updateVersion(value) {
       this.version = value;
-    }
+      this.versionStripped = AppNavbarComponent.stripChars(this.version);
+  }
 
   logout() {
     this.auth.logout();

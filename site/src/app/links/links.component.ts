@@ -1,39 +1,44 @@
-import { InstanceObject } from '../interfaces/instance';
-import { ActivatedRoute } from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import { LinksService } from '../services/links.service';
 import {Component, Input, OnInit} from '@angular/core';
+import {Links, LinksImpl} from '../models/links';
+import 'rxjs/add/operator/switchMap';
 
 @Component({
   selector: 'app-links-component',
   templateUrl: './links.component.html',
-  styleUrls: ['./links.component.css']
+  styleUrls: ['./links.component.css'],
 })
 export class LinksComponent implements OnInit {
-  links: InstanceObject[] = [];
-  filteredLinks: InstanceObject[] = [];
-  driver: string;
+
+  links: Links[] = [];
+  filteredLinks: Links[];
 
   @Input('version') version;
+  @Input('searchTerm') searchTerm;
 
   constructor(
-    private router: ActivatedRoute,
+    private router: Router,
+    private route: ActivatedRoute,
     private linksService: LinksService
   ) { }
 
-  ngOnInit() {
-    this.linksService.getAll(this.version).snapshotChanges().subscribe(links => {
-      links.forEach(element => {
-        this.links.push(element.payload.val());
-      });
+  async populateLinks() {
+      await this.linksService
+          .populate(this.version) // this will get the version w/ no special chars
+          .subscribe(params => { // object instance
+              Object.values(params).forEach( data => {
+                  const link = new LinksImpl(data);
+                  this.linksService.expandLinks(link);
+                  this.links.push(link);
+              });
+              this.filteredLinks = this.links;
+          });
+  }
 
-      this.router.queryParamMap.subscribe(params => {
-
-        this.driver = params.get('driver');
-
-        this.filteredLinks = (this.driver) ?
-          this.links.filter(p => p.driver === this.driver) :
-          this.links;
-      });
-    });
+  async ngOnInit() {
+      if (this.version !== undefined) {
+          await this.populateLinks();
+      }
   }
 }

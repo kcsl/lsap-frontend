@@ -1,3 +1,24 @@
-<div class="card-link" style="position: absolute; left:25%;">
-{{ link.title }}
+<div class="light-card" style="width: 15rem; margin: 1.1%; cursor: pointer; background: whitesmoke; border: lightgrey; border-style:solid; border-radius: 2.5%;" >
+    <img class="card-img-top" src="{{linkObject.mpg}}" style="max-height: 250px;object-fit: cover; border-bottom: lightgrey; border-radius: 2.5%; border-bottom-style: solid;">
+    <div class="card-body" style="padding: 2.5% !important;">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <h5 class="card-title" style="text-align: center;">{{linkObject.filename}}</h5>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-3" style="padding-top: 6px;">
+                    <p class="dot" [style.background-color]="getStyle()" ngbTooltip="{{linkObject.status}}"></p>
+                </div>
+                <div class="col-3">
+                    <!-- locking type -->
+                    <p class="dot" style="font-size: 0.95em;">{{linkObject.type.substring(0, 1)}}</p>
+                </div>
+                <div class="col-3">
+                    <p class="card-text" style="font-size: 0.95em;text-align: center;">{{linkObject.instance_id}}</p>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
