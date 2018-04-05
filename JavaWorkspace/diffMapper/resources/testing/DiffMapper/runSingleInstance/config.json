@@ -1,0 +1,8 @@
+{
+	"old_tag": "v3.19-rc1",
+	"new_tag": "v3.20",
+	"result_dir": "resources/testing/DiffMapper/runSingleInstance/diffmap/results/",
+	"kernel_dir": "resources/testing/DiffMapper/runSingleInstance/kernel/",
+	"diff_test_dir": "resources/testing/DiffMapper/runSingleInstance/diffmap/",
+	"types": ["mutex"]
+}
