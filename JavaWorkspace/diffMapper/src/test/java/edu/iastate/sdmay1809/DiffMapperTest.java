@@ -36,6 +36,7 @@ public class DiffMapperTest {
 		int placed = dm.run("oldInstanceMap.json");
 
 		// Git Cleanup!
+		Utils.execute(new String[] {"git", "checkout", "v3.19-rc1"}, new File(testKernelDir));
 		Utils.execute(new String[] { "rm", "-rf", ".git/" }, new File(testKernelDir));
 
 		assertEquals(1, placed);
@@ -56,6 +57,7 @@ public class DiffMapperTest {
 		int placed = dm.run("oldInstanceMap.json");
 
 		// Git Cleanup!
+		Utils.execute(new String[] {"git", "checkout", "v3.19-rc1"}, new File(testKernelDir));
 		Utils.execute(new String[] { "rm", "-rf", ".git/" }, new File(testKernelDir));
 
 		assertEquals(1, placed);

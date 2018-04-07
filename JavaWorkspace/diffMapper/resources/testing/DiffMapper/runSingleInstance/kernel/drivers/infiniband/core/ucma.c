@@ -142,7 +142,6 @@ static void ucma_put_ctx(struct ucma_context *ctx)
 {
 	if (atomic_dec_and_test(&ctx->ref))
 		complete(&ctx->comp);
-	/* I've added this unnecessary comment! */
 }
 
 static struct ucma_context *ucma_alloc_ctx(struct ucma_file *file)
@@ -1362,10 +1361,8 @@ out:
 
 static void ucma_lock_files(struct ucma_file *file1, struct ucma_file *file2)
 {
-	/* Acquire                                         /* 1c5cd3f@@@DEADLOCK@@@32630@@@24@@@drivers/infiniband/core/ucma.c@@@mut */
-mutex's based on pointer comparison to prevent deadlock. */
+	/* Acquire mutex's based on pointer comparison to prevent deadlock. */
 	if (file1 < file2) {
-		/* 1c5cd3f@@@DEADLOCK@@@32630@@@24@@@drivers/infiniband/core/ucma.c@@@mut */
 		mutex_lock(&file1->mut);
 		mutex_lock(&file2->mut);
 	} else {
