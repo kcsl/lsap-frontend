@@ -1362,7 +1362,8 @@ out:
 
 static void ucma_lock_files(struct ucma_file *file1, struct ucma_file *file2)
 {
-	/* Acquire mutex's based on pointer comparison to prevent deadlock. */
+	/* Acquire                                         /* 1c5cd3f@@@DEADLOCK@@@32630@@@24@@@drivers/infiniband/core/ucma.c@@@mut */
+mutex's based on pointer comparison to prevent deadlock. */
 	if (file1 < file2) {
 		/* 1c5cd3f@@@DEADLOCK@@@32630@@@24@@@drivers/infiniband/core/ucma.c@@@mut */
 		mutex_lock(&file1->mut);

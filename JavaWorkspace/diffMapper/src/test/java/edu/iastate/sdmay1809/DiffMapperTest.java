@@ -22,7 +22,7 @@ public class DiffMapperTest {
 	}
 
 	@Test
-	public void testRunSingleInstance() throws JSONException, IOException, InterruptedException {
+	public void testRunSingleInstance() throws JSONException, IOException, InterruptedException, Exception {
 		// Git Setup!
 		String testKernelDir = Paths.get("resources", "testing", "DiffMapper", "runSingleInstance", "kernel")
 				.toString();
@@ -42,7 +42,7 @@ public class DiffMapperTest {
 	}
 
 	@Test
-	public void testAllowPrints() throws JSONException, IOException, InterruptedException {
+	public void testAllowPrints() throws JSONException, IOException, InterruptedException, Exception {
 		// Git Setup!
 		String testKernelDir = Paths.get("resources", "testing", "DiffMapper", "runSingleInstance", "kernel")
 				.toString();
@@ -62,7 +62,7 @@ public class DiffMapperTest {
 	}
 
 	@Test
-	public void testMultpleInstancesSingleFile() throws JSONException, IOException, InterruptedException {
+	public void testMultpleInstancesSingleFile() throws JSONException, IOException, InterruptedException, Exception {
 		// Git Setup!
 		String testKernelDir = Paths.get("resources", "testing", "DiffMapper", "runMultipleInstancesSingleFile", "kernel")
 				.toString();
@@ -76,6 +76,7 @@ public class DiffMapperTest {
 		int placed = dm.run("oldInstanceMap.json");
 
 		// Git Cleanup!
+		Utils.execute(new String[] {"git", "checkout", "v3.17-rc1"}, new File(testKernelDir));
 		Utils.execute(new String[] { "rm", "-rf", ".git/" }, new File(testKernelDir));
 
 		assertEquals(8, placed);

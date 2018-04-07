@@ -61,8 +61,6 @@ int pvr2_ctrl_set_mask_value(struct pvr2_ctrl *cptr,int mask,int val)
 {
 	int ret = 0;
 	if (!cptr) return -EINVAL;
-	/* 1e16f13@@@DEADLOCK@@@1847@@@30@@@drivers/media/usb/pvrusb2/pvrusb2-ctrl.c@@@big_lock_mutex */
-	/* 1e16f13@@@DEADLOCK@@@1847@@@30@@@drivers/media/usb/pvrusb2/pvrusb2-ctrl.c@@@big_lock_mutex */
 	LOCK_TAKE(cptr->hdw->big_lock); do {
 		if (cptr->info->set_value) {
 			if (cptr->info->type == pvr2_ctl_bitmask) {
@@ -84,12 +82,10 @@ int pvr2_ctrl_set_mask_value(struct pvr2_ctrl *cptr,int mask,int val)
 
 
 /* Get the current value of the given control. */
-       /* 1e16f5b@@@DEADLOCK@@@2542@@@30@@@drivers/media/usb/pvrusb2/pvrusb2-ctrl.c@@@big_lock_mutex */
 int pvr2_ctrl_get_value(struct pvr2_ctrl *cptr,int *valptr)
 {
 	int ret = 0;
 	if (!cptr) return -EINVAL;
-	/* 1e16f5b@@@DEADLOCK@@@2542@@@30@@@drivers/media/usb/pvrusb2/pvrusb2-ctrl.c@@@big_lock_mutex */
 	LOCK_TAKE(cptr->hdw->big_lock); do {
 		ret = cptr->info->get_value(cptr,valptr);
 	} while(0); LOCK_GIVE(cptr->hdw->big_lock);
@@ -116,7 +112,6 @@ int pvr2_ctrl_get_max(struct pvr2_ctrl *cptr)
 		} else if (cptr->info->type == pvr2_ctl_int) {
 			ret = cptr->info->def.type_int.max_value;
 		}
-	/* 1e16fb7@@@DEADLOCK@@@3385@@@30@@@drivers/media/usb/pvrusb2/pvrusb2-ctrl.c@@@big_lock_mutex */
 	} while(0); LOCK_GIVE(cptr->hdw->big_lock);
 	return ret;
 }
@@ -127,11 +122,9 @@ int pvr2_ctrl_get_min(struct pvr2_ctrl *cptr)
 {
 	int ret = 0;
 	if (!cptr) return 0;
-	/* 1e16fb7@@@DEADLOCK@@@3385@@@30@@@drivers/media/usb/pvrusb2/pvrusb2-ctrl.c@@@big_lock_mutex */
 	LOCK_TAKE(cptr->hdw->big_lock); do {
 		if (cptr->info->get_min_value) {
 			cptr->info->get_min_value(cptr,&ret);
-		                  /* 1e16feb@@@DEADLOCK@@@3812@@@30@@@drivers/media/usb/pvrusb2/pvrusb2-ctrl.c@@@big_lock_mutex */
 		} else if (cptr->info->type == pvr2_ctl_int) {
 			ret = cptr->info->def.type_int.min_value;
 		}
@@ -145,8 +138,6 @@ int pvr2_ctrl_get_def(struct pvr2_ctrl *cptr, int *valptr)
 {
 	int ret = 0;
 	if (!cptr) return -EINVAL;
-	/* 1e16feb@@@DEADLOCK@@@3812@@@30@@@drivers/m                                        /* 1e17018@@@DEADLOCK@@@4191@@@30@@@drivers/media/usb/pvrusb2/pvrusb2-ctrl.c@@@big_lock_mutex */
-edia/usb/pvrusb2/pvrusb2-ctrl.c@@@big_lock_mutex */
 	LOCK_TAKE(cptr->hdw->big_lock); do {
 		if (cptr->info->get_def_value) {
 			ret = cptr->info->get_def_value(cptr, valptr);
@@ -163,7 +154,6 @@ int pvr2_ctrl_get_cnt(struct pvr2_ctrl *cptr)
 {
 	int ret = 0;
 	if (!cptr) return 0;
-	/* 1e17018@@@DEADLOCK@@@4191@@@30@@@drivers/media/usb/pvrusb2/pvrusb2-ctrl.c@@@big_lock_mutex */
 	LOCK_TAKE(cptr->hdw->big_lock); do {
 		if (cptr->info->type == pvr2_ctl_enum) {
 			ret = cptr->info->def.type_enum.count;
@@ -172,17 +162,6 @@ int pvr2_ctrl_get_cnt(struct pvr2_ctrl *cptr)
 	return ret;
 }
 
-/*
- *
- *
- *
- *
- * Another shift!
- *
- *
- *
- *
- */
 
 /* Retrieve control's valid mask bits (bit mask only) */
 int pvr2_ctrl_get_mask(struct pvr2_ctrl *cptr)
@@ -194,7 +173,6 @@ int pvr2_ctrl_get_mask(struct pvr2_ctrl *cptr)
 			ret = cptr->info->def.type_bitmask.valid_bits;
 		}
 	} while(0); LOCK_GIVE(cptr->hdw->big_lock);
-/* 1e17081@@@DEADLOCK@@@5243@@@30@@@drivers/media/usb/pvrusb2/pvrusb2-ctrl.c@@@big_lock_mutex */
 	return ret;
 }
 
@@ -215,19 +193,6 @@ const char *pvr2_ctrl_get_desc(struct pvr2_ctrl *cptr)
 }
 
 
-/*
- *
- *
- *
- *
- *
- *
- * comment ot shift content
- *
- *
- *
- */
-
 /* Retrieve a control enumeration or bit mask value */
 int pvr2_ctrl_get_valname(struct pvr2_ctrl *cptr,int val,
 			  char *bptr,unsigned int bmax,
@@ -236,7 +201,6 @@ int pvr2_ctrl_get_valname(struct pvr2_ctrl *cptr,int val,
 	int ret = -EINVAL;
 	if (!cptr) return 0;
 	*blen = 0;
-	/* 1e17081@@@DEADLOCK@@@5243@@@30@@@drivers/media/usb/pvrusb2/pvrusb2-ctrl.c@@@big_lock_mutex */
 	LOCK_TAKE(cptr->hdw->big_lock); do {
 		if (cptr->info->type == pvr2_ctl_enum) {
 			const char * const *names;
@@ -502,7 +466,6 @@ static int parse_tlist(const char *ptr,unsigned int len,
 		switch (mode) {
 		case 0:
 			mask = valid_bits;
-			   /* 1e172dc@@@DEADLOCK@@@11580@@@30@@@drivers/media/usb/pvrusb2/pvrusb2-ctrl.c@@@big_lock_mutex */
 			val |= kv;
 			break;
 		case -1:
@@ -544,7 +507,6 @@ int pvr2_ctrl_sym_to_value(struct pvr2_ctrl *cptr,
 
 	if (!len) return -EINVAL;
 
-	/* 1e172dc@@@DEADLOCK@@@11580@@@30@@@drivers/media/usb/pvrusb2/pvrusb2-ctrl.c@@@big_lock_mutex */
 	LOCK_TAKE(cptr->hdw->big_lock); do {
 		if (cptr->info->type == pvr2_ctl_int) {
 			ret = parse_token(ptr,len,valptr,NULL,0);
@@ -594,7 +556,6 @@ int pvr2_ctrl_value_to_sym_internal(struct pvr2_ctrl *cptr,
 		*len = scnprintf(buf,maxlen,"%d",val);
 		ret = 0;
 	} else if (cptr->info->type == pvr2_ctl_bool) {
-		                        /* 1e1735b@@@DEADLOCK@@@13783@@@30@@@drivers/media/usb/pvrusb2/pvrusb2-ctrl.c@@@big_lock_mutex */
 		*len = scnprintf(buf,maxlen,"%s",val ? "true" : "false");
 		ret = 0;
 	} else if (cptr->info->type == pvr2_ctl_enum) {
@@ -629,7 +590,6 @@ int pvr2_ctrl_value_to_sym(struct pvr2_ctrl *cptr,
 			   unsigned int *len)
 {
 	int ret;
-	/* 1e1735b@@@DEADLOCK@@@13783@@@30@@@drivers/media/usb/pvrusb2/pvrusb2-ctrl.c@@@big_lock_mutex */
 	LOCK_TAKE(cptr->hdw->big_lock); do {
 		ret = pvr2_ctrl_value_to_sym_internal(cptr,mask,val,
 						      buf,maxlen,len);
