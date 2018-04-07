@@ -14,29 +14,70 @@ import org.junit.rules.TemporaryFolder;
 public class DiffMapperTest {
 	@Rule
 	public TemporaryFolder testFolder = new TemporaryFolder();
-	
+
 	@Test
 	public void testInit() {
 		DiffMapper dm = new DiffMapper(DiffConfig.builder().build(), false);
 		assertTrue(dm != null);
 	}
-	
+
 	@Test
 	public void testRunSingleInstance() throws JSONException, IOException, InterruptedException {
 		// Git Setup!
-		String testKernelDir = Paths.get("resources", "testing", "DiffMapper", "runSingleInstance", "kernel").toString();
-		Utils.execute(new String[] {"cp", "-R", "../.notgit", ".git"}, new File(testKernelDir));
-		
-		
-		String configFile = Paths.get("resources", "testing", "DiffMapper", "runSingleInstance", "config.json").toString();
+		String testKernelDir = Paths.get("resources", "testing", "DiffMapper", "runSingleInstance", "kernel")
+				.toString();
+		Utils.execute(new String[] { "cp", "-R", "../.notgit", ".git" }, new File(testKernelDir));
+
+		String configFile = Paths.get("resources", "testing", "DiffMapper", "runSingleInstance", "config.json")
+				.toString();
 		DiffConfig config = DiffConfig.builder(configFile).build();
 
 		DiffMapper dm = new DiffMapper(config, false);
 		int placed = dm.run("oldInstanceMap.json");
-		
+
 		// Git Cleanup!
-		Utils.execute(new String[] {"rm", "-rf", ".git/"}, new File(testKernelDir));
-		
+		Utils.execute(new String[] { "rm", "-rf", ".git/" }, new File(testKernelDir));
+
 		assertEquals(1, placed);
+	}
+
+	@Test
+	public void testAllowPrints() throws JSONException, IOException, InterruptedException {
+		// Git Setup!
+		String testKernelDir = Paths.get("resources", "testing", "DiffMapper", "runSingleInstance", "kernel")
+				.toString();
+		Utils.execute(new String[] { "cp", "-R", "../.notgit", ".git" }, new File(testKernelDir));
+
+		String configFile = Paths.get("resources", "testing", "DiffMapper", "runSingleInstance", "config.json")
+				.toString();
+		DiffConfig config = DiffConfig.builder(configFile).build();
+
+		DiffMapper dm = new DiffMapper(config, true);
+		int placed = dm.run("oldInstanceMap.json");
+
+		// Git Cleanup!
+		Utils.execute(new String[] { "rm", "-rf", ".git/" }, new File(testKernelDir));
+
+		assertEquals(1, placed);
+	}
+
+	@Test
+	public void testMultpleInstancesSingleFile() throws JSONException, IOException, InterruptedException {
+		// Git Setup!
+		String testKernelDir = Paths.get("resources", "testing", "DiffMapper", "runMultipleInstancesSingleFile", "kernel")
+				.toString();
+		Utils.execute(new String[] { "cp", "-R", "../.notgit", ".git" }, new File(testKernelDir));
+
+		String configFile = Paths.get("resources", "testing", "DiffMapper", "runMultipleInstancesSingleFile", "config.json")
+				.toString();
+		DiffConfig config = DiffConfig.builder(configFile).build();
+
+		DiffMapper dm = new DiffMapper(config, false);
+		int placed = dm.run("oldInstanceMap.json");
+
+		// Git Cleanup!
+		Utils.execute(new String[] { "rm", "-rf", ".git/" }, new File(testKernelDir));
+
+		assertEquals(8, placed);
 	}
 }

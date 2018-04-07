@@ -1,0 +1,57 @@
+[{
+  "filename": "drivers/media/usb/pvrusb2/pvrusb2-ctrl.c",
+  "offset": 1847,
+  "name": "big_lock_mutex",
+  "length": 30,
+  "id": "1e16f13",
+  "status": "DEADLOCK"
+}, {
+  "filename": "drivers/media/usb/pvrusb2/pvrusb2-ctrl.c",
+  "offset": 2542,
+  "name": "big_lock_mutex",
+  "length": 30,
+  "id": "1e16f5b",
+  "status": "DEADLOCK"
+}, {
+  "filename": "drivers/media/usb/pvrusb2/pvrusb2-ctrl.c",
+  "offset": 3385,
+  "name": "big_lock_mutex",
+  "length": 30,
+  "id": "1e16fb7",
+  "status": "DEADLOCK"
+}, {
+  "filename": "drivers/media/usb/pvrusb2/pvrusb2-ctrl.c",
+  "offset": 3812,
+  "name": "big_lock_mutex",
+  "length": 30,
+  "id": "1e16feb",
+  "status": "DEADLOCK"
+}, {
+  "filename": "drivers/media/usb/pvrusb2/pvrusb2-ctrl.c",
+  "offset": 4191,
+  "name": "big_lock_mutex",
+  "length": 30,
+  "id": "1e17018",
+  "status": "DEADLOCK"
+}, {
+  "filename": "drivers/media/usb/pvrusb2/pvrusb2-ctrl.c",
+  "offset": 5243,
+  "name": "big_lock_mutex",
+  "length": 30,
+  "id": "1e17081",
+  "status": "DEADLOCK"
+}, {
+  "filename": "drivers/media/usb/pvrusb2/pvrusb2-ctrl.c",
+  "offset": 11580,
+  "name": "big_lock_mutex",
+  "length": 30,
+  "id": "1e172dc",
+  "status": "DEADLOCK"
+}, {
+  "filename": "drivers/media/usb/pvrusb2/pvrusb2-ctrl.c",
+  "offset": 13783,
+  "name": "big_lock_mutex",
+  "length": 30,
+  "id": "1e1735b",
+  "status": "DEADLOCK"
+}]
