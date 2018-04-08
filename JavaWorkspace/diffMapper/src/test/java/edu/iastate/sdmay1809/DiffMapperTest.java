@@ -23,63 +23,67 @@ public class DiffMapperTest {
 
 	@Test
 	public void testRunSingleInstance() throws JSONException, IOException, InterruptedException, Exception {
-		// Git Setup!
-		String testKernelDir = Paths.get("resources", "testing", "DiffMapper", "runSingleInstance", "kernel")
-				.toString();
-		Utils.execute(new String[] { "cp", "-R", "../.notgit", ".git" }, new File(testKernelDir));
+		// Setup Test Workspace!
+		File workspace = testFolder.newFolder();
+		File baseDir = Paths.get("resources", "testing", "DiffMapper", "runSingleInstance").toAbsolutePath().toFile();
+		Utils.execute(new String[] { "cp", "-R", ".", workspace.getAbsolutePath() }, baseDir);
 
-		String configFile = Paths.get("resources", "testing", "DiffMapper", "runSingleInstance", "config.json")
-				.toString();
-		DiffConfig config = DiffConfig.builder(configFile).build();
+		// Git Setup!
+		Utils.execute(new String[] { "cp", "-R", ".notgit/", "kernel/.git/" }, workspace);
+
+		DiffConfig config = DiffConfig.builder()
+				.setDiffTestDir(Paths.get(workspace.getAbsolutePath(), "diffmap/").toString())
+				.setKernelDir(Paths.get(workspace.getAbsolutePath(), "kernel/").toString()).setOldTag("v3.19-rc1")
+				.setNewTag("v3.20")
+				.setResultDir(Paths.get(workspace.getAbsolutePath(), "diffmap", "results").toString()).build();
 
 		DiffMapper dm = new DiffMapper(config, false);
 		int placed = dm.run("oldInstanceMap.json");
-
-		// Git Cleanup!
-		Utils.execute(new String[] {"git", "checkout", "v3.19-rc1"}, new File(testKernelDir));
-		Utils.execute(new String[] { "rm", "-rf", ".git/" }, new File(testKernelDir));
 
 		assertEquals(1, placed);
 	}
 
 	@Test
 	public void testAllowPrints() throws JSONException, IOException, InterruptedException, Exception {
-		// Git Setup!
-		String testKernelDir = Paths.get("resources", "testing", "DiffMapper", "runSingleInstance", "kernel")
-				.toString();
-		Utils.execute(new String[] { "cp", "-R", "../.notgit", ".git" }, new File(testKernelDir));
+		// Setup Test Workspace!
+		File workspace = testFolder.newFolder();
+		File baseDir = Paths.get("resources", "testing", "DiffMapper", "runSingleInstance").toAbsolutePath().toFile();
+		Utils.execute(new String[] { "cp", "-R", ".", workspace.getAbsolutePath() }, baseDir);
 
-		String configFile = Paths.get("resources", "testing", "DiffMapper", "runSingleInstance", "config.json")
-				.toString();
-		DiffConfig config = DiffConfig.builder(configFile).build();
+		// Git Setup!
+		Utils.execute(new String[] { "cp", "-R", ".notgit/", "kernel/.git/" }, workspace);
+
+		DiffConfig config = DiffConfig.builder()
+				.setDiffTestDir(Paths.get(workspace.getAbsolutePath(), "diffmap/").toString())
+				.setKernelDir(Paths.get(workspace.getAbsolutePath(), "kernel/").toString()).setOldTag("v3.19-rc1")
+				.setNewTag("v3.20")
+				.setResultDir(Paths.get(workspace.getAbsolutePath(), "diffmap", "results").toString()).build();
 
 		DiffMapper dm = new DiffMapper(config, true);
 		int placed = dm.run("oldInstanceMap.json");
-
-		// Git Cleanup!
-		Utils.execute(new String[] {"git", "checkout", "v3.19-rc1"}, new File(testKernelDir));
-		Utils.execute(new String[] { "rm", "-rf", ".git/" }, new File(testKernelDir));
 
 		assertEquals(1, placed);
 	}
 
 	@Test
 	public void testMultpleInstancesSingleFile() throws JSONException, IOException, InterruptedException, Exception {
-		// Git Setup!
-		String testKernelDir = Paths.get("resources", "testing", "DiffMapper", "runMultipleInstancesSingleFile", "kernel")
-				.toString();
-		Utils.execute(new String[] { "cp", "-R", "../.notgit", ".git" }, new File(testKernelDir));
+		// Setup Test Workspace!
+		File workspace = testFolder.newFolder();
+		File baseDir = Paths.get("resources", "testing", "DiffMapper", "runMultipleInstancesSingleFile")
+				.toAbsolutePath().toFile();
+		Utils.execute(new String[] { "cp", "-R", ".", workspace.getAbsolutePath() }, baseDir);
 
-		String configFile = Paths.get("resources", "testing", "DiffMapper", "runMultipleInstancesSingleFile", "config.json")
-				.toString();
-		DiffConfig config = DiffConfig.builder(configFile).build();
+		// Git Setup!
+		Utils.execute(new String[] { "cp", "-R", ".notgit/", "kernel/.git/" }, workspace);
+
+		DiffConfig config = DiffConfig.builder()
+				.setDiffTestDir(Paths.get(workspace.getAbsolutePath(), "diffmap/").toString())
+				.setKernelDir(Paths.get(workspace.getAbsolutePath(), "kernel/").toString()).setOldTag("v3.17-rc1")
+				.setNewTag("v3.18-rc1")
+				.setResultDir(Paths.get(workspace.getAbsolutePath(), "diffmap", "results").toString()).build();
 
 		DiffMapper dm = new DiffMapper(config, false);
 		int placed = dm.run("oldInstanceMap.json");
-
-		// Git Cleanup!
-		Utils.execute(new String[] {"git", "checkout", "v3.17-rc1"}, new File(testKernelDir));
-		Utils.execute(new String[] { "rm", "-rf", ".git/" }, new File(testKernelDir));
 
 		assertEquals(8, placed);
 	}

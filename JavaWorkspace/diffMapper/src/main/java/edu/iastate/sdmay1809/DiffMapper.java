@@ -80,7 +80,7 @@ public class DiffMapper {
 			JSONArray sorted = sort(changes.getJSONArray(fname));
 			int numChanges = sorted.length();
 
-			insert(config.KERNEL_DIR + fname, sorted);
+			insert(Paths.get(config.KERNEL_DIR, fname).toString(), sorted);
 
 			println("Applied " + String.format("%3d", numChanges) + " changes to: " + fname);
 			changesApplied += numChanges;
