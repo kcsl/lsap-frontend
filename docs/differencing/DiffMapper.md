@@ -89,7 +89,7 @@ The following sections provide a detailed overview of each step. Before reading 
 This step is relatively simple, `DiffMapper` invokes a git command to checkout the old version (i.e. `git checkout v3.17-rc1`). A clean is then performed to make sure the checkout is in the correct state. Finally, a new branch is made from this tag, so changes can be made without interfering with the original linux kernel git history.
 
 ### Use L-SAP results of the old version to find the correct locations of all instances in the kernel
-Once the kernel has been prepared with the old version, We track instances from the input instance map and store them in memory to be inserted in a batch based on the file name. This map is necessary from two perspectives:
+Once the kernel has been prepared with the old version, We track instances from the input instance map and store them in memory to be inserted in a batch based on the file name (see [InstanceTracker](./InstanceTracker.md)). This map is necessary from two perspectives:
 1. We don't know the order in which instances are tracked. It is easier for us for first create the metadata and store it based on the source file. Once we prepare all tracked instances, we now have a more cohesive grouping based on the filename.
 2. Inserting comments requires file I/O operations that are much slower than storing data in memory. If we were to prepare a comment, then insert it directly in code, we would waste a lot of time opening a file and closing it multiple times just to insert one line. It is more efficient to open a file once, insert all metadata, then close it.
 
