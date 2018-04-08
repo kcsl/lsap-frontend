@@ -18,10 +18,12 @@ First, `InstanceTracker` will check for an existing instance map in the given ou
 The InstanceTracker API is as follows:
 #### Constructor
 Method: `InstanceTracker(String sourceDirectory)`
+
 Usage:
 ```
 InstanceTracker it = new InstanceTracker("/path/to/results");
 ```
+
 Parameters:
 
 | Parameter       | Description                          |
@@ -34,6 +36,7 @@ Constructs an instance of `InstanceTracker`
 
 #### run
 Method: `int run(String outputDirectory, boolean checkOutputOverride)`
+
 Usage
 ```
 it.run("/path/to/output/", false);

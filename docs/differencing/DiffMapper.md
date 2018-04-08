@@ -43,11 +43,13 @@ java -jar DiffMapper.jar -D old_tag=3.17-rc1 -D new_tag=3.18-rc1 -D types.1=spin
 The DiffMapper API is as follows:
 #### Constructor
 Method: `DiffMapper(DiffConfig config, boolean allowPrintStatements)`
+
 Usage:
 ```
 DiffConfig config = DiffConfig.builder().build();
 DiffMapper dm = new DiffMapper(config, true);
 ```
+
 Parameters:
 
 | Parameter            | Description                                      |
@@ -61,10 +63,12 @@ Constructs an instance of `DiffMapper`
 
 #### run
 Method: `int run(String inputMapFilename) throws JSONException, IOException`
+
 Usage
 ```
 dm.run("oldInstanceMap.json");
 ```
+
 Parameters:
 
 | Parameter        | Description                                        |
