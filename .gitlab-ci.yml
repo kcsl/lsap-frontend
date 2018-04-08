@@ -1,4 +1,4 @@
-image: maven:alpine
+image: dhanwada/lsap-pipeline:1.0.0
 
 DiffMapper:
   script:

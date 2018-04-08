@@ -48,10 +48,11 @@ public class DiffMapperTest {
 		// Setup Test Workspace!
 		File workspace = testFolder.newFolder();
 		File baseDir = Paths.get("resources", "testing", "DiffMapper", "runSingleInstance").toAbsolutePath().toFile();
-		Utils.execute(new String[] { "cp", "-R", ".", workspace.getAbsolutePath() }, baseDir);
+		System.out.println(Utils.execute(new String[] { "cp", "-R", ".", workspace.getAbsolutePath() }, baseDir));
+		
 
 		// Git Setup!
-		Utils.execute(new String[] { "cp", "-R", ".notgit/", "kernel/.git/" }, workspace);
+		System.out.println(Utils.execute(new String[] { "cp", "-R", ".notgit/", "kernel/.git/" }, workspace));
 
 		DiffConfig config = DiffConfig.builder()
 				.setDiffTestDir(Paths.get(workspace.getAbsolutePath(), "diffmap/").toString())

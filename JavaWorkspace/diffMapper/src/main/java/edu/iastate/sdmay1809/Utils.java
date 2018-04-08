@@ -52,6 +52,12 @@ public class Utils {
 		StringBuilder sb = new StringBuilder();
 		String line = null;
 		
+		sb.append("Performing command: ");
+		for(String command : commands) {
+			sb.append(command + " ");
+		}
+		sb.append("\n");
+		
 		Runtime rt = Runtime.getRuntime();
 		Process pr = rt.exec(commands, null, dir);
 		BufferedReader input = new BufferedReader(new InputStreamReader(pr.getInputStream()));
