@@ -14,10 +14,11 @@ export class FilterComponent implements OnInit {
   constructor(
     private filterService: FilterService) { }
 
-  ngOnInit() {
-    console.log(this.version);
-    this.filters = this.filterService.getAll().snapshotChanges().map(filter => {
-      return filter.map(f => ({ key: f.payload.key, ...f.payload.val() }));
-    });
+  async ngOnInit() {
+      await this.filterService.getAll(this.version).then(instances => {
+          this.filters = instances.map(instance => {
+            return instance.driver;
+          });
+      });
   }
 }

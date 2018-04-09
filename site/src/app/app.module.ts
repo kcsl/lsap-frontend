@@ -7,7 +7,7 @@ import { AuthGuard } from './guards/auth-guard';
 import { AuthService } from './services/auth.service';
 import { NavbarService } from './services/navbar.service';
 import { RouterModule } from '@angular/router';
-import { environment } from './../environments/environment';
+import { environment } from '../environments/environment';
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { AngularFireModule } from 'angularfire2';
@@ -21,8 +21,7 @@ import { AppNavbarComponent } from './navbar/app-navbar.component';
 import { LinksComponent } from './links/links.component';
 import { LoginComponent } from './login/login.component';
 import { FilterComponent } from './links/links-filter/filter.component';
-import { LinkCardComponent } from './link-card/link-card.component';
-import { HomeComponent } from './home/home.component';
+import { LinkCardComponent } from './links/link-card/link-card.component';
 import { LinksPageComponent } from './links/links-page/links-page.component';
 import {AngularFireStorageModule} from 'angularfire2/storage';
 
@@ -35,7 +34,6 @@ import {AngularFireStorageModule} from 'angularfire2/storage';
     LoginComponent,
     FilterComponent,
     LinkCardComponent,
-    HomeComponent,
     LinksPageComponent,
   ],
   imports: [
@@ -48,10 +46,6 @@ import {AngularFireStorageModule} from 'angularfire2/storage';
     CustomFormsModule,
     NgbModule.forRoot(),
     RouterModule.forRoot([
-      {
-        path: '',
-        component: HomeComponent
-      },
       {
         path: 'v/:versionStripped',
         component: LinksComponent
