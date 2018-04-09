@@ -11,8 +11,6 @@ static inline int __raw_spin_trylock(void *lock){return 0;}
 static inline void __raw_spin_unlock(void *lock){}
 
 // Define a macro wrapper for extra functions for query unification.
-#define # define raw_spin_lock_nest_lock(lock, nest_lock) __raw_spin_lock(lock)
-#define # define raw_spin_lock_nested(lock, subclass) __raw_spin_lock(lock)
 #define _raw_spin_lock(lock) __raw_spin_lock(lock)
 #define _raw_spin_lock_bh(lock) __raw_spin_lock(lock)
 #define _raw_spin_lock_irq(lock) __raw_spin_lock(lock)
@@ -26,6 +24,8 @@ static inline void __raw_spin_unlock(void *lock){}
 #define raw_spin_lock_irq(lock) __raw_spin_lock(lock)
 #define raw_spin_lock_irqsave(lock, flags) __raw_spin_lock(lock)
 #define raw_spin_lock_irqsave_nested(lock, flags, subclass) __raw_spin_lock(lock)
+#define raw_spin_lock_nest_lock(lock, nest_lock) __raw_spin_lock(lock)
+#define raw_spin_lock_nested(lock, subclass) __raw_spin_lock(lock)
 #define raw_spin_trylock_bh(lock) __raw_spin_trylock(lock)
 #define raw_spin_trylock_irq(lock) __raw_spin_trylock(lock)
 #define raw_spin_trylock_irqsave(lock, flags) __raw_spin_trylock(lock)

@@ -19,7 +19,7 @@ public class Macro implements Comparable<Macro> {
 		params = new ArrayList<String>();
 		
 		// Remove the preprocessor directive and split into macro name and parameters
-		String tmp = line.replace("#define", "").replace("//", "").trim();
+		String tmp = line.replaceFirst("#\\s*define\\s+", "").replaceFirst("//.*$", "").trim();
 		String[] macroParts = tmp.split("\\(", 2);
 		
 		macroName = macroParts[0].trim();
