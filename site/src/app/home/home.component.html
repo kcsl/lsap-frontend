@@ -1,4 +1,4 @@
 <app-navbar></app-navbar>
-<div *ngIf="version">
-    <app-links-component [searchTerm]="searchTerm" [version]="selectedVersion"></app-links-component>
+<div *ngIf="versionStripped">
+    <app-links-component [searchTerm]="searchTerm" [version]="versionStripped"></app-links-component>
 </div>

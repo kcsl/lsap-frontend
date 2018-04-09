@@ -8,7 +8,6 @@ import { Component, Input, OnInit } from '@angular/core';
 })
 export class FilterComponent implements OnInit {
   filters;
-  @Input('filter') filter;
   @Input('version') version;
 
   constructor(

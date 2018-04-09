@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
-import {AppNavbarComponent} from '../navbar/app-navbar.component';
 import {NavbarService} from '../services/navbar.service';
 
 @Component({
