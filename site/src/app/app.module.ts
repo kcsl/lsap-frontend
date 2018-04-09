@@ -24,6 +24,7 @@ import { FilterComponent } from './links/links-filter/filter.component';
 import { LinkCardComponent } from './links/link-card/link-card.component';
 import { LinksPageComponent } from './links/links-page/links-page.component';
 import {AngularFireStorageModule} from 'angularfire2/storage';
+import {HomeComponent} from './home/home.component';
 
 
 @NgModule({
@@ -35,6 +36,7 @@ import {AngularFireStorageModule} from 'angularfire2/storage';
     FilterComponent,
     LinkCardComponent,
     LinksPageComponent,
+    HomeComponent
   ],
   imports: [
     BrowserModule,
@@ -47,8 +49,12 @@ import {AngularFireStorageModule} from 'angularfire2/storage';
     NgbModule.forRoot(),
     RouterModule.forRoot([
       {
+          path: '',
+          component: HomeComponent
+      },
+      {
         path: 'v/:versionStripped',
-        component: LinksComponent
+        component: HomeComponent
       },
       {
         path: 'login',

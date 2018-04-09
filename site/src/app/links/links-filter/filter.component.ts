@@ -17,7 +17,7 @@ export class FilterComponent implements OnInit {
   async ngOnInit() {
       await this.filterService.getAll(this.version).then(instances => {
           this.filters = instances.map(instance => {
-            return instance.driver;
+            return (instance as any).driver;
           });
       });
   }

@@ -1,7 +1,4 @@
-import { Component, OnInit } from '@angular/core';
-import { AuthService } from '../services/auth.service';
-import {ActivatedRoute} from '@angular/router';
-import { NavbarService } from '../services/navbar.service';
+import {Component, Input, OnInit} from '@angular/core';
 
 @Component({
   selector: 'app-navbar',
@@ -10,44 +7,16 @@ import { NavbarService } from '../services/navbar.service';
 })
 export class AppNavbarComponent implements OnInit {
 
-  versions: String[] = [];
-  version;
-  versionStripped;
+  @Input('versions') versions: String[] = [];
+  @Input('version') version;
+  @Input('versionStripped') versionStripped;
   searchTerm;
   filter: string;
-  constructor(public auth: AuthService,
-              private navbarService: NavbarService) { }
+  constructor() { }
 
-  static stripChars(input) {
-      return input.replace(/[^0-9a-z]/gi, '').toString();
-  }
-
-  async ngOnInit() {
-    await this.navbarService.getAllVersions().snapshotChanges().subscribe(v => {
-        v.forEach(element => {
-            this.versions.push(element.payload.val());
-        });
-        if (this.version == null) {
-            this.version = this.versions[0];
-            this.versionStripped = AppNavbarComponent.stripChars(this.version);
-        }
-    });
-  }
-
-  get selectedVersion() {
-    return this.versionStripped;
-  }
+  ngOnInit() {}
 
   search($event) {
     this.searchTerm = $event.target.value;
-  }
-
-  updateVersion(value) {
-      this.version = value;
-      this.versionStripped = AppNavbarComponent.stripChars(this.version);
-  }
-
-  logout() {
-    this.auth.logout();
   }
 }

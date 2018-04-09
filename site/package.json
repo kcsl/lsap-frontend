@@ -28,7 +28,7 @@
     "angularfire2": "^5.0.0-rc.5-next",
     "bootstrap": "^4.0.0",
     "core-js": "^2.4.1",
-    "express": "^4.16.2",
+    "express": "^4.16.3",
     "firebase": "^4.12.1",
     "font-awesome": "^4.7.0",
     "ng2-validation": "^4.2.0",

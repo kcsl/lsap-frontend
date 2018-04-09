@@ -1,10 +1,10 @@
 <nav class="navbar navbar-fixed-left" id="navbar">
   <div class="container">
     <div class="navbar-header" style="top: 2%; position: absolute;">
-      <a class="navbar-brand" routerLink="/">L-SAP</a>
+      <a class="navbar-brand" routerLink="/v/{{versionStripped}}">L-SAP</a>
 
-      <select id="version" [(ngModel)]="version" (ngModelChange)="updateVersion(version)" required>
-        <option *ngFor="let v of versions">{{ v }}</option>
+      <select id="version" required>
+        <option *ngFor="let v of versions">{{ version }}</option>
       </select>
     </div>
     <div class="col">
@@ -13,13 +13,8 @@
                ng-model="values">
       </div>
       <div *ngIf="version">
-        <app-filter [filter]="filter" [version]="selectedVersion"></app-filter>
+        <app-filter [filter]="filter" [version]="versionStripped"></app-filter>
       </div>
     </div>
   </div>
 </nav>
-<!-- on version change this needs to resend the version -->
-<div *ngIf="version">
-  <app-links-component [searchTerm]="searchTerm" [version]="selectedVersion"></app-links-component>
-</div>
-
