@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import org.json.JSONException;
 
 public class DiffMapperMain {
-	public static void main(String[] args) throws JSONException, IOException {
+	public static void main(String[] args) throws JSONException, IOException, Exception {
 		ArrayList<Long> timings = new ArrayList<Long>();
 
 		DiffConfig config = DiffConfig.builder(args).build();
