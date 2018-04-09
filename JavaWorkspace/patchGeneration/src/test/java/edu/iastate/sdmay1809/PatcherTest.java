@@ -30,6 +30,7 @@ public class PatcherTest {
 		System.setOut(new PrintStream(outContent));
 		
 		patcher = new Patcher("resources/testing/patcherTest.ini");
+		patcher.setKernelDirectory("");
 	}
 	
 	@Test
@@ -153,7 +154,8 @@ public class PatcherTest {
 
 		Files.deleteIfExists(Paths.get("resources/testing/lsap_mutex_lock.txt"));
 		
-		patcher.parseArgs("-v -d resources/testing/".split("\\s"));
+		patcher.setVerbose(true);
+		patcher.setDebugPath("resources/testing/");
 		patcher.generateLSAPMutexLockFile();
 		
 		assertTrue(outContent.toString().length() > 0);
@@ -161,7 +163,8 @@ public class PatcherTest {
 		
 		Files.deleteIfExists(Paths.get("include/linux/lsap_mutex_lock.h"));		
 
-		patcher.parseArgs("".split("\\s"));
+		patcher.setVerbose(false);
+		patcher.setDebugPath(null);
 		patcher.generateLSAPMutexLockFile();
 		
 		assertTrue(Files.exists(Paths.get("include/linux/lsap_mutex_lock.h")));
@@ -175,7 +178,8 @@ public class PatcherTest {
 
 		Files.deleteIfExists(Paths.get("resources/lsap_spinlock.txt"));
 		
-		patcher.parseArgs("-v -d resources/testing/".split("\\s"));
+		patcher.setVerbose(true);
+		patcher.setDebugPath("resources/testing/");
 		patcher.generateLSAPSpinlockFile();
 		
 		assertTrue(outContent.toString().length() > 0);
@@ -183,7 +187,8 @@ public class PatcherTest {
 		
 		Files.deleteIfExists(Paths.get("include/linux/lsap_spinlock.h"));		
 
-		patcher.parseArgs("".split("\\s"));
+		patcher.setVerbose(false);
+		patcher.setDebugPath(null);
 		patcher.generateLSAPSpinlockFile();
 		
 		assertTrue(Files.exists(Paths.get("include/linux/lsap_spinlock.h")));
@@ -198,7 +203,9 @@ public class PatcherTest {
 		Files.deleteIfExists(Paths.get("resources/testing/lsap_spinlock.txt"));
 		Files.deleteIfExists(Paths.get("resources/testing/lsap_mutex_lock.txt"));
 		
-		patcher.patch("-v -d resources/testing/".split("\\s"));
+		patcher.setVerbose(true);
+		patcher.setDebugPath("resources/testing/");
+		patcher.patch();
 		
 		assertTrue(outContent.toString().length() > 0);
 		assertTrue(Files.exists(Paths.get("resources/testing/lsap_spinlock.txt")));
@@ -207,113 +214,56 @@ public class PatcherTest {
 		Files.deleteIfExists(Paths.get("include/linux/lsap_spinlock.h"));		
 		Files.deleteIfExists(Paths.get("include/linux/lsap_mutex_lock.h"));
 
-		patcher.patch("-v".split("\\s"));
+		patcher.setVerbose(false);
+		patcher.setDebugPath(null);
+		patcher.patch();
 		
 		assertTrue(Files.exists(Paths.get("include/linux/lsap_spinlock.h")));
 		assertTrue(Files.exists(Paths.get("include/linux/lsap_mutex_lock.h")));
 	}
 	
 	@Test
-	public void patcherHelp() throws IOException, ParseException
+	public void patcherGetSetKernelPath()
 	{
-		System.setOut(new PrintStream(outContent = new ByteArrayOutputStream()));
-		assertTrue(outContent.toString().length() == 0);
+		patcher.setKernelDirectory("somepath");
+		assertEquals(patcher.getKernelDirectory(), "somepath/");
+		
+		patcher.setKernelDirectory("anotherPath/");
+		assertEquals(patcher.getKernelDirectory(), "anotherPath/");
 
-		patcher.patch("-h".split("\\s"));
-		
-		assertTrue(outContent.toString().length() > 0);
-		
-		System.setOut(new PrintStream(outContent = new ByteArrayOutputStream()));
-		assertTrue(outContent.toString().length() == 0);
+		patcher.setKernelDirectory(null);
+		assertEquals(patcher.getKernelDirectory(), "");
 
-		patcher.patch("-h -v".split("\\s"));
-		
-		assertTrue(outContent.toString().length() > 0);
-		assertFalse(outContent.toString().contains("Verbose output is ON."));
+		patcher.setKernelDirectory("");
+		assertEquals(patcher.getKernelDirectory(), "");
 	}
 	
 	@Test
-	public void patcherParseArgs() throws IOException, ParseException
-	{		
-		patcher.parseArgs("-v".split("\\s"));
-		assertTrue(patcher.getCommandLine().hasOption('v'));
+	public void patcherGetSetDebugPath()
+	{
+		patcher.setDebugPath("somepath");
+		assertEquals(patcher.getDebugPath(), "somepath/");
+
+		patcher.setDebugPath("anotherPath/");
+		assertEquals(patcher.getDebugPath(), "anotherPath/");
 		
-		patcher.parseArgs("-d".split("\\s"));
-		assertTrue(patcher.getCommandLine().hasOption('d'));
-		assertTrue(patcher.getCommandLine().getOptionValue("debug", "resources/PatcherDebug/").equals("resources/PatcherDebug/"));
+		patcher.setDebugPath("");
+		assertEquals(patcher.getDebugPath(), "");
 
-		patcher.parseArgs("--debug somepath/".split("\\s"));
-		assertTrue(patcher.getCommandLine().hasOption('d'));
-		assertTrue(patcher.getCommandLine().getOptionValue("debug", "resources/PatcherDebug/").equals("somepath/"));
-
-		patcher.parseArgs("-kp".split("\\s"));
-		assertTrue(patcher.getCommandLine().hasOption("kp"));
-		assertTrue(patcher.getCommandLine().getOptionValue("kernel-path", "./").equals("./"));
-
-		patcher.parseArgs("--kernel-path somepath/".split("\\s"));
-		assertTrue(patcher.getCommandLine().hasOption("kp"));
-		assertTrue(patcher.getCommandLine().getOptionValue("kernel-path", "./").equals("somepath/"));
-
-		patcher.parseArgs("-v -d".split("\\s"));
-		assertTrue(patcher.getCommandLine().hasOption('v'));
-		assertTrue(patcher.getCommandLine().hasOption('d'));
-		assertTrue(patcher.getCommandLine().getOptionValue("debug", "resources/PatcherDebug/").equals("resources/PatcherDebug/"));
-
-		patcher.parseArgs("-v --debug somepath/".split("\\s"));
-		assertTrue(patcher.getCommandLine().hasOption('v'));		
-		assertTrue(patcher.getCommandLine().hasOption('d'));
-		assertTrue(patcher.getCommandLine().getOptionValue("debug", "resources/PatcherDebug/").equals("somepath/"));
-
-		patcher.parseArgs("-v -kp".split("\\s"));
-		assertTrue(patcher.getCommandLine().hasOption('v'));
-		assertTrue(patcher.getCommandLine().hasOption("kp"));
-		assertTrue(patcher.getCommandLine().getOptionValue("kernel-path", "./").equals("./"));
-
-		patcher.parseArgs("-v --kernel-path somepath/".split("\\s"));
-		assertTrue(patcher.getCommandLine().hasOption('v'));		
-		assertTrue(patcher.getCommandLine().hasOption("kp"));
-		assertTrue(patcher.getCommandLine().getOptionValue("kernel-path", "./").equals("somepath/"));
-
-		patcher.parseArgs("-d --kernel-path somepath/".split("\\s"));
-		assertTrue(patcher.getCommandLine().hasOption('d'));
-		assertTrue(patcher.getCommandLine().getOptionValue("debug", "resources/PatcherDebug/").equals("resources/PatcherDebug/"));
-		assertTrue(patcher.getCommandLine().hasOption("kp"));
-		assertTrue(patcher.getCommandLine().getOptionValue("kernel-path", "./").equals("somepath/"));
-
-		patcher.parseArgs("-d somepath/ --kernel-path somepath/".split("\\s"));
-		assertTrue(patcher.getCommandLine().hasOption('d'));
-		assertTrue(patcher.getCommandLine().getOptionValue("debug", "resources/PatcherDebug/").equals("somepath/"));
-		assertTrue(patcher.getCommandLine().hasOption("kp"));
-		assertTrue(patcher.getCommandLine().getOptionValue("kernel-path", "./").equals("somepath/"));
-
-		patcher.parseArgs("-d somepath/ --kernel-path".split("\\s"));
-		assertTrue(patcher.getCommandLine().hasOption('d'));
-		assertTrue(patcher.getCommandLine().getOptionValue("debug", "resources/PatcherDebug/").equals("somepath/"));
-		assertTrue(patcher.getCommandLine().hasOption("kp"));
-		assertTrue(patcher.getCommandLine().getOptionValue("kernel-path", "./").equals("./"));
-
-		patcher.parseArgs("-d --kernel-path".split("\\s"));
-		assertTrue(patcher.getCommandLine().hasOption('d'));
-		assertTrue(patcher.getCommandLine().getOptionValue("debug", "resources/PatcherDebug/").equals("resources/PatcherDebug/"));
-		assertTrue(patcher.getCommandLine().hasOption("kp"));
-		assertTrue(patcher.getCommandLine().getOptionValue("kernel-path", "./").equals("./"));
-
-		patcher.parseArgs("-d somepath/ -v --kernel-path somepath".split("\\s"));
-		assertTrue(patcher.getCommandLine().hasOption('d'));
-		assertTrue(patcher.getCommandLine().getOptionValue("debug", "resources/PatcherDebug/").equals("somepath/"));
-		assertTrue(patcher.getCommandLine().hasOption('v'));
-		assertTrue(patcher.getCommandLine().hasOption("kp"));
-		assertTrue(patcher.getCommandLine().getOptionValue("kernel-path", "./").equals("somepath"));
-		
-		patcher.parseArgs("-d somepath -v --kernel-path somepath/ -h".split("\\s"));
-		assertTrue(patcher.getCommandLine().hasOption('d'));
-		assertTrue(patcher.getCommandLine().getOptionValue("debug", "resources/PatcherDebug/").equals("somepath"));
-		assertTrue(patcher.getCommandLine().hasOption('v'));
-		assertTrue(patcher.getCommandLine().hasOption("kp"));
-		assertTrue(patcher.getCommandLine().getOptionValue("kernel-path", "./").equals("somepath/"));
-		assertTrue(patcher.getCommandLine().hasOption('h'));
+		patcher.setDebugPath(null);
+		assertEquals(patcher.getDebugPath(), null);
 	}
-
+	
+	@Test
+	public void patcherGetSetVerbose()
+	{
+		patcher.setVerbose(true);
+		assertTrue(patcher.getVerbose());
+		
+		patcher.setVerbose(false);
+		assertFalse(patcher.getVerbose());
+	}
+		
 	@After
 	public void restoreStream()
 	{

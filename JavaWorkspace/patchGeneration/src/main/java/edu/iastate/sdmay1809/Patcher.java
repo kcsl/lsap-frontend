@@ -3,6 +3,7 @@ package edu.iastate.sdmay1809;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -10,12 +11,6 @@ import java.util.Iterator;
 import java.util.Scanner;
 import java.util.Set;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
 public class Patcher 
@@ -28,18 +23,12 @@ public class Patcher
 	private ArrayList<Macro> macros;
 		
 	// Debugging variables
-	private boolean doDebug;
 	private String debugPath;
 	private boolean verbose;
 		
 	// The iniReader
 	private IniReader ini;
-	
-	// CLI Parsing
-	private CommandLineParser parser;
-	private Options options;
-	private CommandLine line;
-	
+		
 	public Patcher(String iniPath) throws IOException, ParseException
 	{		
 		// Read the patcher .ini file
@@ -47,7 +36,11 @@ public class Patcher
 				
 		// Initialize the lists of functions and macros
 		functions = new ArrayList<Function>();
-		macros = new ArrayList<Macro>();				
+		macros = new ArrayList<Macro>();	
+		
+		pathToKernelDirectory = "";
+		debugPath = null;
+		verbose = false;
 	}
 	
 	/**
@@ -63,23 +56,14 @@ public class Patcher
 	 * @throws IOException 
 	 * @throws ParseException 
 	 */
-	public void patch(String[] cliArgs) throws IOException, ParseException
-	{
-		parseArgs(cliArgs);
-
-		if (line.hasOption('h'))
-		{
-			HelpFormatter formatter = new HelpFormatter();
-			formatter.printHelp("patcher", "Options available", options, "", true);
-			return;
-		}
-						
+	public void patch() throws IOException, ParseException
+	{			
 		if (verbose)
 		{
 			System.out.println("Verbose output is ON.\n");
 			System.out.println("Patcher information:");
 			System.out.println("\tPath to kernel: " + pathToKernelDirectory);
-			System.out.println("\tDebugging: " + (doDebug ? "ON\n\t\tDebug file: " + debugPath : "OFF") + "\n");
+			System.out.println("\tDebugging: " + (debugPath != null ? "ON\n\t\tDebug file: " + debugPath : "OFF") + "\n");
 			System.out.println("Mutex Lock Files:");
 			
 			for (String s : ini.getPaths("MutexPaths"))
@@ -141,10 +125,10 @@ public class Patcher
 		macros.clear();
 		
 		// Set the location of the file to write (basically decide if we're writing to a text or header file)
-		if (doDebug)
-			fcb = new FileContentBuffer(debugPath + "lsap_mutex_lock.txt");
+		if (debugPath != null)
+			fcb = new FileContentBuffer(Paths.get(debugPath, "lsap_mutex_lock.txt").toString());
 		else
-			fcb = new FileContentBuffer(pathToKernelDirectory + "include/linux/lsap_mutex_lock.h");
+			fcb = new FileContentBuffer(Paths.get(pathToKernelDirectory, "include/linux/lsap_mutex_lock.h").toString());
 			
 		for (String path : ini.getPaths("MutexPaths"))
 		{		
@@ -298,7 +282,7 @@ public class Patcher
 		fcb.writeln( ""																		);
 		
 		// Print the contents of the patched header file to the header file itself
-		fcb.print(doDebug);		
+		fcb.print(debugPath != null);		
 	}
 	
 	/**
@@ -311,10 +295,10 @@ public class Patcher
 		macros.clear();
 		
 		// Set the location of the file to write (basically decide if we're writing to a text or header file)
-		if (doDebug)
-			fcb = new FileContentBuffer(debugPath + "lsap_spinlock.txt");
+		if (debugPath != null)
+			fcb = new FileContentBuffer(Paths.get(debugPath, "lsap_spinlock.txt").toString());
 		else
-			fcb = new FileContentBuffer(pathToKernelDirectory + "include/linux/lsap_spinlock.h");
+			fcb = new FileContentBuffer(Paths.get(pathToKernelDirectory, "include/linux/lsap_spinlock.h").toString());
 		
 		Function lock = new Function("void __raw_spin_lock(void *lock)");
 		Function trylock = new Function("int __raw_spin_trylock(void *lock)");
@@ -367,6 +351,25 @@ public class Patcher
 		Collections.sort(functions);
 		Collections.sort(macros);
 		
+		if (verbose)
+		{
+			System.out.println("\nSpinlocking Functions Matching Criteria:");
+			
+			for (Function f : functions)
+			{
+				System.out.println("\t" + f.getName());
+			}
+			
+			System.out.println("\nSpinlocking Macros Matching Criteria:");
+			
+			for (Macro m : macros)
+			{
+				System.out.println("\t" + m.getName());
+			}
+			
+			System.out.println();
+		}
+		
 		fcb.writeln("/**************************************************************/"		);
 		fcb.writeln("// SPIN LOCK"															);
 		fcb.writeln("/**************************************************************/"		);
@@ -393,7 +396,7 @@ public class Patcher
 		fcb.writeln( "#endif /* __LINUX_L_SAP_SPINLOCK_H */" 								);
 		fcb.writeln( ""																		);
 
-		fcb.print(doDebug);
+		fcb.print(debugPath != null);
 	}
 	
 	public boolean isFunction(String line)
@@ -430,11 +433,10 @@ public class Patcher
 	
 	public boolean isLockingFunction(String line, Set<Criteria> criteria)
 	{
-		// All locking functions must (obviously) be functions
-		if (!isFunction(line)) return false;		
-		
 		// Get the function name
 		String functionName = getFunctionName(line);
+
+		if (functionName == null) return false;
 		
 		// Check each of the defined criteria for functions. If all criteria are met, return true
 		for (Criteria c : criteria)
@@ -447,11 +449,10 @@ public class Patcher
 	
 	public boolean isLockingMacro(String line, Set<Criteria> criteria)
 	{
-		// All locking macros are preprocessor macro definitions
-		if (!isPreprocDefineMacro(line)) return false;
-		
 		// Get the macro name
 		String macroName = getMacroName(line);
+
+		if (macroName == null) return false;
 		
 		// Check each of the defined criteria for macros. If all criteria are met, return true
 		for (Criteria c : criteria)
@@ -460,43 +461,42 @@ public class Patcher
 		}
 		
 		return true;
+	}	
+	
+	public String getKernelDirectory()
+	{
+		return pathToKernelDirectory;
 	}
 	
-	public void parseArgs(String[] args) throws ParseException
+	public void setKernelDirectory(String kernelPath)
 	{
-		parser = new DefaultParser();
-		options = new Options();
-		
-		options.addOption("v", "verbose", false, "Print additional information to the console");
-		options.addOption(Option.builder("kp")
-								.longOpt("kernel-path")
-								.optionalArg(true)
-								.numberOfArgs(1)
-								.argName("path")
-								.desc("The path to the root directory of the kernel being patched. By default, it is the current directory (\".\")")
-								.build());
-		options.addOption(Option.builder("d")
-								.longOpt("debug")
-								.optionalArg(true)
-								.numberOfArgs(1)
-								.argName("path")
-								.desc("The file in which to store the patched header file output. By default, it is \"./PatcherDebug.txt\"")
-								.build());
-		options.addOption("h", "help", false, "Prints additional help");
-		
-		line = parser.parse(options, args);		
-		
-		// Initialize CLI arguments
-		pathToKernelDirectory = line.getOptionValue("kernel-path", "./").trim();
-		pathToKernelDirectory += (pathToKernelDirectory.charAt(pathToKernelDirectory.length() - 1) != '/') ? "/" : "";
-		doDebug = line.hasOption('d');
-		debugPath = line.getOptionValue("debug", "resources/PatcherDebug/").trim();
-		debugPath += (debugPath.charAt(debugPath.length() - 1) != '/') ? "/" : "";
-		verbose = line.hasOption('v');
+		if (kernelPath == null) pathToKernelDirectory = "";
+		else pathToKernelDirectory = kernelPath.trim() + (kernelPath.trim().endsWith("/") ? "" : "/");
+		if (pathToKernelDirectory.length() == 1) pathToKernelDirectory = "";
 	}
 	
-	public CommandLine getCommandLine()
+	public String getDebugPath()
 	{
-		return line;
+		return debugPath;
+	}
+	
+	public void setDebugPath(String debugFolder)
+	{
+		if (debugFolder == null) debugPath = null;
+		else
+		{
+			debugPath = debugFolder.trim() + (debugFolder.trim().endsWith("/") ? "" : "/");
+			if (debugPath.length() == 1) debugPath = "";
+		}
+	}
+	
+	public boolean getVerbose()
+	{
+		return verbose;
+	}
+	
+	public void setVerbose(boolean isVerbose)
+	{
+		verbose = isVerbose;
 	}
 }
