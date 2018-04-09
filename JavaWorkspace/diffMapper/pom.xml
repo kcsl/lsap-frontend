@@ -83,7 +83,7 @@
 						<manifest>
 							<addClasspath>true</addClasspath>
 							<classpathPrefix>${project.build.finalName}.lib/</classpathPrefix>
-							<mainClass>edu.iastate.sdmay1809.DiffMapper</mainClass>
+							<mainClass>edu.iastate.sdmay1809.DiffMapperMain</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
@@ -102,7 +102,7 @@
 						<configuration>
 							<archive>
 								<manifest>
-									<mainClass>edu.iastate.sdmay1809.DiffMapper</mainClass>
+									<mainClass>edu.iastate.sdmay1809.DiffMapperMain</mainClass>
 								</manifest>
 							</archive>
 							<descriptorRefs>

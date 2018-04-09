@@ -1,7 +1,7 @@
 import { UserService } from './services/user.service';
 import { Router } from '@angular/router';
 import { AuthService } from './services/auth.service';
-import { Component } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 
 @Component({
   selector: 'app-root',
@@ -9,10 +9,11 @@ import { Component } from '@angular/core';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
+
   constructor(
     private userService: UserService,
     private auth: AuthService,
-    router: Router
+    private router: Router
   ) {
     auth.afAuth.authState.subscribe(user => {
       if (!user) { return; }

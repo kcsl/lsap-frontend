@@ -1,0 +1,18 @@
+.dot {
+    height: 15px;
+    width: 15px;
+    border-radius: 50%;
+}
+
+.dot--paired {
+    background: #5FAD56;
+}
+.dot--deadlock {
+    background: #706C61;
+}
+.dot--partial {
+    background:  #F2C14E;
+}
+.dot--unpaired {
+    background: #A72608;
+}

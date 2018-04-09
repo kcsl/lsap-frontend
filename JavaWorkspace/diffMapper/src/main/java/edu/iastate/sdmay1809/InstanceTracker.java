@@ -5,7 +5,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 public class InstanceTracker {
@@ -17,10 +16,8 @@ public class InstanceTracker {
 	}
 
 	public boolean run(String outputDirectory, boolean outputCheckOverride) {
-		JSONArray instanceMap = new JSONArray();
 		File[] instances = getInstances();
 		String outputJSONFile;
-		FileWriter fw = null;
 		boolean retVal = true;
 
 		if (outputDirectory.endsWith("/")) {
@@ -36,7 +33,27 @@ public class InstanceTracker {
 			System.out.println("Skipping instance tracking since the file already exists!");
 			return false;
 		}
+		JSONArray instanceMap = createInstanceMap(instances);
 
+		System.out.println("instances: " + instances.length + ", instanceMap:" + instanceMap.length());
+
+		try {
+			writeMap(instanceMap, outputJSONFile);
+		} catch (IOException io) {
+			System.err.println("[FATAL] : Could not create oldInstanceMap.json in " + outputDirectory);
+			retVal = false;
+		} 
+		return retVal;
+	}
+	
+	protected void writeMap(JSONArray instanceMap, String outputJSONFile) throws IOException{
+		FileWriter fw = new FileWriter(new File(outputJSONFile), false);
+		instanceMap.write(fw);
+		fw.close();
+	}
+
+	protected JSONArray createInstanceMap(File[] instances) {
+		JSONArray instanceMap = new JSONArray();
 		for (File f : instances) {
 			try {
 				JSONObject instance = parseEntry(f.getName());
@@ -45,33 +62,10 @@ public class InstanceTracker {
 				System.err.println("[ERROR] : Threw exception when parsing " + f.getName());
 			}
 		}
-
-		System.out.println("instances: " + instances.length + ", instanceMap:" + instanceMap.length());
-
-		try {
-			fw = new FileWriter(new File(outputJSONFile), false);
-			instanceMap.write(fw);
-		} catch (IOException io) {
-			System.err.println("[FATAL] : Could not create oldInstanceMap.json in " + outputDirectory);
-			retVal = false;
-		} catch (JSONException je) {
-			System.err.println("[FATAL] : Could not write instanceMap to " + outputJSONFile);
-			retVal = false;
-		} finally {
-			if (fw != null) {
-				try {
-					fw.close();
-				} catch (IOException e) {
-					System.err.println("[ERROR] : Could not close File Writer!");
-					retVal = false;
-				}
-			}
-		}
-
-		return retVal;
+		return instanceMap;
 	}
-
-	private File[] getInstances() {
+	
+	protected File[] getInstances() {
 		File sourceDir = new File(sourceDirectory);
 		File[] subSourceDirs = sourceDir.listFiles(new DirectoryFilter());
 		File[] combinedDirs = {};
@@ -85,7 +79,7 @@ public class InstanceTracker {
 		return combinedDirs;
 	}
 
-	private JSONObject parseEntry(String instance) throws Exception {
+	protected JSONObject parseEntry(String instance) throws Exception {
 		JSONObject inst = new JSONObject();
 		String[] outerGroups = instance.split("(\\]|@)@+(\\[|@)");
 		String[] innerGroups = outerGroups[2].replaceAll("@", "/").split("\\+\\/*");

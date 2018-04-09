@@ -6,7 +6,7 @@ export class NavbarService {
 
     constructor(private db: AngularFireDatabase) { }
 
-    getAll() {
+    getAllVersions() {
         return this.db.list('/versions');
     }
 }

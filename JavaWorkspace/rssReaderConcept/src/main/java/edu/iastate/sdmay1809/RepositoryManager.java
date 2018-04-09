@@ -15,11 +15,13 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 
 public class RepositoryManager {
-	Git git;	
-	public RepositoryManager() throws IOException, InvalidRemoteException, TransportException, GitAPIException {
-		if( getDirectory().exists()) {
+	Git git;
+	File directory;
+	public RepositoryManager(String workspace) throws IOException, InvalidRemoteException, TransportException, GitAPIException {
+		directory = new File(workspace + "/kernel");
+		if( directory.exists()) {
 			FileRepositoryBuilder builder = new FileRepositoryBuilder();
-			Repository repo = builder.findGitDir(getDirectory())
+			Repository repo = builder.findGitDir(directory)
 			  .setMustExist(true)
 			  .readEnvironment() 
 			  .build();
@@ -32,17 +34,12 @@ public class RepositoryManager {
 			git = Git.cloneRepository()
 					  .setCloneSubmodules( true )
 					  .setURI( "https://github.com/torvalds/linux.git" )
-					  .setDirectory( getDirectory() )
+					  .setDirectory( directory )
 					  .call();
 	
 			System.out.println("Finished Cloning!");
 		}
 		
-	}
-	
-	
-	private File getDirectory() {
-		return new File(System.getProperty("user.home") + "/LinuxKernel/linux");
 	}
 	
 	public void UpdateRepoToTag(String tag) throws RefAlreadyExistsException, RefNotFoundException, InvalidRefNameException, CheckoutConflictException, GitAPIException {

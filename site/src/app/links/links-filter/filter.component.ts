@@ -9,13 +9,15 @@ import { Component, Input, OnInit } from '@angular/core';
 export class FilterComponent implements OnInit {
   filters;
   @Input('filter') filter;
+  @Input('version') version;
+
   constructor(
     private filterService: FilterService) { }
 
   ngOnInit() {
+    console.log(this.version);
     this.filters = this.filterService.getAll().snapshotChanges().map(filter => {
       return filter.map(f => ({ key: f.payload.key, ...f.payload.val() }));
     });
   }
-
 }

@@ -1,4 +1,4 @@
-image: maven:alpine
+image: dhanwada/lsap-pipeline:1.0.0
 
 DiffMapper:
   script:
@@ -12,3 +12,6 @@ RssReader:
   script:
     - (cd JavaWorkspace/rssReaderConcept; mvn install -B && cat target/site/jacoco/index.html)
 
+Patcher:
+  script:
+    - (cd JavaWorkspace/patchGeneration; mvn install -B && cat target/site/jacoco/index.html)
