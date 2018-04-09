@@ -20,7 +20,7 @@ The InstanceTracker API is as follows:
 Method: `InstanceTracker(String sourceDirectory)`
 
 Usage:
-```
+```Java
 InstanceTracker it = new InstanceTracker("/path/to/results");
 ```
 
@@ -38,7 +38,7 @@ Constructs an instance of `InstanceTracker`
 Method: `int run(String outputDirectory, boolean checkOutputOverride)`
 
 Usage
-```
+```Java
 it.run("/path/to/output/", false);
 ```
 Parameters:

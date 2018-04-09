@@ -45,7 +45,7 @@ The DiffMapper API is as follows:
 Method: `DiffMapper(DiffConfig config, boolean allowPrintStatements)`
 
 Usage:
-```
+```Java
 DiffConfig config = DiffConfig.builder().build();
 DiffMapper dm = new DiffMapper(config, true);
 ```
@@ -65,7 +65,7 @@ Constructs an instance of `DiffMapper`
 Method: `int run(String inputMapFilename) throws JSONException, IOException`
 
 Usage
-```
+```Java
 dm.run("oldInstanceMap.json");
 ```
 
