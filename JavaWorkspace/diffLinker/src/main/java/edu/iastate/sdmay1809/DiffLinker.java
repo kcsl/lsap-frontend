@@ -2,6 +2,7 @@ package edu.iastate.sdmay1809;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.RandomAccessFile;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -20,8 +21,12 @@ public class DiffLinker {
 		DiffConfig config = DiffConfig.builder(args).build();
 
 		timings.add(System.nanoTime());
+		InstanceTracker it = new InstanceTracker(config.RESULT_DIR);
+		it.run(config.DIFF_TEST_DIR, false);
+		
+		timings.add(System.nanoTime());
 		DiffLinker dl = new DiffLinker(config, true, 3);
-		int instancesLinked = dl.run("newInstanceMap.json");
+		int instancesLinked = dl.run("oldInstanceMap.json");
 		if (instancesLinked < 0) {
 			System.err.println("[ERROR] could not link instances!");
 		} else {
@@ -54,7 +59,7 @@ public class DiffLinker {
 
 	private DiffConfig config;
 	private boolean allowPrintStatements = true;
-	private int lineSearchThreshold = 3;
+	private int lineSearchThreshold = 10;
 
 	public DiffLinker(DiffConfig config, boolean allowPrintStatements, int lineSearchThreshold) {
 		this.allowPrintStatements = allowPrintStatements;
@@ -85,6 +90,8 @@ public class DiffLinker {
 				instancesLinked++;
 			}
 		}
+		
+		mapping.write(new PrintWriter(Paths.get(config.DIFF_TEST_DIR, "diffInstanceMap.json").toFile()), 1, 2);
 
 		return instancesLinked;
 	}
