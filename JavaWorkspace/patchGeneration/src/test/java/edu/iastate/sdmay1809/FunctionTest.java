@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.*;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -15,7 +16,7 @@ public class FunctionTest {
 	String otherExampleFunction;
 	
 	@Before
-	public void setUp()
+	public void setUp() throws Exception
 	{
 		function = new Function("int aFunction(int parameter1, struct mutex *lock) {");
 		otherFunction = new Function("extern __must_check void function2(struct mutex *lock) {");
@@ -26,6 +27,17 @@ public class FunctionTest {
 	{
 		assertThat(function, instanceOf(Function.class));
 		assertThat(otherFunction, instanceOf(Function.class));
+		
+		try
+		{
+			Function f = new Function("something that's not a function");
+			fail("No exception thrown on malformatted function: " + f.getName());
+		}
+		
+		catch(Exception e)
+		{
+			
+		}
 	}
 	
 	@Test
@@ -64,9 +76,9 @@ public class FunctionTest {
 	}
 	
 	@Test
-	public void functionContains()
+	public void functionContains() throws Exception
 	{
-		ArrayList<Function> functions = new ArrayList<Function>();
+		HashSet<Function> functions = new HashSet<Function>();
 		
 		functions.add(function);
 		functions.add(otherFunction);
@@ -89,17 +101,43 @@ public class FunctionTest {
 	}
 	
 	@Test
-	public void functionConvertToStaticInline()
+	public void functionConvertToStaticInline() throws Exception
 	{
 		assertEquals(function.convertToStaticInline(), "static inline int aFunction(int parameter1, struct mutex *lock){return 0;}");
 		assertEquals(otherFunction.convertToStaticInline(), "static inline void function2(struct mutex *lock){}");
+		assertEquals((new Function("static inline struct mutex *func3() {return NULL;}")).convertToStaticInline(), "static inline struct mutex * func3(){return NULL;}");
 	}
 	
 	@Test
-	public void functionEquals()
+	public void functionEquals() throws Exception
 	{
 		assertTrue(function.equals(function));
 		assertTrue(function.equals(new Function("int aFunction(int parameter1, struct mutex *lock) {")));
 		assertFalse(function.equals(new Criteria("something", true)));
 	}
+	
+	@Test
+	public void functionGetFunctionName()
+	{
+		assertTrue(Function.getFunctionName(" extern int func(int someParam)").equals("func"));
+		assertTrue(Function.getFunctionName("extern void func(double someParam)").equals("func"));
+		assertTrue(Function.getFunctionName(" extern int __must_check func(struct mutex *lock)").equals("func"));
+		assertTrue(Function.getFunctionName("extern void __must_check func()").equals("func"));
+		assertTrue(Function.getFunctionName("int func(int someParam)").equals("func"));
+		assertTrue(Function.getFunctionName(" void func(double someParam)").equals("func"));
+		assertTrue(Function.getFunctionName("int __must_check func(struct mutex *lock)").equals("func"));
+		assertTrue(Function.getFunctionName(" void __must_check func()").equals("func"));
+		
+		assertEquals(Function.getFunctionName(" extern int func;"), null);
+		assertEquals(Function.getFunctionName("extern void func;"), null);
+		assertEquals(Function.getFunctionName(" extern int __must_check func;"), null);
+		assertEquals(Function.getFunctionName("extern void __must_check func;"), null);
+		assertEquals(Function.getFunctionName(" int func;"), null);
+		assertEquals(Function.getFunctionName("void func;"), null);
+		assertEquals(Function.getFunctionName(" int __must_check func;"), null);
+		assertEquals(Function.getFunctionName("void __must_check func;"), null);
+		assertEquals(Function.getFunctionName(" return var != NULL;"), null);
+		assertEquals(Function.getFunctionName(null), null);
+	}
+
 }

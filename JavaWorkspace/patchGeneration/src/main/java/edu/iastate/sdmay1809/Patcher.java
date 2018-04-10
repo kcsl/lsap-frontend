@@ -4,12 +4,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.commons.cli.ParseException;
 
@@ -19,8 +17,8 @@ public class Patcher
 	private FileContentBuffer fcb;
 
 	// Collections of functions and macros for a given patched header file
-	private ArrayList<Function> functions;
-	private ArrayList<Macro> macros;
+	private TreeSet<Function> functions;
+	private TreeSet<Macro> macros;
 		
 	// Debugging variables
 	private String debugPath;
@@ -35,8 +33,8 @@ public class Patcher
 		ini = new IniReader(iniPath);		
 				
 		// Initialize the lists of functions and macros
-		functions = new ArrayList<Function>();
-		macros = new ArrayList<Macro>();	
+		functions = new TreeSet<Function>();
+		macros = new TreeSet<Macro>();	
 		
 		pathToKernelDirectory = "";
 		debugPath = null;
@@ -53,10 +51,9 @@ public class Patcher
 	 * 
 	 * 		LSAP_SPINLOCK:
 	 * 			Comment out original function implementation
-	 * @throws IOException 
-	 * @throws ParseException 
+	 * @throws Exception 
 	 */
-	public void patch() throws IOException, ParseException
+	public void patch() throws Exception
 	{			
 		if (verbose)
 		{
@@ -118,8 +115,9 @@ public class Patcher
 	
 	/**
 	 *  Generate the header file source code for lsap_mutex_lock.h
+	 * @throws Exception 
 	 */
-	public void generateLSAPMutexLockFile() throws IOException
+	public void generateLSAPMutexLockFile() throws Exception
 	{
 		functions.clear();
 		macros.clear();
@@ -149,7 +147,7 @@ public class Patcher
 			while (s.hasNextLine())
 			{
 				String line = s.nextLine();
-				
+								
 				// Only bother with analysis if the line is a locking function
 				if (isLockingFunction(line, ini.getCriteria("MutexFunctionCriteria")))
 				{
@@ -175,26 +173,14 @@ public class Patcher
 			// We've scanned the entire file, so close the scanner
 			s.close();
 		}
-		
-		// Remove duplicates
-		Set<Function> tempFunctions = new HashSet<Function>();
-		Set<Macro> tempMacros = new HashSet<Macro>();
-		
-		tempFunctions.addAll(functions);
-		functions.clear();
-		functions.addAll(tempFunctions);
-		
-		tempMacros.addAll(macros);
-		macros.clear();
-		macros.addAll(tempMacros);
-		
+				
 		if (verbose)
 		{
 			System.out.println("Some macros and functions have the same name. Removing duplicates:");
 		}
 		
 		// If there are functions and macros with the same name, we want to use the macro, so remove the function
-		for (Iterator<Function> iter = functions.listIterator(); iter.hasNext();)
+		for (Iterator<Function> iter = functions.iterator(); iter.hasNext();)
 		{
 			Function f = iter.next();
 			
@@ -209,27 +195,6 @@ public class Patcher
 			}
 		}
 
-		// For macros, we need to define which function they'll end up calling.
-		// It seems like the name of the function we want to call contains the name of the macro
-		for (Macro m : macros)
-		{
-			// Set a default function to call for the macro
-			m.setMacroBody(functions.get(0));
-			
-			// See if there's a function that we should use instead. If so, use it
-			for (Function f : functions)
-			{
-				if (f.getName().contains(m.getName()))
-				{
-					m.setMacroBody(f);
-					break;
-				}
-			}
-		}
-		
-		Collections.sort(functions);
-		Collections.sort(macros);
-		
 		if (verbose)
 		{
 			System.out.println("\nMutex Locking Functions Matching Criteria:");
@@ -269,11 +234,26 @@ public class Patcher
 		// Comment denotes the start of the macro definitions
 		fcb.writeln( ""																		);
 		fcb.writeln( "// Define a macro wrapper for extra functions for query unification." );		
-		
+
 		// Write all of the macros to the patched header file
 		for (Macro m : macros)
 		{
-			fcb.writeln(m.printAsDefine());
+			boolean printed = false;
+				
+			// See if there's a function that we should use instead. If so, use it
+			for (Function f : functions)
+			{
+				if (f.getName().contains(m.getName()))
+				{
+					fcb.writeln(m.printAsDefine(f));
+					printed = true;
+					break;
+				}
+			}
+
+			if (printed) continue;
+			
+			fcb.writeln(m.printAsDefine(functions.first()));
 		}
 		
 		// End the patched header file
@@ -287,9 +267,9 @@ public class Patcher
 	
 	/**
 	 *  Generate the header file source code for lsap_spinlock.h
-	 * @throws IOException 
+	 * @throws Exception 
 	 */
-	public void generateLSAPSpinlockFile() throws IOException
+	public void generateLSAPSpinlockFile() throws Exception
 	{
 		functions.clear();
 		macros.clear();
@@ -340,17 +320,7 @@ public class Patcher
 			// We've scanned the entire file, so close the scanner
 			s.close();
 		}
-		
-		for (Macro m : macros)
-		{
-			if (m.getName().contains("try")) m.setMacroBody(trylock);
-			else if (m.getName().contains("unlock")) m.setMacroBody(unlock);
-			else m.setMacroBody(lock);
-		}
-				
-		Collections.sort(functions);
-		Collections.sort(macros);
-		
+						
 		if (verbose)
 		{
 			System.out.println("\nSpinlocking Functions Matching Criteria:");
@@ -389,7 +359,9 @@ public class Patcher
 
 		for (Macro m : macros)
 		{
-			fcb.writeln(m.printAsDefine());
+			if (m.getName().contains("try")) fcb.writeln(m.printAsDefine(trylock));
+			else if (m.getName().contains("unlock")) fcb.writeln(m.printAsDefine(unlock));
+			else fcb.writeln(m.printAsDefine(lock));
 		}
 		
 		fcb.writeln( "" 																	);
@@ -399,42 +371,10 @@ public class Patcher
 		fcb.print(debugPath != null);
 	}
 	
-	public boolean isFunction(String line)
-	{
-		if (line == null) return false;
-				
-		// All functions we're interested in have a return type of int or void
-		// Of course, to be a function, it must accept parameters, so we check for the start of a list with "("
-		return line.matches("^\\s*(extern)?\\s*(int|void){1}\\s*(__must_check)?\\s*[A-Za-z0-9_]+\\s*\\(.*$");
-	}
-	
-	public boolean isPreprocDefineMacro(String line)
-	{
-		if (line == null) return false;
-		
-		// To be a preprocessor macro definition, the line must contain "#define" but must also accept parameters.
-		// We check for the parameters with "("
-		return line.matches("^\\s*#\\s*define\\s+[A-Za-z0-9_]+\\s*\\(.*$");
-	}
-	
-	public String getFunctionName(String line)
-	{
-		if (line == null || !isFunction(line)) return null;
-		
-		return line.replaceFirst("^\\s*(extern)?\\s*(int|void){1}\\s*(__must_check)?\\s*", "").replaceFirst("\\s*\\(.*$", "").trim();		
-	}
-	
-	public String getMacroName(String line)
-	{
-		if (line == null || !isPreprocDefineMacro(line)) return null;
-		
-		return line.replaceFirst("^\\s*#\\s*define\\s+", "").replaceFirst("\\(.*$", "").trim();
-	}
-	
 	public boolean isLockingFunction(String line, Set<Criteria> criteria)
 	{
 		// Get the function name
-		String functionName = getFunctionName(line);
+		String functionName = Function.getFunctionName(line);
 
 		if (functionName == null) return false;
 		
@@ -450,7 +390,7 @@ public class Patcher
 	public boolean isLockingMacro(String line, Set<Criteria> criteria)
 	{
 		// Get the macro name
-		String macroName = getMacroName(line);
+		String macroName = Macro.getMacroName(line);
 
 		if (macroName == null) return false;
 		
