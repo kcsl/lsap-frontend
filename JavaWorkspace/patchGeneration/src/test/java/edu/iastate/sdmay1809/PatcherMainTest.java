@@ -4,12 +4,10 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-import org.apache.commons.cli.ParseException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,7 +22,7 @@ public class PatcherMainTest {
 	}
 	
 	@Test
-	public void patcherMainDebug() throws IOException, ParseException
+	public void patcherMainDebug() throws Exception
 	{
 		Files.deleteIfExists(Paths.get("resources/testing/lsap_mutex_lock.txt"));
 		Files.deleteIfExists(Paths.get("resources/testing/lsap_spinlock.txt"));

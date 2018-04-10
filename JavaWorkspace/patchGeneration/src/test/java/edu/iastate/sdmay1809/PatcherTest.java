@@ -38,44 +38,7 @@ public class PatcherTest {
 	{
 		assertThat(patcher, instanceOf(Patcher.class));
 	}
-	
-	@Test
-	public void patcherIsFunction()
-	{
-		assertTrue(patcher.isFunction(" extern int func(int someParam)"));
-		assertTrue(patcher.isFunction("extern void func(double someParam)"));
-		assertTrue(patcher.isFunction(" extern int __must_check func(struct mutex *lock)"));
-		assertTrue(patcher.isFunction("extern void __must_check func()"));
-		assertTrue(patcher.isFunction("int func(int someParam)"));
-		assertTrue(patcher.isFunction(" void func(double someParam)"));
-		assertTrue(patcher.isFunction("int __must_check func(struct mutex *lock)"));
-		assertTrue(patcher.isFunction(" void __must_check func()"));
-		
-		assertFalse(patcher.isFunction(" extern int func;"));
-		assertFalse(patcher.isFunction("extern void func;"));
-		assertFalse(patcher.isFunction(" extern int __must_check func;"));
-		assertFalse(patcher.isFunction("extern void __must_check func;"));
-		assertFalse(patcher.isFunction(" int func;"));
-		assertFalse(patcher.isFunction("void func;"));
-		assertFalse(patcher.isFunction(" int __must_check func;"));
-		assertFalse(patcher.isFunction("void __must_check func;"));
-		assertFalse(patcher.isFunction(" return var != NULL;"));
-		assertFalse(patcher.isFunction(null));
-	}
-	
-	@Test
-	public void patcherGetFunctionName()
-	{
-		assertEquals(patcher.getFunctionName(" extern int func(int someParam)"), "func");
-		assertEquals(patcher.getFunctionName(" extern int test(int someParam)"), "test");
-		assertEquals(patcher.getFunctionName(" extern int apple(int someParam)"), "apple");
-		assertEquals(patcher.getFunctionName(" extern int windows(int someParam)"), "windows");
-		assertEquals(patcher.getFunctionName(" extern int micro(int someParam)"), "micro");
-		assertEquals(patcher.getFunctionName(" extern int jimmy(int someParam)"), "jimmy");
-		assertEquals(patcher.getFunctionName(null), null);
-		assertEquals(patcher.getFunctionName(" extern int jimmy;"), null);
-	}
-	
+			
 	@Test
 	public void patcherIsLockingFunction()
 	{
@@ -95,34 +58,6 @@ public class PatcherTest {
 		assertFalse(patcher.isLockingFunction(" extern void lock_the_cabbage_up (int lock)", criteria));
 		assertFalse(patcher.isLockingFunction(" extern int spinlock;", criteria));
 		assertFalse(patcher.isLockingFunction(null, criteria));
-	}
-
-	@Test
-	public void patcherIsMacro()
-	{
-		assertTrue(patcher.isPreprocDefineMacro("# define macro(lock)"));
-		assertTrue(patcher.isPreprocDefineMacro("#  define macro (lock)"));
-		assertTrue(patcher.isPreprocDefineMacro(" #define macro( lock )"));
-		assertTrue(patcher.isPreprocDefineMacro("# define macro (lock)"));
-		
-		assertFalse(patcher.isPreprocDefineMacro("# define macro 1"));
-		assertFalse(patcher.isPreprocDefineMacro("#  define macro lock"));
-		assertFalse(patcher.isPreprocDefineMacro(" #define macro something_else"));
-		assertFalse(patcher.isPreprocDefineMacro("# define macro"));
-		assertFalse(patcher.isPreprocDefineMacro(null));
-	}
-	
-	@Test
-	public void patcherGetMacroName()
-	{
-		assertEquals(patcher.getMacroName("# define macro(lock)"), "macro");
-		assertEquals(patcher.getMacroName("# define test(lock)"), "test");
-		assertEquals(patcher.getMacroName("# define apple(lock)"), "apple");
-		assertEquals(patcher.getMacroName("# define windows(lock)"), "windows");
-		assertEquals(patcher.getMacroName("# define micro(lock)"), "micro");
-		assertEquals(patcher.getMacroName("# define jimmy(lock)"), "jimmy");
-		assertEquals(patcher.getMacroName(null), null);
-		assertEquals(patcher.getMacroName("# define jimmy"), null);
 	}
 	
 	@Test
@@ -147,7 +82,7 @@ public class PatcherTest {
 	}
 	
 	@Test
-	public void patcherGenerateLSAPMutexHeaderFile() throws IOException, ParseException
+	public void patcherGenerateLSAPMutexHeaderFile() throws Exception
 	{
 		System.setOut(new PrintStream(outContent = new ByteArrayOutputStream()));
 		assertTrue(outContent.toString().length() == 0);
@@ -171,7 +106,7 @@ public class PatcherTest {
 	}
 
 	@Test
-	public void patcherGenerateLSAPSpinLockHeaderFile() throws IOException, ParseException
+	public void patcherGenerateLSAPSpinLockHeaderFile() throws Exception
 	{
 		System.setOut(new PrintStream(outContent = new ByteArrayOutputStream()));
 		assertTrue(outContent.toString().length() == 0);
@@ -195,7 +130,7 @@ public class PatcherTest {
 	}
 	
 	@Test
-	public void patcherPatch() throws IOException, ParseException
+	public void patcherPatch() throws Exception
 	{
 		System.setOut(new PrintStream(outContent = new ByteArrayOutputStream()));
 		assertTrue(outContent.toString().length() == 0);

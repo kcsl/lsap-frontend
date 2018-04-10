@@ -1,6 +1,5 @@
 package edu.iastate.sdmay1809;
 
-import java.io.IOException;
 import java.nio.file.Paths;
 
 import org.apache.commons.cli.CommandLine;
@@ -9,11 +8,10 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
 
 public class PatcherMain 
 {
-	public static void main(String[] args) throws IOException, ParseException
+	public static void main(String[] args) throws Exception
 	{
 		CommandLineParser parser = new DefaultParser();
 		Options options = new Options();

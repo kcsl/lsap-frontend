@@ -3,7 +3,8 @@ package edu.iastate.sdmay1809;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.*;
 
-import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -13,10 +14,10 @@ public class MacroTest {
 	Macro otherMacro;
 	
 	@Before
-	public void setUp()
+	public void setUp() throws Exception
 	{
 		macro = new Macro("#define aMacro(lock, otherParam) body(lock)");
-		otherMacro = new Macro("#define macro2(lock) otherBody(lock)");
+		otherMacro = new Macro("#define macro2() otherBody(lock)");
 	}
 	
 	@Test
@@ -24,6 +25,17 @@ public class MacroTest {
 	{
 		assertThat(macro, instanceOf(Macro.class));
 		assertThat(otherMacro, instanceOf(Macro.class));
+		
+		try
+		{
+			Macro m = new Macro("something that's not a macro");
+			fail("No exception thrown on malformatted macro: " + m.getName());
+		}
+		
+		catch(Exception e)
+		{
+			
+		}
 	}
 	
 	@Test
@@ -42,44 +54,21 @@ public class MacroTest {
 		assertEquals(macro.getParameter(2), null);
 		
 		assertEquals(otherMacro.getParameter(-1), null);
-		assertEquals(otherMacro.getParameter(0), "lock");
-		assertEquals(otherMacro.getParameter(1), null);
+		assertEquals(otherMacro.getParameter(0), null);
 		
-		ArrayList<String> macroParams = macro.getParameters();
-		ArrayList<String> otherMacroParams = otherMacro.getParameters();
+		List<String> macroParams = macro.getParameters();
+		List<String> otherMacroParams = otherMacro.getParameters();
 		
 		assertEquals(macroParams.get(0), "lock");
 		assertEquals(macroParams.get(1), "otherParam");
 		
-		assertEquals(otherMacroParams.get(0), "lock");
+		assertEquals(otherMacroParams.size(), 0);
 	}
-	
+		
 	@Test
-	public void macroPrintAsDefine()
+	public void macroContains() throws Exception
 	{
-		macro.setMacroBody(new Function("int func(struct mutex *lock, int otherParam) {"));
-		otherMacro.setMacroBody(new Function("int func(struct mutex *lock, int otherParam) {"));
-		
-		assertEquals(macro.printAsDefine(), "#define aMacro(lock, otherParam) func(lock, otherParam)");
-		assertEquals(otherMacro.printAsDefine(), "#define macro2(lock) func(lock, 0)");
-		
-		macro = new Macro("#define aMacro(atomic, lock) body(lock)");
-		macro.setMacroBody(new Function("int func(struct mutex *lock) {"));
-		otherMacro.setMacroBody(new Function("int func(struct lockdep_map *lock, struct mutex *lock2) {"));
-
-		assertEquals(macro.printAsDefine(), "#define aMacro(atomic, lock) func(lock)");
-		assertEquals(otherMacro.printAsDefine(), "#define macro2(lock) func(&(lock)->dep_map, NULL)");
-		
-		setUp();
-		
-		assertEquals(macro.printAsDefine(), null);
-		assertEquals(otherMacro.printAsDefine(), null);
-	}
-	
-	@Test
-	public void macroContains()
-	{
-		ArrayList<Macro> macros = new ArrayList<Macro>();
+		HashSet<Macro> macros = new HashSet<Macro>();
 		
 		macros.add(macro);
 		macros.add(otherMacro);
@@ -102,10 +91,39 @@ public class MacroTest {
 	}
 	
 	@Test
-	public void macroEquals()
+	public void macroEquals() throws Exception
 	{
 		assertTrue(macro.equals(macro));
 		assertTrue(macro.equals(new Macro("#define aMacro(lock, otherParam) body(lock)")));
 		assertFalse(macro.equals(new Criteria("something", false)));
+	}
+	
+	@Test
+	public void macroGetMacroName()
+	{
+		assertTrue(Macro.getMacroName("# define macro(lock)").equals("macro"));
+		assertTrue(Macro.getMacroName("#  define macro (lock)").equals("macro"));
+		assertEquals(Macro.getMacroName(" #define macro( lock )"), "macro");
+		assertTrue(Macro.getMacroName("# define macro (lock)").equals("macro"));
+		
+		assertEquals(Macro.getMacroName("# define macro 1"), null);
+		assertEquals(Macro.getMacroName("#  define macro lock"), null);
+		assertEquals(Macro.getMacroName(" #define macro something_else"), null);
+		assertEquals(Macro.getMacroName("# define macro"), null);
+		assertEquals(Macro.getMacroName(null), null);
+	}
+	
+	@Test
+	public void macroPrintAsDefine() throws Exception
+	{
+		assertEquals(macro.printAsDefine(null), null);
+		assertEquals(macro.printAsDefine(new Function("static inline void func(struct mutex *lock, int otherParam)")),
+					 "#define aMacro(lock, otherParam) func(NULL, 0)");
+		assertEquals(macro.printAsDefine(new Function("static inline void func(struct mutex *lock, int otherParam, struct mutex *otherLock)")),
+				 "#define aMacro(lock, otherParam) func(NULL, 0, NULL)");
+		assertEquals(macro.printAsDefine(new Function("static inline void func(int otherParam, struct mutex *lock)")),
+				 "#define aMacro(lock, otherParam) func(0, NULL)");
+		assertEquals(macro.printAsDefine(new Function("static inline void func()")),
+				 "#define aMacro(lock, otherParam) func()");
 	}
 }
