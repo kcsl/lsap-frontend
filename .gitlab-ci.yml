@@ -1,5 +1,9 @@
 image: dhanwada/lsap-pipeline:1.0.0
 
+Shared:
+  script:
+    - (cd JavaWorkspace/shared; mvn install -B && cat target/site/jacoco/index.html)
+
 DiffMapper:
   script:
     - (cd JavaWorkspace/diffMapper; mvn install -B && cat target/site/jacoco/index.html)
