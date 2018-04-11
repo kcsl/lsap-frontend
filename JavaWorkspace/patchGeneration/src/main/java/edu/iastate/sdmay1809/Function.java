@@ -1,7 +1,7 @@
 package edu.iastate.sdmay1809;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
 
 /**
  * This class defines a C function including return type and parameter names and types
@@ -14,30 +14,23 @@ public class Function implements Comparable<Function>
 	private ArrayList<Parameter> parameters;
 	
 	// Constructor. Pass in a line that contains a function declaration
-	public Function(String functionLine)
+	public Function(String functionLine) throws Exception
 	{
+		functionName = getFunctionName(functionLine);
+		
+		if (functionName == null) throw new Exception("String doesn't represent a function definition!");
+		
 		parameters = new ArrayList<Parameter>();
 		
-		// Split the line into two parts: the function name and return type, and it's parameters
-		String[] functionParts = functionLine.replace("//", "").split("\\(", 2);
-		String[] parameterList = functionParts[1].substring(0, functionParts[1].indexOf(")")).split(",");
+		returnType = functionLine.replaceFirst(functionName + ".*$", "")
+								 .replaceFirst("^\\s*(extern\\s+)?(static\\s+)?(inline\\s+)?(?=(struct\\s+)?\\w+(\\s*\\*\\s*|\\s+))", "")
+								 .replace("__must_check", "")
+								 .trim();
 		
-		// For each parameter in the string array, add it to the parameter list
-		for (String parameter : parameterList)
+		for (String parameter : functionLine.replaceFirst("^.*\\(", "").replaceFirst("\\).*$", "").trim().split(",", -1))
 		{
-			parameters.add(new Parameter(parameter));
+			if (!parameter.trim().equals("")) parameters.add(new Parameter(parameter.trim()));
 		}
-		
-		// index represents the location of the break between the return type and the function name
-		int index = functionParts[0].lastIndexOf(" ");
-		
-		// Set the function name and return type
-		returnType = functionParts[0].substring(0, index).trim();
-		functionName = functionParts[0].substring(index + 1, functionParts[0].length()).trim();
-		
-		// Some functions contain extern and __must_check. Remove these parts and extra spaces
-		if (returnType.contains("extern")) returnType = returnType.replace("extern", "").trim();
-		if (returnType.contains("__must_check")) returnType = returnType.replace("__must_check", "").trim();		
 	}
 	
 	// Get the function return type
@@ -90,15 +83,16 @@ public class Function implements Comparable<Function>
 		// End of parameters, start of body
 		line += "){";
 		
-		// Empty body. Return  0 for int functions, do nothing otherwise
-		if (returnType.equals("void")) line += "}";
-		else line += "return 0;}";
+		// Empty body
+		if (returnType.charAt(returnType.length() - 1) == '*') line += "return NULL;}";	// Pointer return type, return NULL
+		else if (returnType.equals("void")) line += "}";								// Void return type, don't return
+		else line += "return 0;}";														// Non-pointer return type, return 0
 		
 		return line;
 	}
 	
 	// This function determines whether a list of functions contains a function with a given name
-	public static boolean contains(List<Function> functions, String name)
+	public static boolean contains(Set<Function> functions, String name)
 	{
 		// Iterate through all functions in the list. Return true if the desired name is found
 		for (Function f : functions)
@@ -121,5 +115,13 @@ public class Function implements Comparable<Function>
 		if (o.getClass() != Function.class) return false;
 		
 		return this.getName().equals(((Function)o).getName());
+	}
+	
+	public static String getFunctionName(String line)
+	{
+		if (line == null) return null;
+		else line = line.replaceAll("__must_check", "");
+		if (!line.matches("^\\s*(?!return)(extern\\s+)?(static\\s+)?(inline\\s+)?(struct\\s+)?\\w+(\\s*\\*\\s*|\\s+)\\w+\\s*\\(.*$")) return null;
+		return line.replaceFirst("^\\s*(?!return)(extern\\s+)?(static\\s+)?(inline\\s+)?(struct\\s+)?\\w+(\\s*\\*\\s*|\\s+)", "").replaceFirst("\\s*\\(.*$", "").trim();
 	}
 }
