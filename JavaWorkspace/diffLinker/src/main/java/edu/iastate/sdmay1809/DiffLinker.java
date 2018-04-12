@@ -14,6 +14,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import edu.iastate.sdmay1809.shared.DiffConfig;
+import edu.iastate.sdmay1809.shared.InstanceTracker;
 
 public class DiffLinker {
 	public static void main(String[] args) throws JSONException, IOException {
