@@ -8,7 +8,6 @@ class InstanceParserV1 implements InstanceParser {
 	private String innerGroupRegex;
 	
 	public InstanceParserV1() {
-		super();
 		this.outerGroupRegex = "(\\]|@)@+(\\[|@)";
 		this.innerGroupRegex = "\\+\\/*";
 	}

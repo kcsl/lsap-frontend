@@ -24,6 +24,10 @@ public class InstanceParserManager {
 		return parserMap.get(key);
 	}
 	
+	public static void clear() {
+		parserMap.clear();
+	}
+	
 	public static Collection<InstanceParser> getParsers() {
 		return parserMap.values();
 	}

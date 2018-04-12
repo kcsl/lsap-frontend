@@ -3,6 +3,7 @@ package edu.iastate.sdmay1809.shared.InstanceTracker;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Paths;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -23,12 +24,8 @@ public class InstanceTracker {
 		File[] instances = getInstances();
 		String outputJSONFile;
 		boolean retVal = true;
-
-		if (outputDirectory.endsWith("/")) {
-			outputJSONFile = outputDirectory + "oldInstanceMap.json";
-		} else {
-			outputJSONFile = outputDirectory + "/oldInstanceMap.json";
-		}
+		
+		outputJSONFile = Paths.get(outputDirectory, "oldInstanceMap.json").toString();
 
 		File check = new File(outputJSONFile);
 

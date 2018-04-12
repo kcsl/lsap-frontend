@@ -231,4 +231,37 @@ public class InstanceTrackerTest {
 		boolean result = it.run(pathToTest.toString(), true);
 		assertFalse(result);
 	}
+	
+	@Test
+	public void testRunParseEntryVariants() throws InvalidInstanceFormatException, Exception {
+		pathToTest = Paths.get(System.getProperty("user.dir"), "resources", "testing", "InstanceTracker",
+				"singleInstance");
+		String resultsDir = Paths.get(pathToTest.toString(), "results").toString();
+		InstanceTracker it = new InstanceTracker(resultsDir);
+		File[] instances = it.getInstances();
+		assertEquals(1, instances.length);
+		
+		try {
+			it.parseEntry(instances[0].getName(), "V2", false);
+			fail("V1 instance should fail when using V2");
+		} catch (InvalidInstanceFormatException e) {}
+		
+		JSONObject instance = it.parseEntry(instances[0].getName(), "V2");
+		assertNotNull(instance);
+		assertEquals("source.c", instance.getString("filename"));
+		assertEquals(42, instance.getInt("offset"));
+		assertEquals(24, instance.getInt("length"));
+		assertEquals("instance_name", instance.getString("name"));
+		assertEquals("ffa462", instance.getString("id"));
+		assertEquals("UNPAIRED", instance.getString("status"));
+		
+		instance = it.parseEntry(instances[0].getName(), "V1");
+		assertNotNull(instance);
+		assertEquals("source.c", instance.getString("filename"));
+		assertEquals(42, instance.getInt("offset"));
+		assertEquals(24, instance.getInt("length"));
+		assertEquals("instance_name", instance.getString("name"));
+		assertEquals("ffa462", instance.getString("id"));
+		assertEquals("UNPAIRED", instance.getString("status"));
+	}
 }
