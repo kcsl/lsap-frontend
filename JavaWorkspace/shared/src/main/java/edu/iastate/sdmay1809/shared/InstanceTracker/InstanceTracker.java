@@ -1,4 +1,4 @@
-package edu.iastate.sdmay1809.shared;
+package edu.iastate.sdmay1809.shared.InstanceTracker;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -6,6 +6,8 @@ import java.io.IOException;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+
+import edu.iastate.sdmay1809.shared.Utils;
 
 public class InstanceTracker {
 
