@@ -15,6 +15,7 @@ public class InstanceTracker {
 
 	public InstanceTracker(String sourceDirectory) {
 		InstanceParserManager.put(new InstanceParserV1());
+		InstanceParserManager.put(new InstanceParserV2());
 		this.sourceDirectory = sourceDirectory;
 	}
 
