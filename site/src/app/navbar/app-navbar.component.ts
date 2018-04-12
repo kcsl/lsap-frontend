@@ -1,7 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { AuthService } from '../services/auth.service';
-import {ActivatedRoute} from '@angular/router';
-import { NavbarService } from '../services/navbar.service';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {ActivatedRoute, Router} from '@angular/router';
 
 @Component({
   selector: 'app-navbar',
@@ -10,44 +8,39 @@ import { NavbarService } from '../services/navbar.service';
 })
 export class AppNavbarComponent implements OnInit {
 
-  versions: String[] = [];
-  version;
-  versionStripped;
+  @Input('versions') versions: String[] = [];
+  private _version: string;
+  @Input('versionStripped') versionStripped;
+
+  @Output() versionChange = new EventEmitter();
   searchTerm;
-  filter: string;
-  constructor(public auth: AuthService,
-              private navbarService: NavbarService) { }
 
   static stripChars(input) {
       return input.replace(/[^0-9a-z]/gi, '').toString();
   }
 
-  async ngOnInit() {
-    await this.navbarService.getAllVersions().snapshotChanges().subscribe(v => {
-        v.forEach(element => {
-            this.versions.push(element.payload.val());
-        });
-        if (this.version == null) {
-            this.version = this.versions[0];
-            this.versionStripped = AppNavbarComponent.stripChars(this.version);
-        }
-    });
-  }
+  constructor(private route: ActivatedRoute, private router: Router) { }
 
-  get selectedVersion() {
-    return this.versionStripped;
-  }
+  ngOnInit() {}
 
   search($event) {
     this.searchTerm = $event.target.value;
   }
 
-  updateVersion(value) {
-      this.version = value;
-      this.versionStripped = AppNavbarComponent.stripChars(this.version);
+  get version() {
+    return this._version;
   }
 
-  logout() {
-    this.auth.logout();
+  @Input('version')
+  set version(val: string) {
+      this._version = val;
+      console.log(this.version);
+      this.versionChange.emit(this.version);
+  }
+
+  navigateToNewVersion(version: string) {
+    this.version = version;
+    this.versionStripped = AppNavbarComponent.stripChars(version);
+    this.router.navigate(['/v/' + this.versionStripped + '/']);
   }
 }

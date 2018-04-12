@@ -13,9 +13,14 @@ export class LinksComponent implements OnInit {
 
   links: Links[] = [];
   filteredLinks: Links[];
+  driver;
 
-  @Input('version') version;
+  private _version;
   @Input('searchTerm') searchTerm;
+
+  static stripChars(input) {
+      return input.replace(/[^0-9a-z]/gi, '').toString();
+  }
 
   constructor(
     private router: Router,
@@ -23,9 +28,22 @@ export class LinksComponent implements OnInit {
     private linksService: LinksService
   ) { }
 
+  get version() {
+      return this._version;
+  }
+
+  @Input('version')
+  set version(val: string) {
+      this._version = val;
+      this.populateLinks();
+  }
+
   async populateLinks() {
+      console.log('links version: ' + this.version);
+      this.filteredLinks = [];
+      this.links = [];
       await this.linksService
-          .populate(this.version) // this will get the version w/ no special chars
+          .populate(LinksComponent.stripChars(this.version)) // this will get the version w/ no special chars
           .subscribe(params => { // object instance
               Object.values(params).forEach( data => {
                   const link = new LinksImpl(data);
@@ -36,9 +54,12 @@ export class LinksComponent implements OnInit {
           });
   }
 
-  async ngOnInit() {
-      if (this.version !== undefined) {
-          await this.populateLinks();
-      }
+  ngOnInit() {
+      this.route.queryParamMap.subscribe(params => {
+          this.driver = params.get('driver');
+          this.filteredLinks = (this.driver) ?
+              this.links.filter(link => link.driver === this.driver) :
+              this.links;
+      });
   }
 }
