@@ -1,5 +1,6 @@
 package edu.iastate.sdmay1809;
 
+import edu.iastate.sdmay1809.shared.DiffConfig;
 import junit.framework.TestCase;
 
 public class DiffLinkerTest extends TestCase {

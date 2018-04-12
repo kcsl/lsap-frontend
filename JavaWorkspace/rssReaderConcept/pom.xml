@@ -139,7 +139,7 @@
 			<version>20180130</version>
 		</dependency>
 	</dependencies>
-	<groupId>rssReader</groupId>
+	<groupId>edu.iastate.sdmay1809</groupId>
 	<version>0.1.0</version>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
