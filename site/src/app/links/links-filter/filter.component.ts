@@ -1,5 +1,6 @@
 import { FilterService } from '../../services/filter.service';
-import { Component, Input, OnInit } from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
+import {ActivatedRoute} from '@angular/router';
 
 @Component({
   selector: 'app-filter',
@@ -8,16 +9,40 @@ import { Component, Input, OnInit } from '@angular/core';
 })
 export class FilterComponent implements OnInit {
   filters;
-  @Input('filter') filter;
-  @Input('version') version;
+  private _version;
+  driver;
 
-  constructor(
-    private filterService: FilterService) { }
+  static stripChars(input) {
+      return input.replace(/[^0-9a-z]/gi, '').toString();
+  }
+
+  constructor(private filterService: FilterService,
+              private route: ActivatedRoute) { }
+
+  get version() {
+      if (this._version !== null) {
+          return FilterComponent.stripChars(this._version);
+      }
+  }
+
+  @Input('version')
+  set version(val) {
+      this._version = val;
+      this.getInstanceDrivers();
+  }
 
   ngOnInit() {
-    console.log(this.version);
-    this.filters = this.filterService.getAll().snapshotChanges().map(filter => {
-      return filter.map(f => ({ key: f.payload.key, ...f.payload.val() }));
-    });
+      this.route.queryParamMap.subscribe(params => {
+          this.driver = params.get('driver');
+      });
   }
+
+  async getInstanceDrivers() {
+      await this.filterService.getAll(this.version).then(instances => {
+          this.filters = instances.map(instance => {
+              return (instance as any).driver;
+          });
+      });
+  }
+
 }

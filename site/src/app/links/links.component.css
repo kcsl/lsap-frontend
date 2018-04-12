@@ -1,11 +1,3 @@
-.flexbox-container {
-    display: -ms-flexbox;
-    display: -webkit-flex;
-    display: flex;
-    -ms-flex-align: center;
-    -webkit-align-items: center;
-    -webkit-box-align: center;.
-    align-items: center;
-    height: 100vh;
-    flex-wrap: wrap;
+.container {
+    margin-left: 232px;
 }
