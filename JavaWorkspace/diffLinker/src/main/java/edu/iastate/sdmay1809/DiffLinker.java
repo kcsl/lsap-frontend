@@ -1,6 +1,5 @@
 package edu.iastate.sdmay1809;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.RandomAccessFile;
@@ -17,15 +16,15 @@ import org.json.JSONObject;
 public class DiffLinker {
 	public static void main(String[] args) throws JSONException, IOException {
 		ArrayList<Long> timings = new ArrayList<Long>();
-		
+
 		DiffConfig config = DiffConfig.builder(args).build();
 
 		timings.add(System.nanoTime());
 		InstanceTracker it = new InstanceTracker(config.RESULT_DIR);
 		it.run(config.DIFF_TEST_DIR, false);
-		
+
 		timings.add(System.nanoTime());
-		DiffLinker dl = new DiffLinker(config, true, 3);
+		DiffLinker dl = new DiffLinker(config, true, 10);
 		int instancesLinked = dl.run("oldInstanceMap.json");
 		if (instancesLinked < 0) {
 			System.err.println("[ERROR] could not link instances!");
@@ -45,18 +44,6 @@ public class DiffLinker {
 		}
 	}
 
-	public static boolean setCurrentDirectory(String directory_name) {
-		boolean result = false; // Boolean indicating whether directory was set
-		File directory; // Desired current working directory
-
-		directory = new File(directory_name).getAbsoluteFile();
-		if (directory.exists() || directory.mkdirs()) {
-			result = (System.setProperty("user.dir", directory.getAbsolutePath()) != null);
-		}
-
-		return result;
-	}
-
 	private DiffConfig config;
 	private boolean allowPrintStatements = true;
 	private int lineSearchThreshold = 10;
@@ -68,101 +55,129 @@ public class DiffLinker {
 	}
 
 	public int run(String newMapFilename) throws JSONException, IOException {
-		if (!setCurrentDirectory(config.KERNEL_DIR)) {
-			println("Couldn't get the kernel dir");
-			return -1;
-		}
-
 		int instancesLinked = 0;
 		Charset utf8 = Charset.forName("UTF-8");
 		println("Parsing new instance map...");
 		Path newInstance = Paths.get(config.DIFF_TEST_DIR, newMapFilename);
 		String newInstanceContent = String.join("\n", Files.readAllLines(newInstance, utf8));
 		JSONArray newMap = new JSONArray(newInstanceContent);
-		
+
 		JSONArray mapping = new JSONArray();
 
-		println("Tracking instances...");
+		println("Linking instances...");
 		for (int i = 0; i < newMap.length(); i++) {
 			JSONObject instance = newMap.getJSONObject(i);
-			
-			if(linkInstances(mapping, instance)) {
+
+			if (linkInstances(mapping, instance)) {
 				instancesLinked++;
 			}
 		}
-		
+
 		mapping.write(new PrintWriter(Paths.get(config.DIFF_TEST_DIR, "diffInstanceMap.json").toFile()), 1, 2);
 
 		return instancesLinked;
 	}
-	
+
 	public boolean linkInstances(JSONArray mapping, JSONObject object) throws IOException {
 		String filename = object.getString("filename");
 		long offset = object.getLong("offset");
-		
+
 		String name = object.getString("name");
 		String status = object.getString("status");
 		String id = object.getString("id");
 		long length = object.getLong("length");
-		
+
 		String metadata = null;
+		Path fileToSearch = Paths.get(config.KERNEL_DIR, filename);
+
+		println("Searching through: " + fileToSearch.toString());
 		// Need to capture comment data within a certain threshold of lines
-		
+
 		String[] linesFound = {};
 		String buffer = "";
-		byte[] byteBuffer = new byte[40]; // byte buffer to capture data 40 bytes at a time
-		RandomAccessFile r = new RandomAccessFile(new File(filename), "rw");
-		
+		byte[] byteBuffer = new byte[40]; // byte buffer to capture data 40
+											// bytes at a time
+		RandomAccessFile r = new RandomAccessFile(fileToSearch.toFile(), "rw");
+
 		// Start at offset
 		r.seek(offset);
-		
-		// While we can still get lines
-		while(linesFound.length < this.lineSearchThreshold) {
-			// Get the current offset and go back 40 bytes
+
+		// capture some starting data
+		int j = 0;
+		while (j++ < 3) {
 			long currOffset = r.getFilePointer();
-			r.seek(currOffset - 40);
+			int newLength = (int) Math.min(40, r.length() - 1 - currOffset);
 			// Capture the 40 bytes
-			r.readFully(byteBuffer, 0, 40);
-			buffer = new String(byteBuffer) + buffer;
-			// Split the buffer to capture the lines
-			linesFound = buffer.split("\n", this.lineSearchThreshold);
-		}
-		
-		// Close the file
-		r.close();
-		
-		// Search for our string
-		for(int i = linesFound.length - 1; i >= 0; i--) {
-			if(linesFound[i].trim().matches("^/* (?:[[:alnum:]]+@@@){5}[[:alnum:]]+ */$")) {
-				metadata = linesFound[i].trim();
+			r.readFully(byteBuffer, 0, newLength);
+			buffer = buffer + new String(byteBuffer);
+			linesFound = buffer.split("\n");
+			if (newLength < 40) {
+				break;
 			}
 		}
-		
+
+		int linesFoundAfter = linesFound.length;
+
+		// Start at offset again
+		r.seek(offset);
+
+		// While we can still get lines
+		while (linesFound.length < this.lineSearchThreshold + linesFoundAfter) {
+			// Get the current offset and go back 40 bytes
+			long currOffset = r.getFilePointer();
+			long newOffset = Math.max(currOffset - 40, 0);
+			r.seek(newOffset);
+			// Capture the 40 bytes
+			r.readFully(byteBuffer, 0, 40);
+			r.seek(newOffset);
+			buffer = new String(byteBuffer) + buffer;
+			// Split the buffer to capture the lines
+			linesFound = buffer.split("\n", this.lineSearchThreshold + linesFoundAfter);
+			// println("Parsing from " + newOffset + " to " + currOffset + "
+			// Current Buffer: \n" + buffer);
+			if (newOffset == 0) {
+				break;
+			}
+		}
+
+		// Close the file
+		r.close();
+
+		println("Searching through " + linesFound.length + " lines");
+
+		// Search for our string
+		for (int i = linesFound.length - 1; i >= 0; i--) {
+			if (linesFound[i].trim().matches("\\/\\* (?:[a-zA-Z0-9\\.\\/\\_]+@@@){5}[a-zA-Z0-9\\.\\/\\_]+ \\*\\/")) {
+				metadata = linesFound[i].trim();
+				break;
+			}
+		}
+
 		// TODO: Add validation checking
-	
+
 		JSONObject map = new JSONObject();
-		JSONObject newData = new JSONObject()
-				.put("id", id)
-				.put("name", name)
-				.put("status", status)
-				.put("filename", filename)
-				.put("offset", offset)
-				.put("length", length);
-		if(metadata != null) {
+		JSONObject newData = new JSONObject().put("id", id).put("name", name).put("status", status)
+				.put("filename", filename).put("offset", offset).put("length", length);
+		if (metadata != null) {
 			println("Found String: " + metadata);
-			
-			// TODO: Break out comment into actual data!
-			JSONObject oldData = new JSONObject()
-					.put("metadata", metadata);
+
+			String[] commentSplit = metadata.split(" ");
+			JSONObject oldData = new JSONObject();
+			String[] dataSplit = commentSplit[1].split("@@@");
+
+			oldData.put("id", dataSplit[0]).put("name", dataSplit[5]).put("status", dataSplit[1])
+					.put("filename", dataSplit[4]).put("offset", dataSplit[2]).put("length", dataSplit[3]);
+
+			oldData.put("metadata", metadata);
 			map.put("new", newData).put("old", oldData);
 		} else {
 			println("No String found");
-			
+
 			map.put("new", newData);
 		}
-		
+
 		mapping.put(map);
-		
+
 		return (metadata != null);
 	}
 
