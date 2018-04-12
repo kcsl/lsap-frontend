@@ -3,16 +3,18 @@ package edu.iastate.sdmay1809.shared.InstanceTracker;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-class InstanceFormatV1 extends InstanceFormat {
+class InstanceParserV1 implements InstanceParser {
 	
-	InstanceFormatV1() {
+	private String outerGroupRegex;
+	private String innerGroupRegex;
+	
+	public InstanceParserV1() {
 		super();
 		this.outerGroupRegex = "(\\]|@)@+(\\[|@)";
 		this.innerGroupRegex = "\\+\\/*";
 	}
 
-	@Override
-	JSONObject parseEntry(String instance) throws InvalidInstanceFormatException {
+	public JSONObject parseEntry(String instance) throws InvalidInstanceFormatException {
 		JSONObject inst = new JSONObject();
 		String[] outerGroups = instance.split(outerGroupRegex);
 		String[] innerGroups = outerGroups[2].replaceAll("@", "/").split(innerGroupRegex);
