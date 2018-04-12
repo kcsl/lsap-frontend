@@ -48,18 +48,14 @@ import {HomeComponent} from './home/home.component';
     CustomFormsModule,
     NgbModule.forRoot(),
     RouterModule.forRoot([
-      {
-          path: '',
-          component: HomeComponent
-      },
-      {
-        path: 'v/:versionStripped',
-        component: HomeComponent
-      },
-      {
-        path: 'login',
-        component: LoginComponent
-      }
+        { path: '', component: HomeComponent, pathMatch: 'full' },
+        { path: 'v/:versionStripped', component: HomeComponent,
+            children: [
+                { path: '', component: LinksComponent, pathMatch: 'full' },
+                { path: 'i', redirectTo: '', pathMatch: 'full' },
+                { path: 'i/:id', component: LinksPageComponent }
+            ]
+        }
     ])
   ],
   providers: [

@@ -16,7 +16,7 @@ export class LinksComponent implements OnInit {
   driver;
 
   private _version;
-  @Input('searchTerm') searchTerm;
+  // @Input('searchTerm') searchTerm;
 
   static stripChars(input) {
       return input.replace(/[^0-9a-z]/gi, '').toString();
@@ -39,7 +39,6 @@ export class LinksComponent implements OnInit {
   }
 
   async populateLinks() {
-      console.log('links version: ' + this.version);
       this.filteredLinks = [];
       this.links = [];
       await this.linksService
@@ -60,6 +59,9 @@ export class LinksComponent implements OnInit {
           this.filteredLinks = (this.driver) ?
               this.links.filter(link => link.driver === this.driver) :
               this.links;
+      });
+      this.route.parent.params.subscribe(params => {
+          this.version = params.get('version');
       });
   }
 }

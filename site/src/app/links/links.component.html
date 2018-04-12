@@ -1,10 +1,11 @@
 <div class="container">
     <div class="row">
         <ng-container *ngFor="let linkObject of filteredLinks; let i = index">
-            <div class="col-3" *ngIf="linkObject">
-                <app-link-card [linkObject]="linkObject"></app-link-card>
+            <div class="col-3">
+                <app-link-card [linkObject]="linkObject" [version]="_version"></app-link-card>
             </div>
             <div class="w-100" *ngIf="(i+1)%4 === 0"></div>
         </ng-container>
     </div>
 </div>
+<router-outlet></router-outlet>
