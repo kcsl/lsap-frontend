@@ -17,6 +17,10 @@ public class InstanceParserManager {
 	}
 	
 	public static InstanceParser get(String key) {
+		if(key == null) {
+			return null;
+		}
+		
 		return parserMap.get(key);
 	}
 	

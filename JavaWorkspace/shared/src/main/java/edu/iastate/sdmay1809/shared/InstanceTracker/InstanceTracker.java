@@ -14,6 +14,7 @@ public class InstanceTracker {
 	String sourceDirectory;
 
 	public InstanceTracker(String sourceDirectory) {
+		InstanceParserManager.put(new InstanceParserV1());
 		this.sourceDirectory = sourceDirectory;
 	}
 
@@ -81,22 +82,29 @@ public class InstanceTracker {
 		return combinedDirs;
 	}
 
-	protected JSONObject parseEntry(String instance) throws Exception {
-		JSONObject inst = new JSONObject();
-		String[] outerGroups = instance.split("(\\]|@)@+(\\[|@)");
-		String[] innerGroups = outerGroups[2].replaceAll("@", "/").split("\\+\\/*");
-
-		try {
-			inst.put("status", outerGroups[0]);
-			inst.put("id", outerGroups[1]);
-			inst.put("name", outerGroups[3]);
-			inst.put("offset", Integer.parseInt(innerGroups[0]));
-			inst.put("length", Integer.parseInt(innerGroups[1]));
-			inst.put("filename", innerGroups[2].split("\\/", 2)[1]);
-		} catch(Exception e) {
-			throw new Exception(e.getMessage());
+	protected JSONObject parseEntry(String instance) throws InvalidInstanceFormatException, Exception {
+		return parseEntry(instance, null, true);
+	}
+	
+	protected JSONObject parseEntry(String instance, String parser) throws InvalidInstanceFormatException, Exception {
+		return parseEntry(instance, parser, true);
+	}
+	
+	protected JSONObject parseEntry(String instance, String parser, boolean tryAllParsers) throws InvalidInstanceFormatException, Exception {
+		InstanceParser p = InstanceParserManager.get(parser);
+		if(p == null) {
+			return parseEntry(instance);
 		}
-
-		return inst;
+		
+		try {
+			return p.parseEntry(instance);
+		} catch (InvalidInstanceFormatException e) {
+			if(tryAllParsers) {
+				System.err.println("[WARN] : Couldn't Parse Entry with Parser " + p.getName() + ", trying all parsers");
+				return parseEntry(instance);
+			} else {
+				throw new InvalidInstanceFormatException(e.getMessage());
+			}	
+		}
 	}
 }
