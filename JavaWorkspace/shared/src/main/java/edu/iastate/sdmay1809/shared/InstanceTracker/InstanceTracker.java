@@ -1,17 +1,22 @@
-package edu.iastate.sdmay1809.shared;
+package edu.iastate.sdmay1809.shared.InstanceTracker;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Paths;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+
+import edu.iastate.sdmay1809.shared.Utils;
 
 public class InstanceTracker {
 
 	String sourceDirectory;
 
 	public InstanceTracker(String sourceDirectory) {
+		InstanceParserManager.put(new InstanceParserV1());
+		InstanceParserManager.put(new InstanceParserV2());
 		this.sourceDirectory = sourceDirectory;
 	}
 
@@ -19,12 +24,8 @@ public class InstanceTracker {
 		File[] instances = getInstances();
 		String outputJSONFile;
 		boolean retVal = true;
-
-		if (outputDirectory.endsWith("/")) {
-			outputJSONFile = outputDirectory + "oldInstanceMap.json";
-		} else {
-			outputJSONFile = outputDirectory + "/oldInstanceMap.json";
-		}
+		
+		outputJSONFile = Paths.get(outputDirectory, "oldInstanceMap.json").toString();
 
 		File check = new File(outputJSONFile);
 
@@ -79,22 +80,47 @@ public class InstanceTracker {
 		return combinedDirs;
 	}
 
-	protected JSONObject parseEntry(String instance) throws Exception {
-		JSONObject inst = new JSONObject();
-		String[] outerGroups = instance.split("(\\]|@)@+(\\[|@)");
-		String[] innerGroups = outerGroups[2].replaceAll("@", "/").split("\\+\\/*");
-
-		try {
-			inst.put("status", outerGroups[0]);
-			inst.put("id", outerGroups[1]);
-			inst.put("name", outerGroups[3]);
-			inst.put("offset", Integer.parseInt(innerGroups[0]));
-			inst.put("length", Integer.parseInt(innerGroups[1]));
-			inst.put("filename", innerGroups[2].split("\\/", 2)[1]);
-		} catch(Exception e) {
-			throw new Exception(e.getMessage());
+	protected JSONObject parseEntry(String instance) throws InvalidInstanceFormatException, Exception {
+		return parseEntry(instance, null, true);
+	}
+	
+	protected JSONObject parseEntry(String instance, String parser) throws InvalidInstanceFormatException, Exception {
+		return parseEntry(instance, parser, true);
+	}
+	
+	protected JSONObject parseEntry(String instance, String parser, boolean tryAllParsers) throws InvalidInstanceFormatException, Exception {
+		InstanceParser p = InstanceParserManager.get(parser);
+		if(p == null) {
+			return parseEntryAll(instance);
 		}
-
+		
+		try {
+			return p.parseEntry(instance);
+		} catch (InvalidInstanceFormatException e) {
+			if(tryAllParsers) {
+				System.err.println("[WARN] : Couldn't Parse Entry with Parser " + p.getName() + ", trying all parsers");
+				return parseEntryAll(instance);
+			} else {
+				throw new InvalidInstanceFormatException(e.getMessage());
+			}	
+		}
+	}
+	
+	private JSONObject parseEntryAll(String instance) throws Exception {
+		JSONObject inst = null;
+		for(InstanceParser p : InstanceParserManager.getParsers()) {
+			try {
+				inst = p.parseEntry(instance);
+				break;
+			} catch (InvalidInstanceFormatException e) {
+				System.err.println("[WARN] : Couldn't Parse Entry with Parser " + p.getName());
+			}
+		}
+		
+		if(inst == null) {
+			throw new Exception("No Parsers could parse this entry: " + instance);
+		}
+		
 		return inst;
 	}
 }
