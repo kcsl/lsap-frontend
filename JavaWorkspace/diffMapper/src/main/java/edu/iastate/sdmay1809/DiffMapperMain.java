@@ -5,6 +5,9 @@ import java.util.ArrayList;
 
 import org.json.JSONException;
 
+import edu.iastate.sdmay1809.shared.DiffConfig;
+import edu.iastate.sdmay1809.shared.InstanceTracker;
+
 public class DiffMapperMain {
 	public static void main(String[] args) throws JSONException, IOException, Exception {
 		ArrayList<Long> timings = new ArrayList<Long>();
