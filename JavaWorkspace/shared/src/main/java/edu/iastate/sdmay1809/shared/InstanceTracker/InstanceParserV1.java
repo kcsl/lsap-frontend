@@ -13,6 +13,10 @@ class InstanceParserV1 implements InstanceParser {
 		this.outerGroupRegex = "(\\]|@)@+(\\[|@)";
 		this.innerGroupRegex = "\\+\\/*";
 	}
+	
+	public String getName() {
+		return "V1";
+	}
 
 	public JSONObject parseEntry(String instance) throws InvalidInstanceFormatException {
 		JSONObject inst = new JSONObject();

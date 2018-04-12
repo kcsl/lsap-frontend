@@ -8,10 +8,12 @@ public class InstanceParserManager {
 	
 	private static Map<String, InstanceParser> parserMap = new HashMap<String, InstanceParser>();
 	
-	public static InstanceParser put(String key, InstanceParser parser) {
-		InstanceParser prev = parserMap.get(key);
-		parserMap.put(key, parser);
-		return prev;
+	public static InstanceParser put(InstanceParser parser) {
+		if(parser == null) {
+			return null;
+		}
+		
+		return parserMap.put(parser.getName(), parser);
 	}
 	
 	public static InstanceParser get(String key) {
