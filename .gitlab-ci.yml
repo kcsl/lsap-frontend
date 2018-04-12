@@ -6,10 +6,12 @@ Shared:
 
 DiffMapper:
   script:
+    - (cd JavaWorkspace/shared; mvn install -B)
     - (cd JavaWorkspace/diffMapper; mvn install -B && cat target/site/jacoco/index.html)
 
 DiffLinker:
   script:
+    - (cd JavaWorkspace/shared; mvn install -B)
     - (cd JavaWorkspace/diffLinker; mvn install -B && cat target/site/jacoco/index.html)
     
 RssReader:
