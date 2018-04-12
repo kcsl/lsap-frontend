@@ -1,6 +1,6 @@
 <div class="container">
     <div class="row">
-        <ng-container *ngFor="let linkObject of links; let i = index">
+        <ng-container *ngFor="let linkObject of filteredLinks; let i = index">
             <div class="col-3" *ngIf="linkObject">
                 <app-link-card [linkObject]="linkObject"></app-link-card>
             </div>

@@ -1,16 +1,16 @@
 <div class="sticky-top" style="top:80px;">
   <div class="list-group">
-    <a [class.active]="!filter"
-      routerLink="/v/{{version}}/"
+    <a [class.active]="!driver"
+      routerLink="/v/{{_version}}/"
       class="list-group-item list-group-item-action">
       All Drivers
     </a>
     <a class="list-group-item list-group-item-action"
-      routerLink="/v/{{version}}/"
-      [queryParams]="{filter: f}"
-      [class.active]="filters === filter"
-      *ngFor="let f of filters">
-      {{ f }}
+      routerLink="/v/{{_version}}/"
+      [queryParams]="{driver: d}"
+      [class.active]="driver === d"
+      *ngFor="let d of filters">
+      {{ d }}
     </a>
   </div>
 </div>
