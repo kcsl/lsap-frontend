@@ -124,8 +124,13 @@ public class UtilsTest {
 	
 	@Test
 	public void executeCompletesCorrectly() throws IOException, InterruptedException {
-		String execOutput = Utils.execute(new String[] {"pwd"}, null);
-		
-		assertThat(execOutput, containsString("Process exited with value 0"));
+		String execOutput;
+		if(System.getProperty("os.name").equals("Windows")) {
+			execOutput = Utils.execute(new String[] {"cd"}, null);
+			assertThat(execOutput, containsString(System.getProperty("user.dir")));
+		} else {
+			execOutput = Utils.execute(new String[] {"pwd"}, null);
+			assertThat(execOutput, containsString("Process exited with value 0"));
+		}
 	}
 }
