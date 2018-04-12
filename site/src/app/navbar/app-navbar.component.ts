@@ -10,10 +10,11 @@ export class AppNavbarComponent implements OnInit {
 
   @Input('versions') versions: String[] = [];
   private _version: string;
+  private _searchTerm: string;
   @Input('versionStripped') versionStripped;
 
   @Output() versionChange = new EventEmitter();
-  searchTerm;
+  @Output() searchTermChange = new EventEmitter();
 
   static stripChars(input) {
       return input.replace(/[^0-9a-z]/gi, '').toString();
@@ -36,6 +37,17 @@ export class AppNavbarComponent implements OnInit {
       this._version = val;
       console.log(this.version);
       this.versionChange.emit(this.version);
+  }
+
+  get searchTerm() {
+    return this._searchTerm;
+  }
+
+  @Input('searchTerm')
+  set searchTerm(val: string) {
+      this._searchTerm = val;
+      console.log(this.searchTerm);
+      this.searchTermChange.emit(this.searchTerm);
   }
 
   navigateToNewVersion(version: string) {

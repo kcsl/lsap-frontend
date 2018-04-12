@@ -10,6 +10,7 @@ import {NavbarService} from '../services/navbar.service';
 export class HomeComponent implements OnInit {
 
   version;
+  searchTerm;
   versions: String[] = [];
   versionStripped;
   driver;
@@ -33,6 +34,7 @@ export class HomeComponent implements OnInit {
       });
 
       this.route.paramMap.subscribe(params => {
+          this.searchTerm = params.get('searchTerm');
           this.version = params.get('versionStripped');
           this.versionStripped = HomeComponent.stripChars(this.version);
       });

@@ -3,6 +3,7 @@ import { LinksService } from '../services/links.service';
 import {Component, Input, OnInit} from '@angular/core';
 import {Links, LinksImpl} from '../models/links';
 import 'rxjs/add/operator/switchMap';
+import {HomeComponent} from '../home/home.component';
 
 @Component({
   selector: 'app-links-component',
@@ -15,8 +16,8 @@ export class LinksComponent implements OnInit {
   filteredLinks: Links[];
   driver;
 
+  private _searchTerm;
   private _version;
-  // @Input('searchTerm') searchTerm;
 
   static stripChars(input) {
       return input.replace(/[^0-9a-z]/gi, '').toString();
@@ -38,20 +39,38 @@ export class LinksComponent implements OnInit {
       this.populateLinks();
   }
 
+    get searchTerm() {
+        return this._searchTerm;
+    }
+
+    @Input('searchTerm')
+    set searchTerm(val: string) {
+        this._searchTerm = val;
+        console.log(this._searchTerm);
+        this.filter();
+    }
+
   async populateLinks() {
-      this.filteredLinks = [];
+      // reset the data
       this.links = [];
+      this.filteredLinks = this.links;
+
       await this.linksService
           .populate(LinksComponent.stripChars(this.version)) // this will get the version w/ no special chars
           .subscribe(params => { // object instance
-              Object.values(params).forEach( data => {
-                  const link = new LinksImpl(data);
-                  this.linksService.expandLinks(link);
-                  this.links.push(link);
-              });
-              this.filteredLinks = this.links;
+              // null check
+              if (params) {
+                  Object.values(params).forEach(data => {
+                      const link = new LinksImpl(data);
+                      this.linksService.expandLinks(link);
+                      this.links.push(link);
+                  });
+                  this.filteredLinks = this.links;
+              }
           });
   }
+
+  filter() {}
 
   ngOnInit() {
       this.route.queryParamMap.subscribe(params => {
@@ -60,8 +79,11 @@ export class LinksComponent implements OnInit {
               this.links.filter(link => link.driver === this.driver) :
               this.links;
       });
-      this.route.parent.params.subscribe(params => {
-          this.version = params.get('version');
+      this.route.paramMap.subscribe(params => {
+         this.searchTerm = params.get('searchTerm');
+      });
+      this.route.parent.paramMap.subscribe(params => {
+          this.version = params.get('versionStripped');
       });
   }
 }

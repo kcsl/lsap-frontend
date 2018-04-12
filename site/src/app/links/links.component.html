@@ -1,5 +1,5 @@
 <div class="container">
-    <div class="row">
+    <div class="row" *ngIf="(filteredLinks.length !== 0); else empty">
         <ng-container *ngFor="let linkObject of filteredLinks; let i = index">
             <div class="col-3">
                 <app-link-card [linkObject]="linkObject" [version]="_version"></app-link-card>
@@ -7,5 +7,11 @@
             <div class="w-100" *ngIf="(i+1)%4 === 0"></div>
         </ng-container>
     </div>
+    <ng-template #empty>
+        <div class="flex-container">
+            <div class="flex-item">
+                No Links Found. Please try a different search term.
+            </div>
+        </div>
+    </ng-template>
 </div>
-<router-outlet></router-outlet>
