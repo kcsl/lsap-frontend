@@ -14,6 +14,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import edu.iastate.sdmay1809.shared.DiffConfig;
+import edu.iastate.sdmay1809.shared.Utils;
+
 public class DiffMapper {
 
 	private boolean allowPrintStatements = true;
