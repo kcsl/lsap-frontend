@@ -94,7 +94,7 @@ public class InstanceTracker {
 	protected JSONObject parseEntry(String instance, String parser, boolean tryAllParsers) throws InvalidInstanceFormatException, Exception {
 		InstanceParser p = InstanceParserManager.get(parser);
 		if(p == null) {
-			return parseEntry(instance);
+			return parseEntryAll(instance);
 		}
 		
 		try {
@@ -102,10 +102,28 @@ public class InstanceTracker {
 		} catch (InvalidInstanceFormatException e) {
 			if(tryAllParsers) {
 				System.err.println("[WARN] : Couldn't Parse Entry with Parser " + p.getName() + ", trying all parsers");
-				return parseEntry(instance);
+				return parseEntryAll(instance);
 			} else {
 				throw new InvalidInstanceFormatException(e.getMessage());
 			}	
 		}
+	}
+	
+	private JSONObject parseEntryAll(String instance) throws Exception {
+		JSONObject inst = null;
+		for(InstanceParser p : InstanceParserManager.getParsers()) {
+			try {
+				inst = p.parseEntry(instance);
+				break;
+			} catch (InvalidInstanceFormatException e) {
+				System.err.println("[WARN] : Couldn't Parse Entry with Parser " + p.getName());
+			}
+		}
+		
+		if(inst == null) {
+			throw new Exception("No Parsers could parse this entry: " + instance);
+		}
+		
+		return inst;
 	}
 }
