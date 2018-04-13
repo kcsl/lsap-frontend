@@ -3,10 +3,9 @@ package edu.iastate.sdmay1809;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.*;
 
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
 
-import org.javatuples.Pair;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -105,11 +104,11 @@ public class FunctionTest {
 	@Test
 	public void functionIsLockingFunction() throws Exception
 	{
-		HashSet<Pair<String, Boolean>> criteria = new HashSet<Pair<String, Boolean>>();
+		HashMap<String, Boolean> criteria = new HashMap<String, Boolean>();
 		
-		criteria.add(new Pair<String, Boolean>("spin", true));
-		criteria.add(new Pair<String, Boolean>("lock", true));
-		criteria.add(new Pair<String, Boolean>("no", false));
+		criteria.put("spin", true);
+		criteria.put("lock", true);
+		criteria.put("no", false);
 		
 		assertTrue(Function.isLockingFunction(f1, criteria));
 		assertTrue(Function.isLockingFunction(f2, criteria));

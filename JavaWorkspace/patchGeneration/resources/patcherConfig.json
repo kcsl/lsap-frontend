@@ -1,0 +1,49 @@
+{
+	"MutexFunctionCriteria": {
+		"mutex" : true,
+		"lock" : true,
+		"mutex_lock_io_nested" : false,
+		"_is_" : false
+	},
+	
+	"MutexMacroCriteria": {
+		"mutex" : true,
+		"lock" : true,
+		"nested" : false
+	},
+	
+	"SpinFunctionCriteria": {
+	
+	},
+	
+	"SpinMacroCriteria": {
+		"lock" : true,
+		"_is_" : false,
+		"_can_" : false,
+		"_before_" : false,
+		"assert" : false,
+		"init" : false,
+		"_raw_spin_unlock_bh" : false,
+		"_raw_spin_unlock_irq" : false,
+		"_raw_spin_unlock_irqrestore" : false,
+		"attribute" : false
+	},
+	
+	"MutexPathsToRead": [
+		"include/linux/mutex.h"
+	],
+	
+	"MutexPathsToChange": [
+		"include/linux/mutex.h"
+	],
+	
+	"SpinPathsToRead": [
+		"include/linux/spinlock.h",
+		"include/linux/spinlock_api_smp.h"
+	],
+	
+	"SpinPathsToChange": [
+		"include/linux/spinlock.h",
+		"include/linux/spinlock_api_smp.h"
+	]
+}

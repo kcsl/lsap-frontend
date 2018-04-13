@@ -2,11 +2,9 @@ package edu.iastate.sdmay1809;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.javatuples.Pair;
 
 public class Macro implements Locker
 {
@@ -15,10 +13,10 @@ public class Macro implements Locker
 	
 	public Macro(String macroDefinition) throws Exception
 	{
-		if (macroDefinition == null) throw new Exception("Unable to find a macro definition in \"" + macroDefinition + "\"");
+		if (macroDefinition == null) throw new Exception("MACRO: Unable to find a macro definition in \"" + macroDefinition + "\"");
 				
-		Matcher m = Pattern.compile("^\\s*#\\s*define\\s+\\w+\\s*\\([^\\)]*\\)").matcher(macroDefinition.toLowerCase());
-		if (!m.find()) throw new Exception("Unable to find a macro definition in \"" + macroDefinition + "\"");
+		Matcher m = Pattern.compile("^\\s*#\\s*[defineDEFINE]{6}\\s+\\w+\\s*\\([^\\)]*\\)").matcher(macroDefinition);
+		if (!m.find()) throw new Exception("MACRO: Unable to find a macro definition in \"" + macroDefinition + "\"");
 		
 		macroDefinition = m.group().replace("\n", " ");
 		parameters = new ArrayList<String>();
@@ -59,11 +57,11 @@ public class Macro implements Locker
 		return this.name.equals(((Locker)o).getName());
 	}
 	
-	public static boolean isLockingMacro(Macro m, Set<Pair<String, Boolean>> criteria)
+	public static boolean isLockingMacro(Macro m, Map<String, Boolean> criteria)
 	{
-		for (Pair<String, Boolean> c : criteria)
+		for (String s : criteria.keySet())
 		{
-			if (m.getName().contains(c.getValue0()) != c.getValue1()) return false;
+			if (m.getName().contains(s) != criteria.get(s)) return false;
 		}
 		
 		return true;

@@ -3,10 +3,9 @@ package edu.iastate.sdmay1809;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.*;
 
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
 
-import org.javatuples.Pair;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -101,11 +100,11 @@ public class MacroTest {
 	@Test
 	public void macroIsLockingMacro() throws Exception
 	{
-		HashSet<Pair<String, Boolean>> criteria = new HashSet<Pair<String, Boolean>>();
+		HashMap<String, Boolean> criteria = new HashMap<String, Boolean>();
 		
-		criteria.add(new Pair<String, Boolean>("mac", true));
-		criteria.add(new Pair<String, Boolean>("ro", true));
-		criteria.add(new Pair<String, Boolean>("no", false));
+		criteria.put("mac", true);
+		criteria.put("ro", true);
+		criteria.put("no", false);
 		
 		assertTrue(Macro.isLockingMacro(m1, criteria));
 		assertTrue(Macro.isLockingMacro(m2, criteria));
