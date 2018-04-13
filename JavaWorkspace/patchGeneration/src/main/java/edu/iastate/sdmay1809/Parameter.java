@@ -1,21 +1,23 @@
 package edu.iastate.sdmay1809;
 
-public class Parameter
-{
+public class Parameter {
 	private String type;
 	private String name;
 	
-	public Parameter(String fullParam)
+	public Parameter(String fullParam) throws Exception
 	{
-		int index = fullParam.length() - 1;
-		
-		while (index >= 0 && (fullParam.charAt(index) != ' ' && fullParam.charAt(index) != '*'))
+		try
 		{
-			index--;
+			name = fullParam.trim().replaceFirst("^.*(\\*|[ ])", "").trim();
+			type = fullParam.trim().replaceFirst("\\w+$", "").replaceFirst("\\s*\\*\\s*", "*").trim();
 		}
 		
-		type = fullParam.substring(0, index + 1).trim();
-		name = fullParam.substring(index + 1, fullParam.length()).trim();
+		catch (Exception e)
+		{
+			throw new Exception("PARAMETER: Unable to parse parameter from " + fullParam + "!");
+		}
+		
+		if (name.length() == 0 || type.length() == 0) throw new Exception("PARAMETER: Unable to parse parameter from " + fullParam + "!");
 	}
 	
 	public String getType()
@@ -26,5 +28,5 @@ public class Parameter
 	public String getName()
 	{
 		return name;
-	}
+	}	
 }

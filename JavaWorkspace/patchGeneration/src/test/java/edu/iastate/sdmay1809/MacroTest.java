@@ -6,124 +6,108 @@ import static org.junit.Assert.*;
 import java.util.HashSet;
 import java.util.List;
 
+import org.javatuples.Pair;
 import org.junit.Before;
 import org.junit.Test;
 
 public class MacroTest {
-	Macro macro;
-	Macro otherMacro;
+	Macro m1;
+	Macro m2;
+	Macro m3;
 	
 	@Before
 	public void setUp() throws Exception
 	{
-		macro = new Macro("#define aMacro(lock, otherParam) body(lock)");
-		otherMacro = new Macro("#define macro2() otherBody(lock)");
+		m1 = new Macro("# define macro( lock, otherParam ) something(lock)");
+		m2 = new Macro("#define macro (lock, otherParam) something");
+		m3 = new Macro("#DEFINE macro ( lockname ) \\\n" + 
+				"		{ .owner = ATOMIC_LONG_INIT(0) \\\n" + 
+				"		, .wait_lock = __SPIN_LOCK_UNLOCKED(lockname.wait_lock) \\\n" + 
+				"		, .wait_list = LIST_HEAD_INIT(lockname.wait_list) \\\n" + 
+				"		__DEBUG_MUTEX_INITIALIZER(lockname) \\\n" + 
+				"		__DEP_MAP_MUTEX_INITIALIZER(lockname) }");
 	}
 	
 	@Test
 	public void macroConstructor()
 	{
-		assertThat(macro, instanceOf(Macro.class));
-		assertThat(otherMacro, instanceOf(Macro.class));
+		assertThat(m1, instanceOf(Macro.class));
+		assertThat(m2, instanceOf(Macro.class));
+		assertThat(m3, instanceOf(Macro.class));
 		
-		try
-		{
-			Macro m = new Macro("something that's not a macro");
-			fail("No exception thrown on malformatted macro: " + m.getName());
-		}
-		
-		catch(Exception e)
-		{
-			
-		}
+		assertTrue(Locker.class.isInstance(m1));
+		assertTrue(Locker.class.isInstance(m2));
+		assertTrue(Locker.class.isInstance(m3));
 	}
 	
 	@Test
 	public void macroGetName()
 	{
-		assertEquals(macro.getName(), "aMacro");
-		assertEquals(otherMacro.getName(), "macro2");
+		assertEquals(m1.getName(), "macro");
+		assertEquals(m2.getName(), "macro");
+		assertEquals(m3.getName(), "macro");
 	}
 	
 	@Test
 	public void macroGetParameter()
 	{
-		assertEquals(macro.getParameter(-1), null);
-		assertEquals(macro.getParameter(0), "lock");
-		assertEquals(macro.getParameter(1), "otherParam");
-		assertEquals(macro.getParameter(2), null);
-		
-		assertEquals(otherMacro.getParameter(-1), null);
-		assertEquals(otherMacro.getParameter(0), null);
-		
-		List<String> macroParams = macro.getParameters();
-		List<String> otherMacroParams = otherMacro.getParameters();
-		
-		assertEquals(macroParams.get(0), "lock");
-		assertEquals(macroParams.get(1), "otherParam");
-		
-		assertEquals(otherMacroParams.size(), 0);
-	}
-		
-	@Test
-	public void macroContains() throws Exception
-	{
-		HashSet<Macro> macros = new HashSet<Macro>();
-		
-		macros.add(macro);
-		macros.add(otherMacro);
-		macros.add(new Macro("#define anotherMacro(lock, param3) func(lock)"));
-		
-		assertTrue(Macro.contains(macros, "aMacro"));
-		assertTrue(Macro.contains(macros, "macro2"));
-		assertTrue(Macro.contains(macros, "anotherMacro"));
-		
-		assertFalse(Macro.contains(macros, "bMacro"));
-		assertFalse(Macro.contains(macros, "macro3"));
-		assertFalse(Macro.contains(macros, "yetAnotherMacro"));
+		assertEquals(m1.getParameter(-1), null);
+		assertEquals(m1.getParameter(0), "lock");
+		assertEquals(m1.getParameter(1), "otherParam");
+		assertEquals(m1.getParameter(2), null);
+
+		assertEquals(m2.getParameter(-1), null);
+		assertEquals(m2.getParameter(0), "lock");
+		assertEquals(m2.getParameter(1), "otherParam");
+		assertEquals(m2.getParameter(2), null);
+
+		assertEquals(m3.getParameter(-1), null);
+		assertEquals(m3.getParameter(0), "lockname");
+		assertEquals(m3.getParameter(1), null);
 	}
 	
 	@Test
-	public void macroCompareTo()
+	public void macroGetParameters()
 	{
-		assertTrue(macro.compareTo(otherMacro) < 0);
-		assertTrue(otherMacro.compareTo(macro) > 0);
+		List<String> params = m1.getParameters();
+		
+		assertEquals(params.size(), 2);
+		assertEquals(params.get(0), "lock");
+		assertEquals(params.get(1), "otherParam");
+		
+		params = m2.getParameters();
+		
+		assertEquals(params.size(), 2);
+		assertEquals(params.get(0), "lock");
+		assertEquals(params.get(1), "otherParam");
+		
+		params = m3.getParameters();
+		
+		assertEquals(params.size(), 1);
+		assertEquals(params.get(0), "lockname");
 	}
 	
 	@Test
 	public void macroEquals() throws Exception
 	{
-		assertTrue(macro.equals(macro));
-		assertTrue(macro.equals(new Macro("#define aMacro(lock, otherParam) body(lock)")));
-		assertFalse(macro.equals(new Criteria("something", false)));
+		assertTrue(m1.equals(m1));
+		assertTrue(m1.equals(m2));
+		assertFalse(m1.equals(new Macro("#define otherMacro(someParam) doThing(someParam)")));
+		assertFalse(m1.equals(null));
 	}
 	
 	@Test
-	public void macroGetMacroName()
+	public void macroIsLockingMacro() throws Exception
 	{
-		assertTrue(Macro.getMacroName("# define macro(lock)").equals("macro"));
-		assertTrue(Macro.getMacroName("#  define macro (lock)").equals("macro"));
-		assertEquals(Macro.getMacroName(" #define macro( lock )"), "macro");
-		assertTrue(Macro.getMacroName("# define macro (lock)").equals("macro"));
+		HashSet<Pair<String, Boolean>> criteria = new HashSet<Pair<String, Boolean>>();
 		
-		assertEquals(Macro.getMacroName("# define macro 1"), null);
-		assertEquals(Macro.getMacroName("#  define macro lock"), null);
-		assertEquals(Macro.getMacroName(" #define macro something_else"), null);
-		assertEquals(Macro.getMacroName("# define macro"), null);
-		assertEquals(Macro.getMacroName(null), null);
-	}
-	
-	@Test
-	public void macroPrintAsDefine() throws Exception
-	{
-		assertEquals(macro.printAsDefine(null), null);
-		assertEquals(macro.printAsDefine(new Function("static inline void func(struct mutex *lock, int otherParam)")),
-					 "#define aMacro(lock, otherParam) func(NULL, 0)");
-		assertEquals(macro.printAsDefine(new Function("static inline void func(struct mutex *lock, int otherParam, struct mutex *otherLock)")),
-				 "#define aMacro(lock, otherParam) func(NULL, 0, NULL)");
-		assertEquals(macro.printAsDefine(new Function("static inline void func(int otherParam, struct mutex *lock)")),
-				 "#define aMacro(lock, otherParam) func(0, NULL)");
-		assertEquals(macro.printAsDefine(new Function("static inline void func()")),
-				 "#define aMacro(lock, otherParam) func()");
+		criteria.add(new Pair<String, Boolean>("mac", true));
+		criteria.add(new Pair<String, Boolean>("ro", true));
+		criteria.add(new Pair<String, Boolean>("no", false));
+		
+		assertTrue(Macro.isLockingMacro(m1, criteria));
+		assertTrue(Macro.isLockingMacro(m2, criteria));
+		assertTrue(Macro.isLockingMacro(m3, criteria));
+		assertFalse(Macro.isLockingMacro(new Macro("#define noMacro(someParam) doThing(someParam)"), criteria));
 	}
 }
