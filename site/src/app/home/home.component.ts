@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {NavbarService} from '../services/navbar.service';
+import {SharedService} from '../services/shared.service';
 
 @Component({
   selector: 'app-home',
@@ -10,15 +11,23 @@ import {NavbarService} from '../services/navbar.service';
 export class HomeComponent implements OnInit {
 
   version;
-  searchTerm;
   versions: String[] = [];
   versionStripped;
   driver;
 
-  constructor(private route: ActivatedRoute, private navbarService: NavbarService, private router: Router) { }
+  constructor(
+    private route: ActivatedRoute,
+    private navbarService: NavbarService,
+    private router: Router,
+    private sharedService: SharedService,
+  ) { }
 
   static stripChars(input) {
       return input.replace(/[^0-9a-z]/gi, '').toString();
+  }
+
+  passToLinks($event) {
+      this.sharedService.getSearch($event);
   }
 
   ngOnInit() {
@@ -34,7 +43,6 @@ export class HomeComponent implements OnInit {
       });
 
       this.route.paramMap.subscribe(params => {
-          this.searchTerm = params.get('searchTerm');
           this.version = params.get('versionStripped');
           this.versionStripped = HomeComponent.stripChars(this.version);
       });

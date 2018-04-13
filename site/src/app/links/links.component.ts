@@ -1,9 +1,10 @@
 import {ActivatedRoute, Router} from '@angular/router';
 import { LinksService } from '../services/links.service';
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, Inject, Input, OnInit} from '@angular/core';
 import {Links, LinksImpl} from '../models/links';
 import 'rxjs/add/operator/switchMap';
 import {HomeComponent} from '../home/home.component';
+import {SharedService} from '../services/shared.service';
 
 @Component({
   selector: 'app-links-component',
@@ -16,8 +17,8 @@ export class LinksComponent implements OnInit {
   filteredLinks: Links[];
   driver;
 
-  private _searchTerm;
   private _version;
+  private _searchTerm;
 
   static stripChars(input) {
       return input.replace(/[^0-9a-z]/gi, '').toString();
@@ -26,8 +27,9 @@ export class LinksComponent implements OnInit {
   constructor(
     private router: Router,
     private route: ActivatedRoute,
-    private linksService: LinksService
-  ) { }
+    private linksService: LinksService,
+    private sharedService: SharedService
+  ) {}
 
   get version() {
       return this._version;
@@ -39,16 +41,16 @@ export class LinksComponent implements OnInit {
       this.populateLinks();
   }
 
-    get searchTerm() {
-        return this._searchTerm;
-    }
+  @Input('searchTerm')
+  set searchTerm(val) {
+      this._searchTerm = val;
+      // change filteredLinks based on new search term
+      this.filter();
+  }
 
-    @Input('searchTerm')
-    set searchTerm(val: string) {
-        this._searchTerm = val;
-        console.log(this._searchTerm);
-        this.filter();
-    }
+  get searchTerm() {
+      return this._searchTerm;
+  }
 
   async populateLinks() {
       // reset the data
@@ -70,20 +72,31 @@ export class LinksComponent implements OnInit {
           });
   }
 
-  filter() {}
+  filter() {
+      this.filteredLinks = this.links.filter((link) => {
+          // check to see if it matches any of our search parameters
+          return link.title.toUpperCase().includes(this._searchTerm.toUpperCase())
+              || link.type.toUpperCase().includes(this._searchTerm.toUpperCase())
+              || link.driver.toUpperCase().includes(this._searchTerm.toUpperCase())
+              || link.status.toUpperCase().includes(this._searchTerm.toUpperCase())
+              || link.filename.toUpperCase().includes(this._searchTerm.toUpperCase())
+              || link.instance_id.toUpperCase().includes(this._searchTerm.toUpperCase());
+      });
+  }
 
   ngOnInit() {
+      // get current drivers for filtering via drivers to work
       this.route.queryParamMap.subscribe(params => {
           this.driver = params.get('driver');
           this.filteredLinks = (this.driver) ?
               this.links.filter(link => link.driver === this.driver) :
               this.links;
       });
-      this.route.paramMap.subscribe(params => {
-         this.searchTerm = params.get('searchTerm');
-      });
+      // get versionStripped in order to be able to navigate into LinksPage
       this.route.parent.paramMap.subscribe(params => {
           this.version = params.get('versionStripped');
       });
+      // get searchTerm from the nav-bar search bar
+      this.sharedService.searchTerm.subscribe(term => this.searchTerm = term);
   }
 }

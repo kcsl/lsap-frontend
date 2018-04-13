@@ -35,7 +35,6 @@ export class AppNavbarComponent implements OnInit {
   @Input('version')
   set version(val: string) {
       this._version = val;
-      console.log(this.version);
       this.versionChange.emit(this.version);
   }
 
@@ -46,7 +45,6 @@ export class AppNavbarComponent implements OnInit {
   @Input('searchTerm')
   set searchTerm(val: string) {
       this._searchTerm = val;
-      console.log(this.searchTerm);
       this.searchTermChange.emit(this.searchTerm);
   }
 

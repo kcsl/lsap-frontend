@@ -25,6 +25,7 @@ import { LinkCardComponent } from './links/link-card/link-card.component';
 import { LinksPageComponent } from './links/links-page/links-page.component';
 import {AngularFireStorageModule} from 'angularfire2/storage';
 import {HomeComponent} from './home/home.component';
+import {SharedService} from './services/shared.service';
 
 
 @NgModule({
@@ -65,7 +66,8 @@ import {HomeComponent} from './home/home.component';
     AdminAuthGuard,
     FilterService,
     LinksService,
-    NavbarService
+    NavbarService,
+    SharedService
   ],
   bootstrap: [AppComponent]
 })
