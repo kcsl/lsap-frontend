@@ -8,7 +8,8 @@ import java.util.regex.Pattern;
 
 import org.javatuples.Pair;
 
-public class Macro implements Locker{
+public class Macro implements Locker
+{
 	private String name;
 	private List<String> parameters;
 	
@@ -16,10 +17,10 @@ public class Macro implements Locker{
 	{
 		if (macroDefinition == null) throw new Exception("Unable to find a macro definition in \"" + macroDefinition + "\"");
 				
-		Matcher m = Pattern.compile("^\\s*#\\s*[defineDEFINE]{6}\\s+\\w+\\s*\\([^\\)]*\\)").matcher(macroDefinition);
+		Matcher m = Pattern.compile("^\\s*#\\s*define\\s+\\w+\\s*\\([^\\)]*\\)").matcher(macroDefinition.toLowerCase());
 		if (!m.find()) throw new Exception("Unable to find a macro definition in \"" + macroDefinition + "\"");
 		
-		macroDefinition = m.group();
+		macroDefinition = m.group().replace("\n", " ");
 		parameters = new ArrayList<String>();
 		
 		name = macroDefinition.replaceFirst("^\\s*#\\s*[defineDEFINE]{6}\\s+", "").replaceFirst("\\([^\\)]*\\).*$", "").trim();

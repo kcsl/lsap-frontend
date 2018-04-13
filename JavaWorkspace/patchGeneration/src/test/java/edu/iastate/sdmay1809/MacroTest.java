@@ -87,6 +87,7 @@ public class MacroTest {
 		assertEquals(params.get(0), "lockname");
 	}
 	
+	@SuppressWarnings("unlikely-arg-type")
 	@Test
 	public void macroEquals() throws Exception
 	{
@@ -94,6 +95,7 @@ public class MacroTest {
 		assertTrue(m1.equals(m2));
 		assertFalse(m1.equals(new Macro("#define otherMacro(someParam) doThing(someParam)")));
 		assertFalse(m1.equals(null));
+		assertTrue(m1.equals(new Function("int macro(int param);")));
 	}
 	
 	@Test
