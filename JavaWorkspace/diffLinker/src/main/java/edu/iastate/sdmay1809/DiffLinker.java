@@ -51,6 +51,20 @@ public class DiffLinker {
 		}
 
 		mapping.write(new PrintWriter(Paths.get(config.DIFF_TEST_DIR, "diffInstanceMap.json").toFile()), 1, 2);
+		
+		int mappingLength = mapping.length();
+		JSONArray interestingCases = new JSONArray();
+		for(int i = 0; i < mappingLength; i++) {
+			JSONObject link = mapping.getJSONObject(i);
+			if(link.has("old")) {
+				if(!link.getJSONObject("old").getString("status").equals(link.getJSONObject("new").getString("status"))) {
+					println(link.toString());
+					interestingCases.put(link);
+				}
+			}
+			
+		}
+		interestingCases.write(new PrintWriter(Paths.get(config.DIFF_TEST_DIR, "diffInteresting.json").toFile()), 1, 2);
 
 		return instancesLinked;
 	}
@@ -79,7 +93,7 @@ public class DiffLinker {
 		int instancesLinked = 0;
 
 		Path fileToSearch = Paths.get(config.KERNEL_DIR, filename);
-		println("Searching through: " + fileToSearch.toString());
+//		println("Searching through: " + fileToSearch.toString());
 		// Need to capture comment data within a certain threshold of lines
 
 		RandomAccessFile r = new RandomAccessFile(fileToSearch.toFile(), "r");
@@ -94,6 +108,8 @@ public class DiffLinker {
 		}
 
 		r.close();
+		
+		println((instancesLinked < length ? "MISSED " : "SUCCESS") + ", " + fileToSearch.toString() + ", " + String.format("%2d", length) + ", " + String.format("%2d", instancesLinked));
 
 		return instancesLinked;
 	}
@@ -112,12 +128,12 @@ public class DiffLinker {
 		String buffer = before + after;
 		String[] linesFound = buffer.split("\n");
 		
-		println("Found " + linesFound.length + " lines");
-		println("Buffer: \n" + buffer);
+//		println("Found " + linesFound.length + " lines");
+//		println("Buffer: \n" + buffer);
 
 		// Search for our string
 		for (int i = linesFound.length - 1; i >= 0; i--) {
-			if (linesFound[i].trim().matches("\\/\\* (?:[a-zA-Z0-9\\.\\/\\_]+@@@){5}[a-zA-Z0-9\\.\\/\\_]+ \\*\\/")) {
+			if (linesFound[i].trim().matches("\\/\\* (?:[a-zA-Z0-9\\.\\/\\_-]+@@@){5}[a-zA-Z0-9\\.\\/\\_-]+ \\*\\/")) {
 				metadata = linesFound[i].trim();
 				break;
 			}
@@ -129,7 +145,7 @@ public class DiffLinker {
 		JSONObject newData = new JSONObject().put("id", id).put("name", name).put("status", status)
 				.put("filename", filename).put("offset", offset).put("length", length);
 		if (metadata != null) {
-			println("Found String: " + metadata);
+//			println("Found String: " + metadata);
 
 			String[] commentSplit = metadata.split(" ");
 			JSONObject oldData = new JSONObject();
@@ -141,7 +157,7 @@ public class DiffLinker {
 			oldData.put("metadata", metadata);
 			map.put("new", newData).put("old", oldData);
 		} else {
-			println("No String found");
+//			println("No String found");
 
 			map.put("new", newData);
 		}
