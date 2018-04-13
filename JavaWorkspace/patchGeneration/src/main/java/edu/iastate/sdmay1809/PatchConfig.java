@@ -66,49 +66,52 @@ public class PatchConfig {
 								SPIN_PATHS_TO_READ,
 								SPIN_PATHS_TO_CHANGE };
 		
-		for (String s : criteriaLabels)
+		if (configObject != null)
 		{
-			JSONObject criteriaObject;
-			Map<String, Boolean> curCriteria = new HashMap<String, Boolean>();
-			
-			try
+			for (String s : criteriaLabels)
 			{
-				criteriaObject = configObject.getJSONObject(s);
-				for (String key : criteriaObject.keySet())
-				{
-					curCriteria.put(key, criteriaObject.getBoolean(key));
-				}
-			}
-			
-			catch(JSONException e)
-			{
-				throw new Exception("CONFIG: Error parsing object \"" + s + "\" in config file!");
-			}
-			
-			criteria.put(s, curCriteria);
-		}
-		
-		for (String s : pathLabels)
-		{
-			JSONArray pathObject;
-			Set<String> curPaths = new HashSet<String>();
-			
-			try
-			{
-				pathObject = configObject.getJSONArray(s);
+				JSONObject criteriaObject;
+				Map<String, Boolean> curCriteria = new HashMap<String, Boolean>();
 				
-				for (Object path : pathObject)
+				try
 				{
-					curPaths.add((String) path);
+					criteriaObject = configObject.getJSONObject(s);
+					for (String key : criteriaObject.keySet())
+					{
+						curCriteria.put(key, criteriaObject.getBoolean(key));
+					}
 				}
+				
+				catch(JSONException e)
+				{
+					throw new Exception("CONFIG: Error parsing object \"" + s + "\" in config file!");
+				}
+				
+				criteria.put(s, curCriteria);
 			}
 			
-			catch(JSONException e)
+			for (String s : pathLabels)
 			{
-				throw new Exception("CONFIG: Error parsing object \"" + s + "\" in config file!");
+				JSONArray pathObject;
+				Set<String> curPaths = new HashSet<String>();
+				
+				try
+				{
+					pathObject = configObject.getJSONArray(s);
+					
+					for (Object path : pathObject)
+					{
+						curPaths.add((String) path);
+					}
+				}
+				
+				catch(JSONException e)
+				{
+					throw new Exception("CONFIG: Error parsing object \"" + s + "\" in config file!");
+				}
+				
+				paths.put(s, curPaths);
 			}
-			
-			paths.put(s, curPaths);
 		}
 	}
 	
@@ -124,7 +127,15 @@ public class PatchConfig {
 	
 	public static void setJSONPath(String path)
 	{
-		jsonPath = Paths.get(path);
+		try
+		{
+			jsonPath = Paths.get(path);
+		}
+		
+		catch(Exception e)
+		{
+			jsonPath = null;
+		}
 	}
 	
 	public Map<String, Boolean> getCriteria(String label)
