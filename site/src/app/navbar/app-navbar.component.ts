@@ -24,8 +24,15 @@ export class AppNavbarComponent implements OnInit {
 
   ngOnInit() {}
 
-  search($event) {
-    this.searchTerm = $event.target.value;
+  async search($event) {
+    if (this.router.url === '/v/' + this._version + '/') {
+        this.searchTerm = $event.target.value;
+    } else {
+      // TODO – fix this race condition. Not properly waiting for router to nav first
+      await this.router.navigate(['/v/' + this._version + '/']).then(
+          this.searchTerm = $event.target.value
+      );
+    }
   }
 
   get version() {

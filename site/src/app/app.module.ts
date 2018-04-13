@@ -26,6 +26,7 @@ import { LinksPageComponent } from './links/links-page/links-page.component';
 import {AngularFireStorageModule} from 'angularfire2/storage';
 import {HomeComponent} from './home/home.component';
 import {SharedService} from './services/shared.service';
+import {LinksPageService} from './services/links_page.service';
 
 
 @NgModule({
@@ -67,7 +68,8 @@ import {SharedService} from './services/shared.service';
     FilterService,
     LinksService,
     NavbarService,
-    SharedService
+    SharedService,
+    LinksPageService
   ],
   bootstrap: [AppComponent]
 })
