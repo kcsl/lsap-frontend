@@ -1,3 +1,18 @@
 .container {
     margin-left: 232px;
+    margin-top: 15px;
+    height:100% !important;
+}
+
+.flex-container {
+    margin-left: -15px !important;
+    height: 100% !important;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.flex-item {
+    margin-left: -15px !important;
+    text-align: center;
 }
