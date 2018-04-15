@@ -19,8 +19,15 @@ export class LinksService {
     }
 
     async expandLinks(link: Links) {
-      await this.getAssetURL(link.mpg).toPromise().then(ref => {
-        link.mpg = ref;
-      });
+      if (link.mpg) { // null check
+          await this.getAssetURL(link.mpg).toPromise().then(ref => {
+              link.mpg = ref;
+          });
+      } else {
+        // placeholder image for now
+          await this.getAssetURL('placeholder.png').toPromise().then(ref => {
+            link.mpg = ref;
+          });
+      }
     }
 }

@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {NavbarService} from '../services/navbar.service';
+import {SharedService} from '../services/shared.service';
 
 @Component({
   selector: 'app-home',
@@ -14,10 +15,19 @@ export class HomeComponent implements OnInit {
   versionStripped;
   driver;
 
-  constructor(private route: ActivatedRoute, private navbarService: NavbarService, private router: Router) { }
+  constructor(
+    private route: ActivatedRoute,
+    private navbarService: NavbarService,
+    private router: Router,
+    private sharedService: SharedService,
+  ) { }
 
   static stripChars(input) {
       return input.replace(/[^0-9a-z]/gi, '').toString();
+  }
+
+  passToLinks($event) {
+      this.sharedService.getSearch($event);
   }
 
   ngOnInit() {
