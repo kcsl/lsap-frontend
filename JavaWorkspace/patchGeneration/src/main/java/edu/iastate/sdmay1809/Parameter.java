@@ -17,7 +17,7 @@ public class Parameter {
 			throw new Exception("PARAMETER: Unable to parse parameter from " + fullParam + "!");
 		}
 		
-		if (name.length() == 0 || type.length() == 0) throw new Exception("PARAMETER: Unable to parse parameter from " + fullParam + "!");
+		if (name.length() == 0 || type.length() == 0) throw new Exception("PARAMETER: Unable to parse parameter from \"" + fullParam + "\"!");
 	}
 	
 	public String getType()
@@ -29,4 +29,10 @@ public class Parameter {
 	{
 		return name;
 	}	
+	
+	@Override
+	public String toString()
+	{
+		return type + " " + name;
+	}
 }

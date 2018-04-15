@@ -73,4 +73,46 @@ public class Utils {
 		
 		return sb.toString();
 	}
+	
+	public static int levenshteinDistance (CharSequence lhs, CharSequence rhs) {                          
+	    int lLen = lhs.length() + 1;                                                     
+	    int rLen = rhs.length() + 1;                                                     
+	                                                                                    
+	    // the array of distances                                                       
+	    int[] cost = new int[lLen];                                                     
+	    int[] newCost = new int[lLen];                                                  
+	                                                                                    
+	    // initial cost of skipping prefix in String s0                                 
+	    for (int i = 0; i < lLen; i++) cost[i] = i;                                     
+	                                                                                    
+	    // dynamically computing the array of distances                                  
+	                                                                                    
+	    // transformation cost for each letter in s1                                    
+	    for (int j = 1; j < rLen; j++) {                                                
+	        // initial cost of skipping prefix in String s1                             
+	        newCost[0] = j;                                                             
+	                                                                                    
+	        // transformation cost for each letter in s0                                
+	        for(int i = 1; i < lLen; i++) {                                             
+	            // matching current letters in both strings                             
+	            int match = (lhs.charAt(i - 1) == rhs.charAt(j - 1)) ? 0 : 1;             
+	                                                                                    
+	            // computing cost for each transformation                               
+	            int costReplace = cost[i - 1] + match;                                 
+	            int costInsert  = cost[i] + 1;                                         
+	            int costDelete  = newCost[i - 1] + 1;                                  
+	                                                                                    
+	            // keep minimum cost                                                    
+	            newCost[i] = Math.min(Math.min(costInsert, costDelete), costReplace);
+	        }                                                                           
+	                                                                                    
+	        // swap cost/newcost arrays                                                 
+	        int[] swap = cost; 
+	        cost = newCost; 
+	        newCost = swap;                          
+	    }                                                                               
+	                                                                                    
+	    // the distance is the cost for transforming all letters in both strings        
+	    return cost[lLen - 1];                                                          
+	}
 }

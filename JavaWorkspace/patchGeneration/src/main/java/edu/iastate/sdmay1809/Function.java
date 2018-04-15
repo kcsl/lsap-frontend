@@ -5,9 +5,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class Function implements Locker
 {
+	public static PatchConfig config = null;
+	
 	private String name;
 	private String modifiers;
 	private List<Parameter> parameters;
@@ -64,13 +67,50 @@ public class Function implements Locker
 		return name.equals(((Locker) o).getName());
 	}
 	
+	@Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + name.hashCode();
+        return result;
+	}
+	
 	public static boolean isLockingFunction(Function f, Map<String, Boolean> criteria)
 	{
+		if (f.modifiers.toLowerCase().contains("define") || f.modifiers.toLowerCase().contains("return")) return false;
+		
 		for (String s : criteria.keySet())
 		{
-			if (f.getName().contains(s) != criteria.get(s)) return false;
+			if (f.name.contains(s) != criteria.get(s)) return false;
 		}
 		
 		return true;
+	}
+	
+	@Override
+	public String toString()
+	{
+		if (config == null) return "";
+		
+		String returnType = "";
+		
+		for (String type : config.getFunctionReturnTypes())
+		{
+			if (modifiers.replaceAll("\\s*\\*\\s*", " * ").contains(type.replaceAll("\\s*\\*\\s*", " * ")))
+			{
+				returnType = type;
+				break;
+			}
+		}
+		
+		if (returnType == null || returnType == "") return "";
+		
+		String string = "static inline " + returnType + " " + name + "(" + parameters.stream().map(Object::toString).collect(Collectors.joining(", ")) + ") {";
+		
+		if (returnType.contains("*")) string += "return NULL;}";
+		else if (returnType.contains("void")) string += "}";
+		else string += "return 0;}";
+		
+		return string;
 	}
 }
