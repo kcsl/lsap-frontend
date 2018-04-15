@@ -47,7 +47,7 @@ public class InstanceTrackerTest {
 		Path pathToInstanceMap = Paths.get(pathToTest.toString(), "oldInstanceMap.json");
 		String resultsDir = Paths.get(pathToTest.toString(), "results").toString();
 		InstanceTracker it = new InstanceTracker(resultsDir);
-		it.run(pathToTest.toString(), false);
+		it.run(pathToInstanceMap.toFile(), false);
 		try {
 			String content = String.join("", Files.readAllLines(pathToInstanceMap));
 			JSONArray instances = new JSONArray(content);
@@ -76,7 +76,7 @@ public class InstanceTrackerTest {
 		Path pathToInstanceMap = Paths.get(pathToTest.toString(), "oldInstanceMap.json");
 		String resultsDir = Paths.get(pathToTest.toString(), "results").toString();
 		InstanceTracker it = new InstanceTracker(resultsDir);
-		it.run(pathToTest.toString() + "/", false);
+		it.run(pathToInstanceMap.toFile(), false);
 		try {
 			String content = String.join("", Files.readAllLines(pathToInstanceMap));
 			JSONArray instances = new JSONArray(content);
@@ -103,10 +103,11 @@ public class InstanceTrackerTest {
 		pathToTest = Paths.get(System.getProperty("user.dir"), "resources", "testing", "InstanceTracker",
 				"singleInstance");
 		String resultsDir = Paths.get(pathToTest.toString(), "results").toString();
+		Path outputFile = Paths.get(pathToTest.toString(), "oldInstanceMap.json");
 		InstanceTracker it = new InstanceTracker(resultsDir);
-		boolean run1 = it.run(pathToTest.toString(), false);
-		boolean run2 = it.run(pathToTest.toString(), false);
-		boolean run3 = it.run(pathToTest.toString(), true);
+		boolean run1 = it.run(outputFile.toFile(), false);
+		boolean run2 = it.run(outputFile.toFile(), false);
+		boolean run3 = it.run(outputFile.toFile(), true);
 
 		assertEquals(true, run1);
 		assertEquals(false, run2);
@@ -120,7 +121,7 @@ public class InstanceTrackerTest {
 		Path pathToInstanceMap = Paths.get(pathToTest.toString(), "oldInstanceMap.json");
 		String resultsDir = Paths.get(pathToTest.toString(), "results").toString();
 		InstanceTracker it = new InstanceTracker(resultsDir);
-		it.run(pathToTest.toString(), true);
+		it.run(pathToInstanceMap.toFile(), true);
 
 		try {
 			String content = String.join("", Files.readAllLines(pathToInstanceMap));
@@ -167,7 +168,7 @@ public class InstanceTrackerTest {
 		Path pathToInstanceMap = Paths.get(pathToTest.toString(), "oldInstanceMap.json");
 		String resultsDir = Paths.get(pathToTest.toString(), "results").toString();
 		InstanceTracker it = new InstanceTracker(resultsDir);
-		it.run(pathToTest.toString(), false);
+		it.run(pathToInstanceMap.toFile(), false);
 		try {
 			String content = String.join("", Files.readAllLines(pathToInstanceMap));
 			JSONArray instances = new JSONArray(content);
@@ -207,7 +208,7 @@ public class InstanceTrackerTest {
 		Path pathToInstanceMap = Paths.get(pathToTest.toString(), "oldInstanceMap.json");
 		String resultsDir = Paths.get(pathToTest.toString(), "results").toString();
 		InstanceTracker it = new InstanceTracker(resultsDir);
-		boolean result = it.run(pathToTest.toString(), false);
+		boolean result = it.run(pathToInstanceMap.toFile(), false);
 		assertTrue(result);
 		try {
 			String content = String.join("", Files.readAllLines(pathToInstanceMap));
@@ -227,8 +228,9 @@ public class InstanceTrackerTest {
 		pathToTest = Paths.get(System.getProperty("user.dir"), "resources", "testing", "InstanceTracker",
 				"fileWriteFail");
 		String resultsDir = Paths.get(pathToTest.toString(), "results").toString();
+		Path pathToInstanceMap = Paths.get(pathToTest.toString(), "oldInstanceMap.json");
 		InstanceTracker it = new InstanceTracker(resultsDir);
-		boolean result = it.run(pathToTest.toString(), true);
+		boolean result = it.run(pathToInstanceMap.toFile(), true);
 		assertFalse(result);
 	}
 	
