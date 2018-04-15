@@ -1,6 +1,7 @@
 package edu.iastate.sdmay1809;
 
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 
 import org.json.JSONException;
@@ -16,7 +17,7 @@ public class DiffMapperMain {
 		
 		timings.add(System.nanoTime());
 		InstanceTracker it = new InstanceTracker(config.RESULT_DIR);
-		it.run(config.DIFF_TEST_DIR, false);
+		it.run(Paths.get(config.DIFF_TEST_DIR, "oldInstanceMap.json").toFile(), false);
 
 		timings.add(System.nanoTime());
 		DiffMapper dm = new DiffMapper(config, true);
