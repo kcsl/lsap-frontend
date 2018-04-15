@@ -8,76 +8,30 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Iterator;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import edu.iastate.sdmay1809.shared.DiffConfig;
+import edu.iastate.sdmay1809.shared.Utils;
+
 public class DiffMapper {
 
-	public static String OLD_TAG = "v3.17-rc1";
-	public static String NEW_TAG = "v3.18-rc1";
-	public static String DIFF_TEST_DIR = "/Volumes/dhanwada_cs/";
-	public static String KERNEL_DIR = "/Volumes/dhanwada_cs/kernel/";
-	public static String RESULT_DIR = "/Volumes/dhanwada_cs/sdmay18-09/linux-kernel-" + OLD_TAG.substring(1) + "/";
-	public static String[] TYPES = { "mutex", "spin" };
-
-	public static void main(String[] args) throws JSONException, IOException {
-		ArrayList<Long> timings = new ArrayList<Long>();
-
-		timings.add(System.nanoTime());
-		InstanceTracker it = new InstanceTracker(RESULT_DIR);
-		it.run(DIFF_TEST_DIR, false);
-
-		timings.add(System.nanoTime());
-		DiffMapper dm = new DiffMapper(true);
-		int changesApplied = dm.run("oldInstanceMap.json");
-		if (changesApplied < 0) {
-			System.err.println("[ERROR] could not map differences!");
-		} else {
-			System.out.println("Done! Applied " + changesApplied + " changes");
-		}
-
-		timings.add(System.nanoTime());
-
-		// Print out time differences
-		for (int i = 1; i < timings.size(); i++) {
-			long startTime = timings.get(i - 1);
-			long endTime = timings.get(i);
-			long duration = (endTime - startTime); // divide by 1000000 to get
-													// milliseconds.
-			System.out.println("Function #" + i + ": " + duration + "ns = " + duration / 1000000.0 + "ms");
-		}
-	}
-
-	public static boolean setCurrentDirectory(String directory_name) {
-		boolean result = false; // Boolean indicating whether directory was set
-		File directory; // Desired current working directory
-
-		directory = new File(directory_name).getAbsoluteFile();
-		if (directory.exists() || directory.mkdirs()) {
-			result = (System.setProperty("user.dir", directory.getAbsolutePath()) != null);
-		}
-
-		return result;
-	}
-
 	private boolean allowPrintStatements = true;
+	private DiffConfig config;
 
-	public DiffMapper(boolean allowPrintStatements) {
+	public DiffMapper(DiffConfig config, boolean allowPrintStatements) {
 		this.allowPrintStatements = allowPrintStatements;
+		this.config = config;
 	}
 
-	public int run(String inputMapFilename) throws JSONException, IOException {
-		if (!setCurrentDirectory(KERNEL_DIR)) {
-			println("Couldn't get the kernel dir");
-			return -1;
-		}
+	public int run(String inputMapFilename) throws JSONException, IOException, Exception {
+		performGitSetup();
 
 		println("Parsing instance map...");
-		Path oldInstance = Paths.get(DIFF_TEST_DIR, inputMapFilename);
+		Path oldInstance = Paths.get(config.DIFF_TEST_DIR, inputMapFilename);
 		Charset utf8 = Charset.forName("UTF-8");
 		String oldInstanceContent = String.join("\n", Files.readAllLines(oldInstance, utf8));
 		JSONArray arr = new JSONArray(oldInstanceContent);
@@ -90,10 +44,14 @@ public class DiffMapper {
 		}
 
 		println("Applying changes...");
-		return applyChanges(changes);
+		int retVal = applyChanges(changes);
+
+		performGitCleanup();
+
+		return retVal;
 	}
 
-	public void trackMetaData(JSONObject changes, JSONObject object) throws JSONException, IOException {
+	private void trackMetaData(JSONObject changes, JSONObject object) throws JSONException, IOException {
 		String fileName = object.getString("filename");
 		String name = object.getString("name");
 		String status = object.getString("status");
@@ -117,7 +75,7 @@ public class DiffMapper {
 		changes.getJSONArray(fileName).put(metaData);
 	}
 
-	public int applyChanges(JSONObject changes) throws JSONException, IOException {
+	private int applyChanges(JSONObject changes) throws JSONException, IOException {
 		int changesApplied = 0;
 		Iterator<String> iter = changes.keys();
 		while (iter.hasNext()) {
@@ -125,7 +83,7 @@ public class DiffMapper {
 			JSONArray sorted = sort(changes.getJSONArray(fname));
 			int numChanges = sorted.length();
 
-			insert(KERNEL_DIR + fname, sorted);
+			insert(Paths.get(config.KERNEL_DIR, fname).toString(), sorted);
 
 			println("Applied " + String.format("%3d", numChanges) + " changes to: " + fname);
 			changesApplied += numChanges;
@@ -134,7 +92,7 @@ public class DiffMapper {
 		return changesApplied;
 	}
 
-	public JSONArray sort(JSONArray array) throws JSONException {
+	private JSONArray sort(JSONArray array) throws JSONException {
 		JSONArray sorted = new JSONArray();
 
 		while (array.length() > 0) {
@@ -160,7 +118,7 @@ public class DiffMapper {
 		return sorted;
 	}
 
-	public void insert(String filename, JSONArray instances) throws JSONException, IOException {
+	private void insert(String filename, JSONArray instances) throws JSONException, IOException {
 		File fbak = new File(filename + "~");
 		RandomAccessFile r = new RandomAccessFile(new File(filename), "rw");
 		RandomAccessFile rtemp = new RandomAccessFile(fbak, "rw");
@@ -205,7 +163,81 @@ public class DiffMapper {
 		fbak.delete();
 	}
 
-	public void println(String msg) {
+	private void performGitSetup() throws Exception {
+		File kernel_dir = new File(config.KERNEL_DIR);
+
+		try {
+			// git checkout <old_tag>
+			execGitCheckoutTag(config.OLD_TAG, kernel_dir);
+
+			// git clean -xdfq
+			execGitClean(kernel_dir);
+
+			// git checkout -b diff_map
+			execGitCreateBranch("diff_map", kernel_dir);
+		} catch(Exception e) {
+			println("[ERROR] Couldn't complete git setup!");
+			println(e.getMessage());
+			throw new Exception("Couldn't complete git setup!");
+		}
+	}
+
+	private void performGitCleanup() throws Exception {
+		File kernel_dir = new File(config.KERNEL_DIR);
+
+		try {
+			// git commit -am "add metadata"
+			execGitCommitAll("add metadata", kernel_dir);
+
+			// git checkout <new_tag>
+			execGitCheckoutTag(config.NEW_TAG, kernel_dir);
+
+			// git clean -xdfq
+			execGitClean(kernel_dir);
+
+			// git reset <old_version>
+			execGitReset(config.OLD_TAG, kernel_dir);
+
+			// git commit -am "upgrade to <new version>"
+			execGitCommitAll("upgrade to " + config.NEW_TAG, kernel_dir);
+
+			// git checkout -b diff_map_upgraded
+			execGitCreateBranch("diff_map_upgraded", kernel_dir);
+
+			// git rebase -s recursive -X theirs diff_map
+			execGitRebase("diff_map", kernel_dir);	
+		} catch(Exception e) {
+			println("[ERROR] Couldn't complete git cleanup!");
+			println(e.getMessage());
+			throw new Exception("Couldn't complete git cleanup!");
+		}
+	}
+
+	private void execGitCheckoutTag(String tag, File dir) throws IOException, InterruptedException {
+			println(Utils.execute(new String[] { "git", "checkout", tag }, dir));
+	}
+
+	private void execGitClean(File dir) throws IOException, InterruptedException {
+			println(Utils.execute(new String[] { "git", "clean", "-xdfq" }, dir));
+	}
+
+	private void execGitCreateBranch(String branchName, File dir) throws IOException, InterruptedException {
+			println(Utils.execute(new String[] { "git", "checkout", "-b", branchName }, dir));
+	}
+
+	private void execGitReset(String commit, File dir) throws IOException, InterruptedException {
+			println(Utils.execute(new String[] { "git", "reset", commit }, dir));
+	}
+
+	private void execGitCommitAll(String message, File dir) throws IOException, InterruptedException {
+			println(Utils.execute(new String[] { "git", "commit", "-am", message }, dir));
+	}
+
+	private void execGitRebase(String base, File dir) throws IOException, InterruptedException {
+		println(Utils.execute(new String[] { "git", "rebase", "-s", "recursive", "-X", "theirs", base }, dir));
+	}
+
+	private void println(String msg) {
 		if (allowPrintStatements) {
 			System.out.println(msg);
 		}
