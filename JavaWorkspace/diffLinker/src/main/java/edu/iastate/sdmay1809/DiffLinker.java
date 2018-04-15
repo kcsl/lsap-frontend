@@ -3,6 +3,7 @@ package edu.iastate.sdmay1809;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.RandomAccessFile;
+import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -50,7 +51,8 @@ public class DiffLinker {
 			instancesLinked += linkInstances(key, instances, mapping);
 		}
 
-		mapping.write(new PrintWriter(Paths.get(config.DIFF_TEST_DIR, "diffInstanceMap.json").toFile()), 1, 2);
+		Writer writer = mapping.write(new PrintWriter(Paths.get(config.DIFF_TEST_DIR, "diffInstanceMap.json").toFile()), 1, 2);
+		writer.close();
 
 		int mappingLength = mapping.length();
 		JSONArray interestingCases = new JSONArray();
@@ -65,7 +67,8 @@ public class DiffLinker {
 			}
 
 		}
-		interestingCases.write(new PrintWriter(Paths.get(config.DIFF_TEST_DIR, "diffInteresting.json").toFile()), 1, 2);
+		writer = interestingCases.write(new PrintWriter(Paths.get(config.DIFF_TEST_DIR, "diffInteresting.json").toFile()), 1, 2);
+		writer.close();
 
 		PrintWriter pw = new PrintWriter(Paths.get(config.DIFF_TEST_DIR, "diffInteresting.csv").toFile());
 
@@ -76,15 +79,12 @@ public class DiffLinker {
 		for (int i = 0; i < interestingCasesLength; i++) {
 			JSONObject link = interestingCases.getJSONObject(i);
 			JSONObject newData = link.getJSONObject("new");
+			JSONObject oldData = link.getJSONObject("old");
 
 			pw.write("" + config.NEW_TAG + ", " + newData.getString("status") + ", " + newData.getString("id") + ", "
 					+ newData.getString("name") + ", " + newData.getString("filename") + ", , ");
-			if (link.has("old")) {
-				JSONObject oldData = link.getJSONObject("old");
-				pw.write("" + config.OLD_TAG + ", " + oldData.getString("status") + ", " + oldData.getString("id") + ", "
-						+ oldData.getString("name") + ", " + oldData.getString("filename"));
-			}
-			
+			pw.write("" + config.OLD_TAG + ", " + oldData.getString("status") + ", " + oldData.getString("id") + ", "
+					+ oldData.getString("name") + ", " + oldData.getString("filename"));
 			pw.write("\n");
 
 		}
