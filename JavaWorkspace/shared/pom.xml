@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>edu.iastate.sdmay1809</groupId>
 	<artifactId>shared</artifactId>
-	<version>0.1.0</version>
+	<version>1.0.0</version>
 	<name>Shared</name>
 	<description>Shared code for sdmay18-09 project</description>
 	<build>
