@@ -10,10 +10,11 @@ export class AppNavbarComponent implements OnInit {
 
   @Input('versions') versions: String[] = [];
   private _version: string;
+  private _searchTerm: string;
   @Input('versionStripped') versionStripped;
 
   @Output() versionChange = new EventEmitter();
-  searchTerm;
+  @Output() searchTermChange = new EventEmitter();
 
   static stripChars(input) {
       return input.replace(/[^0-9a-z]/gi, '').toString();
@@ -23,8 +24,15 @@ export class AppNavbarComponent implements OnInit {
 
   ngOnInit() {}
 
-  search($event) {
-    this.searchTerm = $event.target.value;
+  async search($event) {
+    if (this.router.url === '/v/' + this._version + '/') {
+        this.searchTerm = $event.target.value;
+    } else {
+      // TODO – fix this race condition. Not properly waiting for router to nav first
+      await this.router.navigate(['/v/' + this._version + '/']).then(
+          this.searchTerm = $event.target.value
+      );
+    }
   }
 
   get version() {
@@ -34,8 +42,17 @@ export class AppNavbarComponent implements OnInit {
   @Input('version')
   set version(val: string) {
       this._version = val;
-      console.log(this.version);
       this.versionChange.emit(this.version);
+  }
+
+  get searchTerm() {
+    return this._searchTerm;
+  }
+
+  @Input('searchTerm')
+  set searchTerm(val: string) {
+      this._searchTerm = val;
+      this.searchTermChange.emit(this.searchTerm);
   }
 
   navigateToNewVersion(version: string) {
