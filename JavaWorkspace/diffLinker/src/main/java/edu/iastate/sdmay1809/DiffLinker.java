@@ -51,20 +51,45 @@ public class DiffLinker {
 		}
 
 		mapping.write(new PrintWriter(Paths.get(config.DIFF_TEST_DIR, "diffInstanceMap.json").toFile()), 1, 2);
-		
+
 		int mappingLength = mapping.length();
 		JSONArray interestingCases = new JSONArray();
-		for(int i = 0; i < mappingLength; i++) {
+		for (int i = 0; i < mappingLength; i++) {
 			JSONObject link = mapping.getJSONObject(i);
-			if(link.has("old")) {
-				if(!link.getJSONObject("old").getString("status").equals(link.getJSONObject("new").getString("status"))) {
+			if (link.has("old")) {
+				if (!link.getJSONObject("old").getString("status")
+						.equals(link.getJSONObject("new").getString("status"))) {
 					println(link.toString());
 					interestingCases.put(link);
 				}
 			}
-			
+
 		}
 		interestingCases.write(new PrintWriter(Paths.get(config.DIFF_TEST_DIR, "diffInteresting.json").toFile()), 1, 2);
+
+		PrintWriter pw = new PrintWriter(Paths.get(config.DIFF_TEST_DIR, "diffInteresting.csv").toFile());
+
+		pw.write(
+				"New Version, status, id, name, filename, , Old Version, status, id, name, filename,\n");
+
+		int interestingCasesLength = interestingCases.length();
+		for (int i = 0; i < interestingCasesLength; i++) {
+			JSONObject link = interestingCases.getJSONObject(i);
+			JSONObject newData = link.getJSONObject("new");
+
+			pw.write("" + config.NEW_TAG + ", " + newData.getString("status") + ", " + newData.getString("id") + ", "
+					+ newData.getString("name") + ", " + newData.getString("filename") + ", , ");
+			if (link.has("old")) {
+				JSONObject oldData = link.getJSONObject("old");
+				pw.write("" + config.OLD_TAG + ", " + oldData.getString("status") + ", " + oldData.getString("id") + ", "
+						+ oldData.getString("name") + ", " + oldData.getString("filename"));
+			}
+			
+			pw.write("\n");
+
+		}
+		
+		pw.close();
 
 		return instancesLinked;
 	}
@@ -93,23 +118,24 @@ public class DiffLinker {
 		int instancesLinked = 0;
 
 		Path fileToSearch = Paths.get(config.KERNEL_DIR, filename);
-//		println("Searching through: " + fileToSearch.toString());
+		// println("Searching through: " + fileToSearch.toString());
 		// Need to capture comment data within a certain threshold of lines
 
 		RandomAccessFile r = new RandomAccessFile(fileToSearch.toFile(), "r");
 
 		for (int i = 0; i < length; i++) {
 			JSONObject instance = sorted.getJSONObject(i);
-			
-			if(linkInstance(instance, diffMap, r)) {
+
+			if (linkInstance(instance, diffMap, r)) {
 				instancesLinked++;
 			}
 
 		}
 
 		r.close();
-		
-		println((instancesLinked < length ? "MISSED " : "SUCCESS") + ", " + fileToSearch.toString() + ", " + String.format("%2d", length) + ", " + String.format("%2d", instancesLinked));
+
+		println((instancesLinked < length ? "MISSED " : "SUCCESS") + ", " + fileToSearch.toString() + ", "
+				+ String.format("%2d", length) + ", " + String.format("%2d", instancesLinked));
 
 		return instancesLinked;
 	}
@@ -127,9 +153,9 @@ public class DiffLinker {
 		String before = captureLines(r, offset, lineSearchThreshold, true);
 		String buffer = before + after;
 		String[] linesFound = buffer.split("\n");
-		
-//		println("Found " + linesFound.length + " lines");
-//		println("Buffer: \n" + buffer);
+
+		// println("Found " + linesFound.length + " lines");
+		// println("Buffer: \n" + buffer);
 
 		// Search for our string
 		for (int i = linesFound.length - 1; i >= 0; i--) {
@@ -140,12 +166,12 @@ public class DiffLinker {
 		}
 
 		// TODO: Add validation checking
-		
+
 		JSONObject map = new JSONObject();
 		JSONObject newData = new JSONObject().put("id", id).put("name", name).put("status", status)
 				.put("filename", filename).put("offset", offset).put("length", length);
 		if (metadata != null) {
-//			println("Found String: " + metadata);
+			// println("Found String: " + metadata);
 
 			String[] commentSplit = metadata.split(" ");
 			JSONObject oldData = new JSONObject();
@@ -157,7 +183,7 @@ public class DiffLinker {
 			oldData.put("metadata", metadata);
 			map.put("new", newData).put("old", oldData);
 		} else {
-//			println("No String found");
+			// println("No String found");
 
 			map.put("new", newData);
 		}
@@ -166,14 +192,14 @@ public class DiffLinker {
 
 		return (metadata != null);
 	}
-	
+
 	private String captureLines(RandomAccessFile r, long offset, int maxLines, boolean before) {
 		String buffer = "";
 		byte[] byteBuffer;
 		String[] linesFound = {};
 		long fileLength;
 		long currOffset = 0;
-		
+
 		try {
 			r.seek(offset);
 			fileLength = r.length();
@@ -182,25 +208,25 @@ public class DiffLinker {
 			e.printStackTrace(System.err);
 			return "";
 		}
-		
-		while(linesFound.length < maxLines) {
+
+		while (linesFound.length < maxLines) {
 			try {
 				currOffset = r.getFilePointer();
-				int newLength = before ? (int)Math.min(40, currOffset) : (int)Math.min(40, fileLength - 1 - offset);
+				int newLength = before ? (int) Math.min(40, currOffset) : (int) Math.min(40, fileLength - 1 - offset);
 				byteBuffer = new byte[newLength];
-				if(before) {
+				if (before) {
 					r.seek(currOffset - newLength);
 					r.readFully(byteBuffer, 0, newLength);
 					r.seek(currOffset - newLength);
-					
+
 					buffer = new String(byteBuffer) + buffer;
 				} else {
 					r.readFully(byteBuffer, 0, newLength);
 					buffer = buffer + new String(byteBuffer);
 				}
-				
+
 				linesFound = buffer.split("\n", maxLines);
-				if(newLength < 40) {
+				if (newLength < 40) {
 					break;
 				}
 			} catch (Exception e) {
@@ -209,7 +235,7 @@ public class DiffLinker {
 				break;
 			}
 		}
-		
+
 		return buffer;
 	}
 
