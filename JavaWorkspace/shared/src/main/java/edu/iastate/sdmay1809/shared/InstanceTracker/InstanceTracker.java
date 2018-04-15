@@ -3,6 +3,8 @@ package edu.iastate.sdmay1809.shared.InstanceTracker;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -12,11 +14,20 @@ import edu.iastate.sdmay1809.shared.Utils;
 public class InstanceTracker {
 
 	String sourceDirectory;
+	List<String> types;
 
 	public InstanceTracker(String sourceDirectory) {
 		InstanceParserManager.put(new InstanceParserV1());
 		InstanceParserManager.put(new InstanceParserV2());
 		this.sourceDirectory = sourceDirectory;
+		this.types = new ArrayList<String>();
+		types.add("mutex");
+		types.add("spin");
+	}
+	
+	public InstanceTracker(String sourceDirectory, List<String> types) {
+		this.sourceDirectory = sourceDirectory;
+		this.types = types;
 	}
 
 	public boolean run(File outputFile, boolean outputCheckOverride) {
@@ -67,8 +78,12 @@ public class InstanceTracker {
 		File[] currDirs;
 
 		for (File dir : subSourceDirs) {
-			currDirs = dir.listFiles(new DirectoryFilter());
-			combinedDirs = Utils.concatenate(combinedDirs, currDirs);
+			if(types.contains(dir.getName())) {
+				currDirs = dir.listFiles(new DirectoryFilter());
+				combinedDirs = Utils.concatenate(combinedDirs, currDirs);
+			} else {
+				System.err.println("[WARN] : Directory " + dir.getName() + " was not searched since it did not appear in the type whitelist!");
+			}
 		}
 
 		return combinedDirs;

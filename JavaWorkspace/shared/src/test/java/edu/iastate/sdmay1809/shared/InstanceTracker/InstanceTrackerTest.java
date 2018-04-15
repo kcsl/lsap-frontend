@@ -8,7 +8,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -38,6 +40,16 @@ public class InstanceTrackerTest {
 		InstanceTracker it = new InstanceTracker("my_source_dir");
 		assertNotNull(it);
 		assertEquals("my_source_dir", it.sourceDirectory);
+	}
+	
+	@Test
+	public void testInitTypes() {
+		List<String> types = new ArrayList<String>();
+		types.add("type1");
+		InstanceTracker it = new InstanceTracker("my_source_dir", types);
+		assertNotNull(it);
+		assertEquals("my_source_dir", it.sourceDirectory);
+		assertEquals(types, it.types);
 	}
 
 	@Test
@@ -162,13 +174,44 @@ public class InstanceTrackerTest {
 	}
 	
 	@Test
+	public void testFilterTypes() {
+		List<String> types = new ArrayList<String>();
+		types.add("mutex");
+		pathToTest = Paths.get(System.getProperty("user.dir"), "resources", "testing", "InstanceTracker",
+				"multipleTypes");
+		Path pathToInstanceMap = Paths.get(pathToTest.toString(), "oldInstanceMap.json");
+		String resultsDir = Paths.get(pathToTest.toString(), "results").toString();
+		InstanceTracker it = new InstanceTracker(resultsDir, types);
+		it.run(pathToInstanceMap.toFile(), true);
+		try {
+			String content = String.join("", Files.readAllLines(pathToInstanceMap));
+			JSONArray instances = new JSONArray(content);
+			assertEquals(1, instances.length());
+
+			JSONObject mutexInstance = instances.getJSONObject(0);
+			assertEquals("source_mutex.c", mutexInstance.getString("filename"));
+			assertEquals(42, mutexInstance.getInt("offset"));
+			assertEquals(24, mutexInstance.getInt("length"));
+			assertEquals("mutex_instance", mutexInstance.getString("name"));
+			assertEquals("ffa462", mutexInstance.getString("id"));
+			assertEquals("UNPAIRED", mutexInstance.getString("status"));
+		} catch (IOException e) {
+			e.printStackTrace();
+			fail("Couldn't get oldInstanceMap.json");
+		} catch (JSONException e) {
+			e.printStackTrace();
+			fail("Couldn't Perform JSON Operation!");
+		}
+	}
+	
+	@Test
 	public void testMultipleInstances() {
 		pathToTest = Paths.get(System.getProperty("user.dir"), "resources", "testing", "InstanceTracker",
 				"multipleInstances");
 		Path pathToInstanceMap = Paths.get(pathToTest.toString(), "oldInstanceMap.json");
 		String resultsDir = Paths.get(pathToTest.toString(), "results").toString();
 		InstanceTracker it = new InstanceTracker(resultsDir);
-		it.run(pathToInstanceMap.toFile(), false);
+		it.run(pathToInstanceMap.toFile(), true);
 		try {
 			String content = String.join("", Files.readAllLines(pathToInstanceMap));
 			JSONArray instances = new JSONArray(content);
