@@ -22,6 +22,7 @@ public class Patcher {
 	private String kernelPath;
 	private String outputPath;
 	private boolean debug;
+	@SuppressWarnings("unused")
 	private boolean verbose;
 	
 	public Patcher(String configPath, String kernelPath, String outputPath, boolean debug, boolean verbose) throws Exception
@@ -136,6 +137,9 @@ public class Patcher {
 			}
 		}
 		
+		/*
+		 * TODO: Map macros to their functions
+		 */
 		for (Macro m : macros)
 		{
 			int minLevDist = Integer.MAX_VALUE;
@@ -264,6 +268,9 @@ public class Patcher {
 			}
 		}
 		
+		/*
+		 * TODO: Map macros to their functions
+		 */
 		for (Macro m : macros)
 		{
 			int minLevDist = Integer.MAX_VALUE;
@@ -324,22 +331,52 @@ public class Patcher {
 		return new Pair<Set<Function>, Set<Macro>>(functions, macros);
 	}
 	
-	public void removeMutexDefinitions(Pair<Set<Function>, Set<Macro>> locks)
+	public void removeMutexDefinitions(Pair<Set<Function>, Set<Macro>> locks) throws Exception
 	{
-		
+		for (String filePath : config.getPaths(PatchConfig.MUTEX_PATHS_TO_CHANGE))
+		{
+			String fileSource = "";
+			String newSource = "";
+			
+			try
+			{
+				fileSource = String.join("\n", Files.readAllLines(Paths.get(kernelPath, filePath)));
+			}
+			
+			catch (IOException e)
+			{
+				System.err.println("PATCHER: Unable to read file \"" + filePath + "\"! Skipping it.");
+				continue;
+			}
+			
+			Matcher matcher = Pattern.compile("(\\w+\\s*(\\*)?\\s+(\\*)?\\s*)+\\w+\\s*\\([^\\)]*\\)").matcher(fileSource);
+			
+			while(matcher.find())
+			{
+				try
+				{
+					String functionString = matcher.group();
+					if (locks.getValue0().contains(new Function(functionString)))
+					{
+						String transfer = fileSource.substring(0, matcher.start());
+						newSource += transfer;
+						fileSource = fileSource.substring(matcher.end());
+					}
+				}
+				
+				catch (Exception e)
+				{
+					System.err.println("PATCHER: Unable to find a function definition in \"" + matcher.group() + "\"! Skipping it.");
+				}
+			}
+			
+			
+			
+		}
 	}
 	
 	public void removeSpinDefinitions(Pair<Set<Function>, Set<Macro>> locks)
 	{
 		
-	}
-	
-	private List<Function> getFunctions(String source)
-	{
-		List<Function> functions = new ArrayList<Function>();
-		
-		
-		
-		return functions;
 	}	
 }
