@@ -1,0 +1,35 @@
+[
+  {
+    "metadata": "/* 8f4ae5@@@PAIRED@@@14764@@@32@@@drivers/gpu/drm/i915/i915_debugfs.c@@@event_lock */", 
+    "old": {
+      "filename": "drivers/gpu/drm/i915/i915_debugfs.c",
+      "offset": 14764,
+      "name": "event_lock",
+      "length": 32,
+      "id": "8f4ae5",
+      "status": "PAIRED"
+    }
+  },
+  {
+    "metadata": "/* 8f59a7@@@PAIRED@@@54315@@@38@@@drivers/gpu/drm/i915/i915_debugfs.c@@@lock */",
+    "old": {
+      "filename": "drivers/gpu/drm/i915/i915_debugfs.c",
+      "offset": 54315,
+      "name": "lock",
+      "length": 38,
+      "id": "8f59a7",
+      "status": "PAIRED"
+    }
+  },
+  {
+    "metadata": "/* 8f68c0@@@PAIRED@@@78458@@@31@@@drivers/gpu/drm/i915/i915_debugfs.c@@@lock */",
+    "old": {
+      "filename": "drivers/gpu/drm/i915/i915_debugfs.c",
+      "offset": 78458,
+      "name": "lock",
+      "length": 31,
+      "id": "8f68c0",
+      "status": "PAIRED"
+    }
+  }
+]

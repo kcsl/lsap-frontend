@@ -1,0 +1,9 @@
+{
+	"old_tag": "v3.19-rc1",
+	"new_tag": "v4.13",
+	"diff_test_dir": "resources/testing/DiffLinker/testMultipleInstances/diffmap/",
+	"kernel_dir": "resources/testing/DiffLinker/testMultipleInstances/kernel/",
+	"result_dir": "resources/testing/DiffLinker/testMultipleInstances/diffmap/413_results",
+	"types": [
+		"spin"]
+}
