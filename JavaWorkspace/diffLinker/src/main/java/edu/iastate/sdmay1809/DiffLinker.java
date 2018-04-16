@@ -15,6 +15,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import edu.iastate.sdmay1809.shared.DiffConfig;
+import edu.iastate.sdmay1809.shared.InstanceTracker.InstanceParser;
+import edu.iastate.sdmay1809.shared.InstanceTracker.InvalidInstanceFormatException;
 
 public class DiffLinker {
 
@@ -148,6 +150,7 @@ public class DiffLinker {
 		String id = instance.getString("id");
 		long length = instance.getLong("length");
 
+		JSONObject oldData = null;
 		String metadata = null;
 		String after = captureLines(r, offset, 3, false);
 		String before = captureLines(r, offset, lineSearchThreshold, true);
@@ -156,13 +159,16 @@ public class DiffLinker {
 
 		// println("Found " + linesFound.length + " lines");
 		// println("Buffer: \n" + buffer);
+		
+		InstanceParser ip = new MetadataCommentInstanceParser();
 
 		// Search for our string
 		for (int i = linesFound.length - 1; i >= 0; i--) {
-			if (linesFound[i].trim().matches("\\/\\* (?:[a-zA-Z0-9\\.\\/\\_-]+@@@){5}[a-zA-Z0-9\\.\\/\\_-]+ \\*\\/")) {
+			try {
+				oldData = ip.parseEntry(linesFound[i]);
 				metadata = linesFound[i].trim();
 				break;
-			}
+			} catch (InvalidInstanceFormatException e) {}
 		}
 
 		// TODO: Add validation checking
@@ -170,27 +176,17 @@ public class DiffLinker {
 		JSONObject map = new JSONObject();
 		JSONObject newData = new JSONObject().put("id", id).put("name", name).put("status", status)
 				.put("filename", filename).put("offset", offset).put("length", length);
-		if (metadata != null) {
-			// println("Found String: " + metadata);
-
-			String[] commentSplit = metadata.split(" ");
-			JSONObject oldData = new JSONObject();
-			String[] dataSplit = commentSplit[1].split("@@@");
-
-			oldData.put("id", dataSplit[0]).put("name", dataSplit[5]).put("status", dataSplit[1])
-					.put("filename", dataSplit[4]).put("offset", dataSplit[2]).put("length", dataSplit[3]);
-
+		if (oldData != null) {
 			oldData.put("metadata", metadata);
 			map.put("new", newData).put("old", oldData);
 		} else {
 			// println("No String found");
-
 			map.put("new", newData);
 		}
 
 		diffMap.put(map);
 
-		return (metadata != null);
+		return (oldData != null);
 	}
 
 	private String captureLines(RandomAccessFile r, long offset, int maxLines, boolean before) {
