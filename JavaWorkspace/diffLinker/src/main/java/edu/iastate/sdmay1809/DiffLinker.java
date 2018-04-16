@@ -152,8 +152,15 @@ public class DiffLinker {
 
 		JSONObject oldData = null;
 		String metadata = null;
-		String after = captureLines(r, offset, 3, false);
-		String before = captureLines(r, offset, lineSearchThreshold, true);
+		String after;
+		String before;
+		try {
+			after = captureLines(r, offset, 3, false);
+			before = captureLines(r, offset, lineSearchThreshold, true);
+		} catch (CaptureLinesFailedException e) {
+			System.err.println("[ERROR]: Couldn't Capture Lines for id: " + id);
+			return false;
+		}
 		String buffer = before + after;
 		String[] linesFound = buffer.split("\n");
 
@@ -189,7 +196,7 @@ public class DiffLinker {
 		return (oldData != null);
 	}
 
-	private String captureLines(RandomAccessFile r, long offset, int maxLines, boolean before) {
+	private String captureLines(RandomAccessFile r, long offset, int maxLines, boolean before) throws CaptureLinesFailedException {
 		String buffer = "";
 		byte[] byteBuffer;
 		String[] linesFound = {};
@@ -202,7 +209,7 @@ public class DiffLinker {
 		} catch (Exception e) {
 			System.err.println("Couldn't Seek to this offset!");
 			e.printStackTrace(System.err);
-			return "";
+			throw new CaptureLinesFailedException(e.getMessage());
 		}
 
 		while (linesFound.length < maxLines) {
@@ -228,7 +235,7 @@ public class DiffLinker {
 			} catch (Exception e) {
 				System.err.println("Couldn't Capture Bytes at offset: " + currOffset);
 				e.printStackTrace(System.err);
-				break;
+				throw new CaptureLinesFailedException(e.getMessage());
 			}
 		}
 
