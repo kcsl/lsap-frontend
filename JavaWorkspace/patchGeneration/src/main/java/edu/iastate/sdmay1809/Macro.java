@@ -62,7 +62,16 @@ public class Macro implements Locker
 		if (o == null) return false;
 		if (this == o) return true;
 		if (!Locker.class.isInstance(o)) return false;
+		if (Macro.class.isInstance(o))
+		{
+			if (parameters.size() != ((Macro) o).parameters.size()) return false;
+			for (int i = 0; i < parameters.size(); i++)
+			{
+				if (!parameters.get(i).equals(((Macro) o).parameters.get(i))) return false;
+			}
 			
+			return true;
+		}
 		return this.name.equals(((Locker)o).getName());
 	}
 	

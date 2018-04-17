@@ -64,6 +64,7 @@ public class Function implements Locker
 		if (o == null) return false;
 		if (this == o) return true;
 		if (!Locker.class.isInstance(o)) return false;
+		if (Function.class.isInstance(o)) return name.equals(((Function) o).getName()) && modifiers.replaceAll("\\s*\\*\\s*", "* ").equals(((Function) o).getModifiers().replaceAll("\\s*\\*\\s*", "* "));
 		return name.equals(((Locker) o).getName());
 	}
 	
@@ -78,6 +79,19 @@ public class Function implements Locker
 	public static boolean isLockingFunction(Function f, Map<String, Boolean> criteria)
 	{
 		if (f.modifiers.toLowerCase().contains("define") || f.modifiers.toLowerCase().contains("return")) return false;
+		
+		boolean isValidReturnType = false;
+		
+		for (String s : config.getFunctionReturnTypes())
+		{
+			if (f.modifiers.replaceAll("\\s*\\*\\s*", "* ").contains(s.replaceAll("\\s*\\*\\s*", "* ")))
+			{
+				isValidReturnType = true;
+				break;
+			}
+		}
+		
+		if (!isValidReturnType) return false;
 		
 		for (String s : criteria.keySet())
 		{

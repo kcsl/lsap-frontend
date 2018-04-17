@@ -4,7 +4,7 @@ public class PatcherMain
 {
 	public static void main(String[] args) throws Exception
 	{
-		Patcher patcher = new Patcher("resources/patcherConfig.json", "resources/", "resources/testing/patch/real/", false, true);
+		Patcher patcher = new Patcher("resources/patcherConfig.json", "resources/kernel/", "resources/testing/patch/real/", false, true);
 		patcher.patch();		
 	}
 }

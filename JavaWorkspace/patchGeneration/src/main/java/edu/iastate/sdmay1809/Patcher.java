@@ -6,12 +6,14 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.javatuples.Pair;
 
@@ -68,7 +70,6 @@ public class Patcher {
 		removeSpinDefinitions(spinLocks);
 	}
 	
-	@SuppressWarnings("unlikely-arg-type")
 	public Pair<Set<Function>, Set<Macro>> generateLSAPMutexHeaderFile() throws Exception
 	{
 		Set<Function> functions = new LinkedHashSet<Function>();
@@ -101,7 +102,7 @@ public class Patcher {
 					if (!functionLine.toLowerCase().contains("define") && !functionLine.toLowerCase().contains("return"))
 					{
 						Function f = new Function(matcher.group());
-						if (Function.isLockingFunction(f, config.getCriteria(PatchConfig.MUTEX_FUNCTION_CRITERIA))) functions.add(f);
+						if (Function.isLockingFunction(f, config.getCriteria(PatchConfig.MUTEX_FUNCTION_CRITERIA)) && f.toString().length() > 0) functions.add(f);
 					}
 				}
 				
@@ -200,7 +201,6 @@ public class Patcher {
 		return new Pair<Set<Function>, Set<Macro>>(functions, macros);
 	}
 	
-	@SuppressWarnings("unlikely-arg-type")
 	public Pair<Set<Function>, Set<Macro>> generateLSAPSpinHeaderFile() throws Exception
 	{
 		Set<Function> functions = new LinkedHashSet<Function>();
@@ -242,7 +242,7 @@ public class Patcher {
 					System.err.println("PATCHER: Attempted to make function from non-function string:\n" + matcher.group());
 				}
 			}
-									
+			
 			matcher = Pattern.compile("#\\s*[defineDEFINE]{6}\\s+\\w+\\s*\\([^\\)]*\\)").matcher(fileSource);			
 			while (matcher.find())
 			{
@@ -336,11 +336,12 @@ public class Patcher {
 		for (String filePath : config.getPaths(PatchConfig.MUTEX_PATHS_TO_CHANGE))
 		{
 			String fileSource = "";
+			String[] fileSourceSplit;
 			String newSource = "";
 			
 			try
 			{
-				fileSource = String.join("\n", Files.readAllLines(Paths.get(kernelPath, filePath)));
+				fileSourceSplit = Files.readAllLines(Paths.get(kernelPath, filePath)).toArray(new String[0]);
 			}
 			
 			catch (IOException e)
@@ -349,34 +350,180 @@ public class Patcher {
 				continue;
 			}
 			
-			Matcher matcher = Pattern.compile("(\\w+\\s*(\\*)?\\s+(\\*)?\\s*)+\\w+\\s*\\([^\\)]*\\)").matcher(fileSource);
+			Macro macro;
 			
-			while(matcher.find())
+			for (int i = 0; i < fileSourceSplit.length; i++)
 			{
-				try
-				{
-					String functionString = matcher.group();
-					if (locks.getValue0().contains(new Function(functionString)))
-					{
-						String transfer = fileSource.substring(0, matcher.start());
-						newSource += transfer;
-						fileSource = fileSource.substring(matcher.end());
-					}
-				}
+				String line = fileSourceSplit[i];
+								
+				try	{ macro = new Macro(line); }
+				catch (Exception e) { continue; }
 				
-				catch (Exception e)
+				if (locks.getValue1().contains(macro))
 				{
-					System.err.println("PATCHER: Unable to find a function definition in \"" + matcher.group() + "\"! Skipping it.");
+					while(line.replaceFirst("//.*", "").trim().endsWith("\\"))
+					{
+						fileSourceSplit[i] = "//" + line;
+						line = fileSourceSplit[++i];
+					}
+					
+					fileSourceSplit[i] = "//" + line;
 				}
 			}
 			
+			fileSource = String.join("\n", fileSourceSplit);
 			
+			Pattern p = Pattern.compile("(\\w+\\s*(\\*)?\\s+(\\*)?\\s*)+\\w+\\s*\\([^\\)]*\\)");
+			Matcher matcher = p.matcher(fileSource);
 			
+			while (matcher.find())
+			{
+				String functionString = matcher.group();				
+				Function f;
+				
+				try { f = new Function(functionString); }
+				catch (Exception e) { System.err.println("PATCHER: Unable to find function definition in \"" + functionString + "\". Skipping it."); continue; }
+				
+				if (locks.getValue0().contains(f))
+				{	
+					String transfer = fileSource.substring(0, matcher.start());
+					String ignored = "";
+					
+					if (!transfer.endsWith("\n"))
+					{
+						String[] functionSplit = functionString.split("\n");
+						int i = transfer.length() - transfer.replaceAll("\n", "").length();
+						
+						for (int j = 0; j < functionSplit.length; j++, i++)
+						{
+							if (fileSourceSplit[i].contains(functionSplit[j]) && fileSourceSplit[i].trim().startsWith("#"))
+							{
+								ignored += functionSplit[j] + "\n";
+								functionSplit[j] = "";
+							}
+						}
+						
+						functionString = Pattern.compile("\n").splitAsStream(String.join("\n", functionSplit)).filter(s -> s != null && !s.isEmpty()).collect(Collectors.joining("\n"));
+						
+						System.out.println();
+					}
+					
+					functionString = "//" + functionString.replaceAll("\n", "\n//");
+					newSource += transfer + ignored + functionString;
+					fileSource = fileSource.substring(matcher.end());
+					matcher = p.matcher(fileSource);
+				}
+			}
+			
+			newSource += fileSource;
+			
+			if (debug)
+			{
+				System.out.println(newSource);
+			}
+			
+			String fileName = filePath.replaceFirst("\\.\\w+$", (debug ? ".txt" : ".h"));
+			File directory = new File(Paths.get(outputPath, fileName).toString().replaceFirst("\\w+\\.\\w+$", ""));
+			if (!directory.exists()) directory.mkdirs();
+			Files.write(Paths.get(outputPath, fileName), Arrays.stream(newSource.split("\n")).collect(Collectors.toList()), Charset.forName("UTF-8"));
 		}
 	}
 	
-	public void removeSpinDefinitions(Pair<Set<Function>, Set<Macro>> locks)
+	public void removeSpinDefinitions(Pair<Set<Function>, Set<Macro>> locks) throws Exception
 	{
-		
+		for (String filePath : config.getPaths(PatchConfig.SPIN_PATHS_TO_CHANGE))
+		{
+			String fileSource = "";
+			String[] fileSourceSplit;
+			String newSource = "";
+			
+			try
+			{
+				fileSourceSplit = Files.readAllLines(Paths.get(kernelPath, filePath)).toArray(new String[0]);
+			}
+			
+			catch (IOException e)
+			{
+				System.err.println("PATCHER: Unable to read file \"" + filePath + "\"! Skipping it.");
+				continue;
+			}
+			
+			Macro macro;
+			
+			for (int i = 0; i < fileSourceSplit.length; i++)
+			{
+				String line = fileSourceSplit[i];
+								
+				try	{ macro = new Macro(line); }
+				catch (Exception e) { continue; }
+				
+				if (locks.getValue1().contains(macro))
+				{
+					while(line.replaceFirst("//.*", "").trim().endsWith("\\"))
+					{
+						fileSourceSplit[i] = "//" + line;
+						line = fileSourceSplit[++i];
+					}
+					
+					fileSourceSplit[i] = "//" + line;
+				}
+			}
+			
+			fileSource = String.join("\n", fileSourceSplit);
+			
+			Pattern p = Pattern.compile("(\\w+\\s*(\\*)?\\s+(\\*)?\\s*)+\\w+\\s*\\([^\\)]*\\)");
+			Matcher matcher = p.matcher(fileSource);
+			
+			while (matcher.find())
+			{
+				String functionString = matcher.group();				
+				Function f;
+				
+				try { f = new Function(functionString); }
+				catch (Exception e) { System.err.println("PATCHER: Unable to find function definition in \"" + functionString + "\". Skipping it."); continue; }
+				
+				if (locks.getValue0().contains(f))
+				{	
+					String transfer = fileSource.substring(0, matcher.start());
+					String ignored = "";
+					
+					if (!transfer.endsWith("\n"))
+					{
+						String[] functionSplit = functionString.split("\n");
+						int i = transfer.length() - transfer.replaceAll("\n", "").length();
+						
+						for (int j = 0; j < functionSplit.length; j++, i++)
+						{
+							if (fileSourceSplit[i].contains(functionSplit[j]) && fileSourceSplit[i].trim().startsWith("#"))
+							{
+								ignored += functionSplit[j] + "\n";
+								functionSplit[j] = "";
+							}
+						}
+						
+						functionString = Pattern.compile("\n").splitAsStream(String.join("\n", functionSplit)).filter(s -> s != null && !s.isEmpty()).collect(Collectors.joining("\n"));
+						
+						System.out.println();
+					}
+					
+					functionString = "//" + functionString.replaceAll("\n", "\n//");
+					newSource += transfer + ignored + functionString;
+					fileSource = fileSource.substring(matcher.end());
+					matcher = p.matcher(fileSource);
+				}
+			}
+			
+			newSource += fileSource;
+			
+			if (debug)
+			{
+				System.out.println(newSource);
+			}
+			
+			String fileName = filePath.replaceFirst("\\.\\w+$", (debug ? ".txt" : ".h"));
+			File directory = new File(Paths.get(outputPath, fileName).toString().replaceFirst("\\w+\\.\\w+$", ""));
+			if (!directory.exists()) directory.mkdirs();
+			Files.write(Paths.get(outputPath, fileName), Arrays.stream(newSource.split("\n")).collect(Collectors.toList()), Charset.forName("UTF-8"));
+		}
 	}	
 }
