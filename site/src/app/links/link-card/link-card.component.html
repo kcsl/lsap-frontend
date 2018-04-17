@@ -1,0 +1,29 @@
+<a [routerLink]="['/v/' + _version + '/i/' + _linkObject.instance_id]" style="text-decoration: none; color: #000;">
+    <div class="light-card" style="cursor: pointer; background: whitesmoke; border: lightgrey; border-style:solid; border-radius: 2.5%;">
+        <img class="card-img-top" src="{{_linkObject.mpg}}" style="max-height: 250px;margin-left:-2.5px;object-fit: fill; border-bottom: lightgrey; border-radius: 2.5%; border-bottom-style: solid; background: transparent;mix-blend-mode: multiply;">
+        <div class="card-body" style="padding: 1.5% !important;">
+            <div class="container">
+                <div class="row">
+                    <!-- locking title -->
+                    <div class="col-12">
+                        <h5 class="card-title" style="text-align: center;text-transform: uppercase;" ngbTooltip="{{_linkObject.path}}">{{_linkObject.title}}</h5>
+                    </div>
+                </div>
+                <div class="row" id="card-data">
+                    <!-- locking status -->
+                    <div class="col-3">
+                        <p class="dot" [style.background-color]="getStyle()" ngbTooltip="{{_linkObject.status}}"></p>
+                    </div>
+                    <!-- locking type -->
+                    <div class="col-3">
+                        <p class="dot" style="margin-left:-15px;font-style: italic;">{{_linkObject.type}}</p>
+                    </div>
+                    <!-- locking instance id -->
+                    <div class="col-3">
+                        <p class="dot" style="text-align: center;">{{_linkObject.instance_id}}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</a>

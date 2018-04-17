@@ -7,7 +7,7 @@ import { AuthGuard } from './guards/auth-guard';
 import { AuthService } from './services/auth.service';
 import { NavbarService } from './services/navbar.service';
 import { RouterModule } from '@angular/router';
-import { environment } from './../environments/environment';
+import { environment } from '../environments/environment';
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { AngularFireModule } from 'angularfire2';
@@ -21,10 +21,12 @@ import { AppNavbarComponent } from './navbar/app-navbar.component';
 import { LinksComponent } from './links/links.component';
 import { LoginComponent } from './login/login.component';
 import { FilterComponent } from './links/links-filter/filter.component';
-import { LinkCardComponent } from './link-card/link-card.component';
-import { HomeComponent } from './home/home.component';
+import { LinkCardComponent } from './links/link-card/link-card.component';
 import { LinksPageComponent } from './links/links-page/links-page.component';
 import {AngularFireStorageModule} from 'angularfire2/storage';
+import {HomeComponent} from './home/home.component';
+import {SharedService} from './services/shared.service';
+import {LinksPageService} from './services/links_page.service';
 
 
 @NgModule({
@@ -35,8 +37,8 @@ import {AngularFireStorageModule} from 'angularfire2/storage';
     LoginComponent,
     FilterComponent,
     LinkCardComponent,
-    HomeComponent,
     LinksPageComponent,
+    HomeComponent
   ],
   imports: [
     BrowserModule,
@@ -48,18 +50,14 @@ import {AngularFireStorageModule} from 'angularfire2/storage';
     CustomFormsModule,
     NgbModule.forRoot(),
     RouterModule.forRoot([
-      {
-        path: '',
-        component: HomeComponent
-      },
-      {
-        path: 'v/:versionStripped',
-        component: LinksComponent
-      },
-      {
-        path: 'login',
-        component: LoginComponent
-      }
+        { path: '', component: HomeComponent, pathMatch: 'full' },
+        { path: 'v/:versionStripped', component: HomeComponent,
+            children: [
+                { path: '', component: LinksComponent, pathMatch: 'full' },
+                { path: 'i', redirectTo: '', pathMatch: 'full' },
+                { path: 'i/:id', component: LinksPageComponent }
+            ]
+        }
     ])
   ],
   providers: [
@@ -69,7 +67,9 @@ import {AngularFireStorageModule} from 'angularfire2/storage';
     AdminAuthGuard,
     FilterService,
     LinksService,
-    NavbarService
+    NavbarService,
+    SharedService,
+    LinksPageService
   ],
   bootstrap: [AppComponent]
 })

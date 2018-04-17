@@ -15,6 +15,8 @@ import org.junit.Test;
 import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 
+import edu.iastate.sdmay1809.shared.Utils;
+
 public class DiffMapperMainTest {
 	@Rule
 	public TemporaryFolder testFolder = new TemporaryFolder();

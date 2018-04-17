@@ -1,0 +1,41 @@
+.dot {
+    height: 15px;
+    width: 15px;
+    border-radius: 50%;
+    font-size: 1vw;
+}
+
+.dot--paired {
+    background: #5FAD56;
+}
+.dot--deadlock {
+    background: #706C61;
+}
+.dot--partial {
+    background:  #F2C14E;
+}
+.dot--unpaired {
+    background: #A72608;
+}
+
+.light-card {
+    height: 20vw;
+    width: 20vw;
+}
+
+.light-card > .card-img-top {
+    max-height: 250px;
+    max-width: 250px;
+    height: 15vw;
+    width: 20vw;
+}
+
+.card-title {
+    font-size: 1.5vw;
+}
+
+@media screen and (max-width: 800px) {
+    #card-data {
+        display: none !important;
+    }
+}

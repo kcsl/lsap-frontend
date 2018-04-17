@@ -1,11 +1,18 @@
-.flexbox-container {
-    display: -ms-flexbox;
-    display: -webkit-flex;
+.container {
+    margin-left: 232px;
+    margin-top: 15px;
+    height:100% !important;
+}
+
+.flex-container {
+    margin-left: -15px !important;
+    height: 100% !important;
+    list-style: none;
     display: flex;
-    -ms-flex-align: center;
-    -webkit-align-items: center;
-    -webkit-box-align: center;.
     align-items: center;
-    height: 100vh;
-    flex-wrap: wrap;
+    justify-content: center;
+}
+.flex-item {
+    margin-left: -15px !important;
+    text-align: center;
 }

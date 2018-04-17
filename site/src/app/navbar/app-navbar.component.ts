@@ -1,7 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { AuthService } from '../services/auth.service';
-import {ActivatedRoute} from '@angular/router';
-import { NavbarService } from '../services/navbar.service';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {ActivatedRoute, Router} from '@angular/router';
 
 @Component({
   selector: 'app-navbar',
@@ -10,44 +8,56 @@ import { NavbarService } from '../services/navbar.service';
 })
 export class AppNavbarComponent implements OnInit {
 
-  versions: String[] = [];
-  version;
-  versionStripped;
-  searchTerm;
-  filter: string;
-  constructor(public auth: AuthService,
-              private navbarService: NavbarService) { }
+  @Input('versions') versions: String[] = [];
+  private _version: string;
+  private _searchTerm: string;
+  @Input('versionStripped') versionStripped;
+
+  @Output() versionChange = new EventEmitter();
+  @Output() searchTermChange = new EventEmitter();
 
   static stripChars(input) {
       return input.replace(/[^0-9a-z]/gi, '').toString();
   }
 
-  async ngOnInit() {
-    await this.navbarService.getAllVersions().snapshotChanges().subscribe(v => {
-        v.forEach(element => {
-            this.versions.push(element.payload.val());
-        });
-        if (this.version == null) {
-            this.version = this.versions[0];
-            this.versionStripped = AppNavbarComponent.stripChars(this.version);
-        }
-    });
+  constructor(private route: ActivatedRoute, private router: Router) { }
+
+  ngOnInit() {}
+
+  async search($event) {
+    if (this.router.url === '/v/' + this._version + '/') {
+        this.searchTerm = $event.target.value;
+    } else {
+      // TODO – fix this race condition. Not properly waiting for router to nav first
+      await this.router.navigate(['/v/' + this._version + '/']).then(
+          this.searchTerm = $event.target.value
+      );
+    }
   }
 
-  get selectedVersion() {
-    return this.versionStripped;
+  get version() {
+    return this._version;
   }
 
-  search($event) {
-    this.searchTerm = $event.target.value;
+  @Input('version')
+  set version(val: string) {
+      this._version = val;
+      this.versionChange.emit(this.version);
   }
 
-  updateVersion(value) {
-      this.version = value;
-      this.versionStripped = AppNavbarComponent.stripChars(this.version);
+  get searchTerm() {
+    return this._searchTerm;
   }
 
-  logout() {
-    this.auth.logout();
+  @Input('searchTerm')
+  set searchTerm(val: string) {
+      this._searchTerm = val;
+      this.searchTermChange.emit(this.searchTerm);
+  }
+
+  navigateToNewVersion(version: string) {
+    this.version = version;
+    this.versionStripped = AppNavbarComponent.stripChars(version);
+    this.router.navigate(['/v/' + this.versionStripped + '/']);
   }
 }

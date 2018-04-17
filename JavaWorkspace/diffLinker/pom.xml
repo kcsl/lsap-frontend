@@ -83,7 +83,7 @@
 						<manifest>
 							<addClasspath>true</addClasspath>
 							<classpathPrefix>${project.build.finalName}.lib/</classpathPrefix>
-							<mainClass>edu.iastate.sdmay1809.DiffLinker</mainClass>
+							<mainClass>edu.iastate.sdmay1809.DiffLinkerMain</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
@@ -102,7 +102,7 @@
 						<configuration>
 							<archive>
 								<manifest>
-									<mainClass>edu.iastate.sdmay1809.DiffLinker</mainClass>
+									<mainClass>edu.iastate.sdmay1809.DiffLinkerMain</mainClass>
 								</manifest>
 							</archive>
 							<descriptorRefs>
@@ -144,6 +144,11 @@
 			<artifactId>jacoco-maven-plugin</artifactId>
 			<version>0.8.1</version>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>edu.iastate.sdmay1809</groupId>
+			<artifactId>shared</artifactId>
+			<version>1.1.0</version>
 		</dependency>
 	</dependencies>
 	<properties>
