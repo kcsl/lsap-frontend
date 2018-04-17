@@ -6,6 +6,7 @@ import java.io.IOException;
 import org.json.JSONObject;
 
 import edu.iastate.sdmay1809.shared.DiffConfig;
+import edu.iastate.sdmay1809.shared.InstanceTracker.InstanceParserManager;
 import edu.iastate.sdmay1809.shared.InstanceTracker.InstanceTracker;
 
 import java.util.HashMap;
@@ -18,6 +19,7 @@ public class DataBaseFileTranslator extends InstanceTracker {
 	
 	public DataBaseFileTranslator(String sourceDirectory) {
 		super(sourceDirectory);
+		InstanceParserManager.put(new DatabaseObjectParser());
 		File f = new File(sourceDirectory);
 		DiffConfig config = DiffConfig.builder(	f.getParentFile().getParent() + "/config.json").build();
 		versionNum = config.NEW_TAG.replaceAll("\\-|\\.", "");
@@ -63,7 +65,7 @@ public class DataBaseFileTranslator extends InstanceTracker {
 			try {
 				JSONObject cfg = new JSONObject();
 				JSONObject pcg = new JSONObject();
-				JSONObject instance = parseEntry(f.getName());
+				JSONObject instance = parseEntry(f.getName(), "dboparser");
 				instance.put("type", f.getParentFile().getName());
 				String pathTo = versionNum + "/" + instance.getString("type") + "/" + instance.getString("id") + "/";
 				instance.put("mpg", pathTo + "mpg.png");
@@ -103,30 +105,6 @@ public class DataBaseFileTranslator extends InstanceTracker {
 			}
 		}
 		return versionObject;
-	}
-	
-	@Override
-	protected JSONObject parseEntry(String instance) throws Exception {
-		JSONObject inst = new JSONObject();
-		String[] outerGroups = instance.split("(\\]|@)@+(\\[|@)");
-		String[] innerGroups = outerGroups[2].replaceAll("@", "/").split("\\+\\/*");
-
-		try {
-			inst.put("driver", innerGroups[2].split("\\/", 2)[1].split("\\.")[0]);
-			inst.put("filename", innerGroups[2]);
-			inst.put("id", outerGroups[1]);
-			inst.put("length", Integer.parseInt(innerGroups[1]));
-			inst.put("offset", Integer.parseInt(innerGroups[0]));
-			inst.put("status", outerGroups[0]);
-			inst.put("title", outerGroups[3]);
-		} catch(Exception e) {
-			for(StackTraceElement s : e.getStackTrace()) {
-				System.err.println("\n" + s.toString());
-			}
-			throw new Exception(e.getMessage());
-		}
-
-		return inst;
 	}
 
 }
