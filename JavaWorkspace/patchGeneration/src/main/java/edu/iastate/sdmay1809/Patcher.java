@@ -17,8 +17,6 @@ import java.util.stream.Collectors;
 
 import org.javatuples.Pair;
 
-import edu.iastate.sdmay1809.shared.Utils;
-
 public class Patcher {
 	private PatchConfig config;
 	private String kernelPath;
@@ -138,20 +136,24 @@ public class Patcher {
 			}
 		}
 		
-		/*
-		 * TODO: Map macros to their functions
-		 */
 		for (Macro m : macros)
 		{
-			int minLevDist = Integer.MAX_VALUE;
-
+			String[] macroNameParts = m.getName().split("(?=[A-Z])|_");
+			int bestMatchCount = Integer.MIN_VALUE;
+			
 			for (Function f : functions)
 			{
-				int curLevDist = Utils.levenshteinDistance(m.getName(), f.getName());
+				List<String> functionNameParts = Arrays.stream(f.getName().split("(?=[A-Z])|_")).collect(Collectors.toList());
+				int matchCount = 0;
 				
-				if (curLevDist < minLevDist)
+				for (String mnp : macroNameParts)
 				{
-					minLevDist = curLevDist;
+					if (functionNameParts.contains(mnp)) matchCount++;
+				}
+				
+				if (matchCount > bestMatchCount)
+				{
+					bestMatchCount = matchCount;
 					m.setBodyFunction(f);
 				}
 			}
@@ -268,20 +270,24 @@ public class Patcher {
 			}
 		}
 		
-		/*
-		 * TODO: Map macros to their functions
-		 */
 		for (Macro m : macros)
 		{
-			int minLevDist = Integer.MAX_VALUE;
-
+			String[] macroNameParts = m.getName().split("(?=[A-Z])|_");
+			int bestMatchCount = Integer.MIN_VALUE;
+			
 			for (Function f : functions)
 			{
-				int curLevDist = Utils.levenshteinDistance(m.getName(), f.getName());
+				List<String> functionNameParts = Arrays.stream(f.getName().split("(?=[A-Z])|_")).collect(Collectors.toList());
+				int matchCount = 0;
 				
-				if (curLevDist < minLevDist)
+				for (String mnp : macroNameParts)
 				{
-					minLevDist = curLevDist;
+					if (functionNameParts.contains(mnp)) matchCount++;
+				}
+				
+				if (matchCount > bestMatchCount)
+				{
+					bestMatchCount = matchCount;
 					m.setBodyFunction(f);
 				}
 			}
