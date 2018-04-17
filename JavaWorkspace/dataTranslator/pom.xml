@@ -33,7 +33,7 @@
         <dependency>
     	<groupId>edu.iastate.sdmay1809</groupId>
     	<artifactId>shared</artifactId>
-		<version>0.1.0</version>
+		<version>1.1.0</version>
     </dependency>
   </dependencies>
 
@@ -69,6 +69,26 @@
           <artifactId>maven-deploy-plugin</artifactId>
           <version>2.8.2</version>
         </plugin>
+        <plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.1</version>
+				<executions>
+					<execution>
+						<id>pre-unit-test</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>post-unit-test</id>
+						<phase>test</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
       </plugins>
     </pluginManagement>
   </build>
