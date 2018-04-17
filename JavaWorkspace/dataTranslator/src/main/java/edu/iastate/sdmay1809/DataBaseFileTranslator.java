@@ -27,9 +27,6 @@ public class DataBaseFileTranslator extends InstanceTracker {
 	
 	@Override
 	public boolean run(File outputFile, boolean outputCheckOverride) {
-		File[] instances = getInstances();
-		boolean retVal = true;
-
 		File outputJSONFile = new File(outputFile + "/db_" + versionNum + ".json");
 
 		// Don't run if file exists and override is false
@@ -37,6 +34,9 @@ public class DataBaseFileTranslator extends InstanceTracker {
 			System.out.println("Skipping data translation since the file already exists!");
 			return false;
 		}
+		File[] instances = getInstances();
+		boolean retVal = true;
+
 		
 		JSONObject versionObject = createVersionObject(instances);	
 
