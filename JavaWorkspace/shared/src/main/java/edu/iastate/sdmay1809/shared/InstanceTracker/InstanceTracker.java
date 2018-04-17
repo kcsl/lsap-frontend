@@ -33,14 +33,14 @@ public class InstanceTracker {
 	}
 
 	public boolean run(File outputFile, boolean outputCheckOverride) {
-		File[] instances = getInstances();
-		boolean retVal = true;
-
 		// Don't run if file exists and override is false
 		if (outputFile.exists() && !outputCheckOverride) {
 			System.out.println("Skipping instance tracking since the file already exists!");
 			return false;
 		}
+		
+		File[] instances = getInstances();
+		boolean retVal = true;
 		JSONArray instanceMap = createInstanceMap(instances);
 
 		System.out.println("instances: " + instances.length + ", instanceMap:" + instanceMap.length());
