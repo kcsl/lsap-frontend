@@ -123,7 +123,6 @@ public class DiffConfig {
 		fileName = Utils.coalesce(fileName, "config.json");
 		cwd = System.getProperty("user.dir");
 		configFilePath = Paths.get(cwd, fileName);
-		System.out.println(configFilePath.toString());
 		utf8 = Charset.forName("UTF-8");
 		configFileContent = "{}";
 		try {
