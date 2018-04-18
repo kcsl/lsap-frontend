@@ -51,8 +51,6 @@ public class PatcherMain
 							    .build());
 		options.addOption("h", "help", false, "Prints additional help");
 		
-		args = "-kp resources/kernel/ -d resources/patch/debug/".split("\\s+");
-		
 		CommandLine cmd = parser.parse(options, args);
 		
 		if (cmd.hasOption('h'))

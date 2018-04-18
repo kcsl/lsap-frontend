@@ -118,34 +118,57 @@ public class Patcher {
 		removeMutexDefinitions(mutexLocks);
 		removeSpinDefinitions(spinLocks);
 	}
-	
+
 	public Pair<Set<Function>, Set<Macro>> generateLSAPMutexHeaderFile() throws Exception
 	{
-		if (verbose) System.out.println("+--------------------+\n|    Mutex  locks    |\n+--------------------+\n");
+		return generateHeaderFile(config.getFunctions(PatchConfig.MUTEX_FUNCTIONS_TO_INCLUDE), config.getMacros(PatchConfig.MUTEX_MACROS_TO_INCLUDE), config.getPaths(PatchConfig.MUTEX_PATHS_TO_READ),
+								  config.getCriteria(PatchConfig.MUTEX_FUNCTION_CRITERIA), config.getCriteria(PatchConfig.MUTEX_MACRO_CRITERIA), "mutex");
+	}
+	
+	public Pair<Set<Function>, Set<Macro>> generateLSAPSpinHeaderFile() throws Exception
+	{
+		return generateHeaderFile(config.getFunctions(PatchConfig.SPIN_FUNCTIONS_TO_INCLUDE), config.getMacros(PatchConfig.SPIN_MACROS_TO_INCLUDE), config.getPaths(PatchConfig.SPIN_PATHS_TO_READ),
+				  config.getCriteria(PatchConfig.SPIN_FUNCTION_CRITERIA), config.getCriteria(PatchConfig.SPIN_MACRO_CRITERIA), "spin");
+	}
+	
+	public void removeMutexDefinitions(Pair<Set<Function>, Set<Macro>> locks) throws Exception
+	{
+		removeDefinitions(locks, config.getPaths(PatchConfig.MUTEX_PATHS_TO_CHANGE), "mutex");
+	}
+	
+	public void removeSpinDefinitions(Pair<Set<Function>, Set<Macro>> locks) throws Exception
+	{
+		removeDefinitions(locks, config.getPaths(PatchConfig.SPIN_PATHS_TO_CHANGE), "spin");
+	}	
+
+	private Pair<Set<Function>, Set<Macro>> generateHeaderFile(Set<Function> includedFunctions, Set<Macro> includedMacros, Set<String> pathsToReadFrom, 
+			   Map<String, Boolean> functionCriteriaMap, Map<String, Boolean> macroCriteriaMap, String lockType) throws Exception
+	{
+		if (verbose) System.out.println("+--------------------\n|    " + lockType + "  locks    \n+--------------------\n");
 
 		Set<Function> functions = new LinkedHashSet<Function>();
 		Set<Macro> macros = new LinkedHashSet<Macro>();
-		
-		functions.addAll(config.getFunctions(PatchConfig.MUTEX_FUNCTIONS_TO_INCLUDE));
-		macros.addAll(config.getMacros(PatchConfig.MUTEX_MACROS_TO_INCLUDE));
 
-		for (String filePath : config.getPaths(PatchConfig.MUTEX_PATHS_TO_READ))
+		functions.addAll(includedFunctions);
+		macros.addAll(includedMacros);
+
+		for (String filePath : pathsToReadFrom)
 		{
 			if (verbose) System.out.println("Reading \"" + filePath + "\" for functions and macros...");
-			
+
 			String fileSource;
-			
+
 			try
 			{
 				fileSource = String.join("\n", Files.readAllLines(Paths.get(kernelPath, filePath), Charset.forName("UTF-8")));
 			}
-			
+
 			catch (IOException e)
 			{
 				if (debug || verbose) System.err.println("PATCHER: Unable to read file \"" + filePath + "\"! Skipping it.");
 				continue;
 			}
-						
+
 			Matcher matcher = Pattern.compile("(\\w+\\s*(\\*)?\\s+(\\*)?\\s*)+\\w+\\s*\\([^\\)]*\\)").matcher(fileSource);			
 			while (matcher.find())
 			{
@@ -155,41 +178,40 @@ public class Patcher {
 					if (!functionLine.toLowerCase().contains("define") && !functionLine.toLowerCase().contains("return"))
 					{
 						Function f = new Function(matcher.group());
-						if (Function.isLockingFunction(f, config.getCriteria(PatchConfig.MUTEX_FUNCTION_CRITERIA)) && f.toString().length() > 0)
+						if (Function.isLockingFunction(f, functionCriteriaMap) && f.toString().length() > 0)
 						{
 							if (verbose) System.out.println("\tFunction found in \"" + functionLine + "\"");
 							functions.add(f);
 						}
 					}
 				}
-				
+
 				catch (Exception e) 
 				{
 					if (debug || verbose) System.err.println("PATCHER: Attempted to make function from non-function string:\n" + matcher.group());
 				}
 			}
-									
+
 			matcher = Pattern.compile("#\\s*[defineDEFINE]{6}\\s+\\w+\\s*\\([^\\)]*\\)").matcher(fileSource);			
 			while (matcher.find())
 			{
 				try
 				{
 					Macro m = new Macro(matcher.group());
-					if (Macro.isLockingMacro(m, config.getCriteria(PatchConfig.MUTEX_MACRO_CRITERIA))) 
+					if (Macro.isLockingMacro(m, macroCriteriaMap)) 
 					{
 						if (verbose) System.out.println("\tMacro found in \"" + matcher.group() + "\"");
 						macros.add(m);
 					}
 				}
-				
+
 				catch (Exception e)
 				{
 					if (debug || verbose) System.err.println("PATCHER: Attempted to make macro from non-macro string:\n" + matcher.group());
 				}
 			}
-			
 		}
-		
+
 		if (verbose) System.out.println("\nSome functions and macros have the same name. Functions with the same name as a macro will not be added to the patched header file.");
 		for (Iterator<Function> iter = functions.iterator(); iter.hasNext();)
 		{
@@ -200,24 +222,24 @@ public class Patcher {
 				iter.remove();
 			}
 		}
-		
+
 		if (verbose) System.out.println("\nMapping macros to their respective function calls...");
 		for (Macro m : macros)
 		{
 			String[] macroNameParts = m.getName().split("(?=[A-Z])|_");
 			int bestMatchCount = Integer.MIN_VALUE;
 			String functionName = "";
-			
+
 			for (Function f : functions)
 			{
 				List<String> functionNameParts = Arrays.stream(f.getName().split("(?=[A-Z])|_")).collect(Collectors.toList());
 				int matchCount = 0;
-				
+
 				for (String mnp : macroNameParts)
 				{
 					if (functionNameParts.contains(mnp)) matchCount++;
 				}
-				
+
 				if (matchCount > bestMatchCount)
 				{
 					bestMatchCount = matchCount;
@@ -225,41 +247,41 @@ public class Patcher {
 					functionName = f.getName();
 				}
 			}
-			
+
 			if (verbose) System.out.println("\tMacro \"" + m.getName() + "\" will call function \"" + functionName + "\"");
 		}
-		
-		if (verbose) System.out.println("\nGenerating mutex lock header file...");
-		
+
+		if (verbose) System.out.println("\nGenerating " + lockType + " lock header file...");
+
 		List<String> outputContent = new ArrayList<String>();
 
 		outputContent.add("/**************************************************************/");
-		outputContent.add("// MUTEX LOCK");
+		outputContent.add("// " + lockType.toUpperCase() + " LOCK");
 		outputContent.add("/**************************************************************/");
 		outputContent.add("");
-		outputContent.add("#ifndef __LINUX_L_SAP_MUTEX_H");
-		outputContent.add("#define __LINUX_L_SAP_MUTEX_H");
+		outputContent.add("#ifndef __LINUX_L_SAP_" + lockType.toUpperCase() + "_H");
+		outputContent.add("#define __LINUX_L_SAP_" + lockType.toUpperCase() + "_H");
 		outputContent.add("#include <linux/spinlock_types.h>");
 		outputContent.add("");
-		outputContent.add("// Definition for \"mutex\" related functions with empty bodies.");
+		outputContent.add("// Definition for \"" + lockType + "\" related functions with empty bodies.");
 
 		for (Function f : functions)
 		{
 			outputContent.add(f.toString());
 		}
-		
+
 		outputContent.add("");
 		outputContent.add("// Define a macro wrapper for extra functions for query unification.");
-		
+
 		for (Macro m : macros)
 		{
 			outputContent.add(m.toString());
 		}
-		
+
 		outputContent.add("");
-		outputContent.add("#endif /* __LINUX_L_SAP_MUTEX_H */");
+		outputContent.add("#endif /* __LINUX_L_SAP_" + lockType.toUpperCase() + "_H */");
 		outputContent.add("");
-		
+
 		if (debug || verbose)
 		{
 			for (String line : outputContent)
@@ -267,278 +289,19 @@ public class Patcher {
 				System.out.println(line);
 			}
 		}
-		
-		File directory = new File(Paths.get(outputPath, "include/linux/lsap_mutex_lock." + (debug ? "txt" : "h")).toString().replaceFirst("\\w+\\.\\w+$", ""));
+
+		File directory = new File(Paths.get(outputPath, "include/linux/lsap_" + lockType.toLowerCase() + "_lock." + (debug ? "txt" : "h")).toString().replaceFirst("\\w+\\.\\w+$", ""));
 		if (!directory.exists()) directory.mkdirs();
-		Files.write(Paths.get(outputPath, "include/linux/lsap_mutex_lock." + (debug ? "txt" : "h")), outputContent, Charset.forName("UTF-8"));
-		
-		return new Pair<Set<Function>, Set<Macro>>(functions, macros);
-	}
+		Files.write(Paths.get(outputPath, "include/linux/lsap_" + lockType + "_lock." + (debug ? "txt" : "h")), outputContent, Charset.forName("UTF-8"));
+
+		return new Pair<Set<Function>, Set<Macro>>(functions, macros);	
+	}	
 	
-	public Pair<Set<Function>, Set<Macro>> generateLSAPSpinHeaderFile() throws Exception
+	private void removeDefinitions(Pair<Set<Function>, Set<Macro>> locks, Set<String> paths, String lockType) throws IOException
 	{
-		if (verbose) System.out.println("+--------------------+\n|     Spin locks     |\n+--------------------+\n");
-		
-		Set<Function> functions = new LinkedHashSet<Function>();
-		Set<Macro> macros = new LinkedHashSet<Macro>();
-		
-		functions.addAll(config.getFunctions(PatchConfig.SPIN_FUNCTIONS_TO_INCLUDE));
-		macros.addAll(config.getMacros(PatchConfig.SPIN_MACROS_TO_INCLUDE));
+		if (verbose) System.out.println("+----------------------------\n| Editing current " +  lockType + " locks \n+----------------------------\n");
 
-		for (String filePath : config.getPaths(PatchConfig.SPIN_PATHS_TO_READ))
-		{
-			if (verbose) System.out.println("Reading \"" + filePath + "\" for functions and macros...");
-			
-			String fileSource;
-			
-			try
-			{
-				fileSource = String.join("\n", Files.readAllLines(Paths.get(kernelPath, filePath), Charset.forName("UTF-8")));
-			}
-			
-			catch (IOException e)
-			{
-				if (debug || verbose) System.err.println("PATCHER: Unable to read file \"" + filePath + "\"! Skipping it.");
-				continue;
-			}
-			
-			Matcher matcher = Pattern.compile("(\\w+\\s*(\\*)?\\s+(\\*)?\\s*)+\\w+\\s*\\([^\\)]*\\)").matcher(fileSource);			
-			while (matcher.find())
-			{
-				try
-				{
-					String functionLine = matcher.group();
-					if (!functionLine.toLowerCase().contains("define") && !functionLine.toLowerCase().contains("return"))
-					{
-						Function f = new Function(matcher.group());
-						if (Function.isLockingFunction(f, config.getCriteria(PatchConfig.SPIN_FUNCTION_CRITERIA)) && f.toString().length() > 0)
-						{
-							if (verbose) System.out.println("\tFunction found in \"" + functionLine + "\"");
-							functions.add(f);
-						}
-					}
-				}
-				
-				catch (Exception e) 
-				{
-					if (debug || verbose) System.err.println("PATCHER: Attempted to make function from non-function string:\n" + matcher.group());
-				}
-			}
-			
-			matcher = Pattern.compile("#\\s*[defineDEFINE]{6}\\s+\\w+\\s*\\([^\\)]*\\)").matcher(fileSource);			
-			while (matcher.find())
-			{
-				try
-				{
-					Macro m = new Macro(matcher.group());
-					if (Macro.isLockingMacro(m, config.getCriteria(PatchConfig.SPIN_MACRO_CRITERIA))) 
-					{
-						if (verbose) System.out.println("\tMacro found in \"" + matcher.group() + "\"");
-						macros.add(m);
-					}
-				}
-				
-				catch (Exception e)
-				{
-					if (debug || verbose) System.err.println("PATCHER: Attempted to make macro from non-macro string:\n" + matcher.group());
-				}
-			}
-		}
-				
-		if (verbose) System.out.println("\nSome functions and macros have the same name. Functions with the same name as a macro will not be added to the patched header file.");
-		for (Iterator<Function> iter = functions.iterator(); iter.hasNext();)
-		{
-			Function f = iter.next();
-			if (macros.contains(f))
-			{
-				iter.remove();
-			}
-		}
-		
-		if (verbose) System.out.println("\nMapping macros to their respective function calls...");
-		for (Macro m : macros)
-		{
-			String[] macroNameParts = m.getName().split("(?=[A-Z])|_");
-			int bestMatchCount = Integer.MIN_VALUE;
-			String functionName = "";
-			
-			for (Function f : functions)
-			{
-				List<String> functionNameParts = Arrays.stream(f.getName().split("(?=[A-Z])|_")).collect(Collectors.toList());
-				int matchCount = 0;
-				
-				for (String mnp : macroNameParts)
-				{
-					if (functionNameParts.contains(mnp)) matchCount++;
-				}
-				
-				if (matchCount > bestMatchCount)
-				{
-					bestMatchCount = matchCount;
-					m.setBodyFunction(f);
-					functionName = f.getName();
-				}
-			}
-			
-			if (verbose) System.out.println("\tMacro \"" + m.getName() + "\" will call function \"" + functionName + "\"");
-		}
-		
-		if (verbose) System.out.println("\nGenerating spin lock header file...");
-
-		List<String> outputContent = new ArrayList<String>();
-
-		outputContent.add("/**************************************************************/");
-		outputContent.add("// SPIN LOCK");
-		outputContent.add("/**************************************************************/");
-		outputContent.add("");
-		outputContent.add("#ifndef __LINUX_L_SAP_SPINLOCK_H");
-		outputContent.add("#define __LINUX_L_SAP_SPINLOCK_H");
-		outputContent.add("#include <linux/spinlock_types.h>");
-		outputContent.add("");
-		outputContent.add("// Definition for \"spinlock\" related functions with empty bodies.");
-
-		for (Function f : functions)
-		{
-			outputContent.add(f.toString());
-		}
-		
-		outputContent.add("");
-		outputContent.add("// Define a macro wrapper for extra functions for query unification.");
-		
-		for (Macro m : macros)
-		{
-			outputContent.add(m.toString());
-		}
-		
-		outputContent.add("");
-		outputContent.add("#endif /* __LINUX_L_SAP_SPINLOCK_H */");
-		outputContent.add("");
-		
-		if (debug || verbose)
-		{
-			for (String line : outputContent)
-			{
-				System.out.println(line);
-			}
-		}
-		
-		File directory = new File(Paths.get(outputPath, "include/linux/lsap_spinlock." + (debug ? "txt" : "h")).toString().replaceFirst("\\w+\\.\\w+$", ""));
-		if (!directory.exists()) directory.mkdirs();
-		Files.write(Paths.get(outputPath, "include/linux/lsap_spinlock." + (debug ? "txt" : "h")), outputContent, Charset.forName("UTF-8"));
-		
-		return new Pair<Set<Function>, Set<Macro>>(functions, macros);
-	}
-	
-	public void removeMutexDefinitions(Pair<Set<Function>, Set<Macro>> locks) throws Exception
-	{
-		if (verbose) System.out.println("+-----------------------------+\n| Editing current mutex locks |\n+-----------------------------+\n");
-		
-		for (String filePath : config.getPaths(PatchConfig.MUTEX_PATHS_TO_CHANGE))
-		{
-			if (verbose) System.out.println("Editing file \"" + filePath + "\"...");
-			
-			String fileSource = "";
-			String[] fileSourceSplit;
-			String newSource = "";
-			
-			try
-			{
-				fileSourceSplit = Files.readAllLines(Paths.get(kernelPath, filePath)).toArray(new String[0]);
-			}
-			
-			catch (IOException e)
-			{
-				if (debug || verbose) System.err.println("PATCHER: Unable to read file \"" + filePath + "\"! Skipping it.");
-				continue;
-			}
-			
-			Macro macro;
-			
-			if (verbose) System.out.println("Commenting out patched macros...");
-			for (int i = 0; i < fileSourceSplit.length; i++)
-			{
-				String line = fileSourceSplit[i];
-								
-				try	{ macro = new Macro(line); }
-				catch (Exception e) { if (verbose) System.err.println("PATCHER: Attempted to make macro from non-macro string \"" + line + "\". Skipping it."); continue; }
-				
-				if (locks.getValue1().contains(macro))
-				{
-					while(line.replaceFirst("//.*", "").trim().endsWith("\\"))
-					{
-						fileSourceSplit[i] = "//" + line;
-						line = fileSourceSplit[++i];
-					}
-					
-					fileSourceSplit[i] = "//" + line;
-					if (verbose) System.out.println("\tCommented out macro \"" + macro.getName() + "\"");
-				}
-			}
-			
-			fileSource = String.join("\n", fileSourceSplit);
-			
-			Pattern p = Pattern.compile("(\\w+\\s*(\\*)?\\s+(\\*)?\\s*)+\\w+\\s*\\([^\\)]*\\)");
-			Matcher matcher = p.matcher(fileSource);
-			
-			if (verbose) System.out.println("Commenting out patched functions...");
-			while (matcher.find())
-			{
-				String functionString = matcher.group();				
-				Function f;
-				
-				try { f = new Function(functionString); }
-				catch (Exception e) { if (debug || verbose) System.err.println("PATCHER: Unable to find function definition in \"" + functionString + "\". Skipping it."); continue; }
-				
-				if (locks.getValue0().contains(f))
-				{	
-					String transfer = fileSource.substring(0, matcher.start());
-					String ignored = "";
-					
-					if (!transfer.endsWith("\n"))
-					{
-						String[] functionSplit = functionString.split("\n");
-						int i = transfer.length() - transfer.replaceAll("\n", "").length();
-						
-						for (int j = 0; j < functionSplit.length; j++, i++)
-						{
-							if (fileSourceSplit[i].contains(functionSplit[j]) && fileSourceSplit[i].trim().startsWith("#"))
-							{
-								ignored += functionSplit[j] + "\n";
-								functionSplit[j] = "";
-							}
-						}
-						
-						functionString = Pattern.compile("\n").splitAsStream(String.join("\n", functionSplit)).filter(s -> s != null && !s.isEmpty()).collect(Collectors.joining("\n"));						
-					}
-					
-					functionString = "//" + functionString.replaceAll("\n", "\n//");
-					newSource += transfer + ignored + functionString;
-					fileSource = fileSource.substring(matcher.end());
-					matcher = p.matcher(fileSource);
-					
-					if (verbose) System.out.println("\tCommented out function \"" + f.getName() + "\"");
-				}
-			}
-			
-			newSource += fileSource;
-			
-			if (debug)
-			{
-				System.out.println(newSource);
-			}
-			
-			String fileName = filePath.replaceFirst("\\.\\w+$", (debug ? ".txt" : ".h"));
-			File directory = new File(Paths.get(outputPath, fileName).toString().replaceFirst("\\w+\\.\\w+$", ""));
-			if (!directory.exists()) directory.mkdirs();
-			Files.write(Paths.get(outputPath, fileName), Arrays.stream(newSource.split("\n")).collect(Collectors.toList()), Charset.forName("UTF-8"));
-		}
-	}
-	
-	public void removeSpinDefinitions(Pair<Set<Function>, Set<Macro>> locks) throws Exception
-	{
-		if (verbose) System.out.println("+----------------------------+\n| Editing current spin locks |\n+----------------------------+\n");
-
-		for (String filePath : config.getPaths(PatchConfig.SPIN_PATHS_TO_CHANGE))
+		for (String filePath : paths)
 		{
 			if (verbose) System.out.println("Editing file \"" + filePath + "\"...");
 
@@ -614,8 +377,6 @@ public class Patcher {
 						}
 						
 						functionString = Pattern.compile("\n").splitAsStream(String.join("\n", functionSplit)).filter(s -> s != null && !s.isEmpty()).collect(Collectors.joining("\n"));
-						
-						System.out.println();
 					}
 					
 					functionString = "//" + functionString.replaceAll("\n", "\n//");
@@ -639,5 +400,5 @@ public class Patcher {
 			if (!directory.exists()) directory.mkdirs();
 			Files.write(Paths.get(outputPath, fileName), Arrays.stream(newSource.split("\n")).collect(Collectors.toList()), Charset.forName("UTF-8"));
 		}
-	}	
+	}
 }
