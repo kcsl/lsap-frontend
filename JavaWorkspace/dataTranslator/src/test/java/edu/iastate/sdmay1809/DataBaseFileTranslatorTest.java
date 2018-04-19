@@ -10,29 +10,62 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import org.junit.rules.TemporaryFolder;
 import org.junit.runners.MethodSorters;
 import org.junit.AfterClass;
 import org.junit.FixMethodOrder;
+import org.junit.Rule;
 import org.junit.Test;
 
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class DataBaseFileTranslatorTest {
 	static String pathToSource = "resources/translatorTestFiles/kernel/results";
-	static Path pathToSaveDir = Paths.get(System.getProperty("user.dir"), "resources", "translatorTestFiles");
-	static File savedFile = new File(pathToSaveDir.toString() + "/db_132rc2.json");
 	
+	@Rule
+	public TemporaryFolder folder= new TemporaryFolder();
+	
+
 	
 	@Test 
-	public void testFileOverride() {
+	public void testFileOverride() throws IOException {
+		folder.create();
+		File savedFile = new File(folder.getRoot().getAbsolutePath() + "/db_132rc2.json");
 		DataBaseFileTranslator dbt = new DataBaseFileTranslator(pathToSource.toString());
-		assertFalse(dbt.run(pathToSaveDir.toFile(), false));
+		dbt.run(savedFile.getParentFile(), false);
+		assertFalse(dbt.run(savedFile.getParentFile(), false));
 	}
 	
 	@Test
-	public void testDataCreation() {
+	public void testAssetFolderCreation() throws IOException {
+		folder.create();
 		DataBaseFileTranslator dbt = new DataBaseFileTranslator(pathToSource.toString());
-		assertTrue(dbt.run(pathToSaveDir.toFile(), true));
+		assertTrue(dbt.run(folder.getRoot(), true));
+		File root = new File(folder.getRoot().getAbsoluteFile() + "/132rc2");
+		assertTrue(root.exists());
+		File spin = new File(root.getAbsolutePath() + "/spin");
+		File mutex = new File(root.getAbsolutePath() + "/mutex");
+		assertTrue(spin.exists());
+		assertTrue(mutex.exists());
+		assertEquals(spin.list().length, 2);
+		assertEquals(mutex.list().length, 2);
+		
+		for(File f : spin.listFiles()) {
+			assertEquals(f.list().length, 6);
+		}
+		
+		for(File f : mutex.listFiles()) {
+			assertEquals(f.list().length, 6);
+		}
+	}
+	
+	@Test
+	public void testDataCreation() throws IOException {
+		folder.create();
+		File savedFile = new File(folder.getRoot().getAbsolutePath() + "/db_132rc2.json");
+		DataBaseFileTranslator dbt = new DataBaseFileTranslator(pathToSource.toString());
+		assertTrue(dbt.run(folder.getRoot(), true));
+		
 		assertTrue(savedFile.exists());
 		String fileData = "";
 		
@@ -96,11 +129,6 @@ public class DataBaseFileTranslatorTest {
 			
 		}
 		
-	}
-	
-	@AfterClass
-	public static void cleanUp() {
-		savedFile.delete();
 	}
 	
 	private String readFile(String path, Charset encoding) throws IOException {

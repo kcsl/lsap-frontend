@@ -2,7 +2,9 @@ package edu.iastate.sdmay1809;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.nio.file.Files;
 import java.io.IOException;
+
 import org.json.JSONObject;
 
 import edu.iastate.sdmay1809.shared.DiffConfig;
@@ -38,7 +40,7 @@ public class DataBaseFileTranslator extends InstanceTracker {
 		boolean retVal = true;
 
 		
-		JSONObject versionObject = createVersionObject(instances);	
+		JSONObject versionObject = createVersionObject(instances, outputFile.getAbsolutePath());	
 
 		System.out.println("instances: " + instances.length + ", instanceMap:" + versionObject.length());
 
@@ -59,7 +61,7 @@ public class DataBaseFileTranslator extends InstanceTracker {
 		fw.close();
 	}	
 	
-	protected JSONObject createVersionObject(File[] instances) {
+	protected JSONObject createVersionObject(File[] instances, String outputFile) {
 		JSONObject versionObject = new JSONObject();
 		for (File f : instances) {
 			try {
@@ -88,6 +90,17 @@ public class DataBaseFileTranslator extends InstanceTracker {
 					String fixedType = graphType.equals("CFG") ? "cfg" : "pcg";
 					String dir = versionNum + "/" + instance.getString("type") + "/" +
 						instance.getString("id") + "/" + fixedType + "_" + uuid + ".png";
+					
+					File copyFile = new File(outputFile + "/" + dir);
+					
+					try {
+						copyFile.getParentFile().mkdirs();
+						Files.copy(graph.toPath(), copyFile.toPath());
+					}
+					catch (Exception e) {
+						System.err.println("[ERROR] : Could not create asset structure for " + f.getName());
+					}
+					
 					if(graphType.toLowerCase().equals("cfg")) {
 						cfg.put(uuid, dir);
 					}
@@ -101,7 +114,9 @@ public class DataBaseFileTranslator extends InstanceTracker {
 				versionObject.put(instance.getString("id"), instance);
 			} catch (Exception e) {
 				System.err.println("[ERROR] : Threw exception when parsing " + f.getName());
-
+				for(StackTraceElement s: e.getStackTrace()) {
+					System.err.println(s.toString());
+				}
 			}
 		}
 		return versionObject;
