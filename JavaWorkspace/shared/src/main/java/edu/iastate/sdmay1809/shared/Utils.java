@@ -130,22 +130,166 @@ public class Utils {
 			} else if (val instanceof JSONObject) {
 				eq = Utils.convertToMap((JSONObject) val);
 			}
-			
+
 			// Store it in the list
 			list.add(eq);
 		}
 
 		return list;
 	}
-	
-	public static Map<String, Object> insert(String key, Object value, Map<String, Object> map) {
-		String[] parts = key.split("\\.");
-		Map<String, Object> retMap = Utils.coalesce(map, new HashMap<String, Object>());
-		
-		if(parts.length > 1) {
-			
-		} else {
-			
+
+	@SuppressWarnings("unchecked")
+	public static <T> boolean contains(T container, String key, int idx) {
+		if (container == null) {
+			throw new IllegalArgumentException("Container must not be null!");
 		}
+		if (!(container instanceof List) && !(container instanceof Map)) {
+			throw new IllegalArgumentException("Container must be a map or list!");
+		}
+
+		if (container instanceof List) {
+			List<Object> list = (List<Object>) container;
+			if (list.size() <= idx || idx < 0) {
+				return false;
+			} else {
+				return list.get(idx) != null;
+			}
+		} else {
+			if (key == null) {
+				return false;
+			} else {
+				Map<String, Object> map = (Map<String, Object>) container;
+				return map.containsKey(key);
+			}
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T> Object get(T container, String key, int idx) {
+		if (container == null) {
+			throw new IllegalArgumentException("Container must not be null!");
+		}
+		if (!(container instanceof List) && !(container instanceof Map)) {
+			throw new IllegalArgumentException("Container must be a map or list!");
+		}
+
+		if (container instanceof List) {
+			List<Object> list = (List<Object>) container;
+			if (list.size() <= idx || idx < 0) {
+				return null;
+			} else {
+				return list.get(idx);
+			}
+		} else {
+			if (key == null) {
+				return null;
+			} else {
+				Map<String, Object> map = (Map<String, Object>) container;
+				return map.get(key);
+			}
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T> T put(T container, String key, int idx, Object value) {
+		if (container == null) {
+			throw new IllegalArgumentException("Container must not be null!");
+		}
+		if (!(container instanceof List) && !(container instanceof Map)) {
+			throw new IllegalArgumentException("Container must be a map or list!");
+		}
+
+		if (container instanceof List) {
+			List<Object> list = (List<Object>) container;
+			if (idx < 0) {
+				return container;
+			} else if (list.size() <= idx) {
+				list.add(idx, value);
+				container = (T) list;
+				return container;
+			} else {
+				if (list.get(idx) != null) {
+					// TODO: Warn about overriding!
+					return container;
+				}
+				list.add(idx, value);
+				return container;
+			}
+		} else {
+			if (key == null) {
+				return container;
+			} else {
+				Map<String, Object> map = (Map<String, Object>) container;
+				if (map.containsKey(key)) {
+					// TODO: Warn about overriding!
+					return container;
+				}
+				map.put(key, value);
+				return container;
+			}
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T> T insert(String key, Object value, T container) {
+		String[] parts = key.split("\\.", 2);
+		if (container == null) {
+			throw new IllegalArgumentException("Container must not be null!");
+		}
+		if (!(container instanceof List) && !(container instanceof Map)) {
+			throw new IllegalArgumentException("Container must be a map or list!");
+		}
+		
+		int idx = -1;
+		try {
+			idx = Integer.parseInt(parts[0]);
+		} catch (Exception e) {
+			idx = -1;
+		}
+
+		if (parts.length > 1) {
+			String[] innerParts = parts[1].split("\\.", 2);
+			int idx2 = -1;
+			try {
+				idx2 = Integer.parseInt(innerParts[0]);
+			} catch (Exception e) {
+				idx2 = -1;
+			}
+			
+			
+			Object val;
+			if (Utils.<T>contains(container, parts[0], idx2)) {
+				val = Utils.<T>get(container, parts[0], idx2);
+				if (idx2 == -1 && val instanceof Map) {
+					Map<String, Object> innerMap = (Map<String, Object>) val;
+					innerMap = Utils.<Map<String, Object>>insert(parts[1], value, innerMap);
+					val = (Object) innerMap;
+				} else if (idx2 != -1 && val instanceof List) {
+					List<Object> innerList = (List<Object>) val;
+					innerList = Utils.<List<Object>>insert(parts[1], value, innerList);
+					val = (Object) innerList;
+				}
+			} else {
+				if (idx2 == -1) {
+					Map<String, Object> innerMap = new HashMap<String, Object>();
+					innerMap = Utils.<Map<String, Object>>insert(parts[1], value, innerMap);
+					val = (Object) innerMap;
+				} else {
+					List<Object> innerList = new ArrayListAnySize<Object>(idx2+1);
+					innerList = Utils.<List<Object>>insert(parts[1], value, innerList);
+					val = (Object) innerList;
+				}
+			}
+			Utils.<T>put(container, parts[0], idx, val);
+		} else {
+			Utils.<T>contains(container, parts[0], 0);
+			if (Utils.<T>contains(container, parts[0], 0)) {
+				// TODO: Warn user about overriding property!
+			} else {
+				Utils.<T>put(container, parts[0], idx, value);
+			}
+		}
+		
+		return container;
 	}
 }

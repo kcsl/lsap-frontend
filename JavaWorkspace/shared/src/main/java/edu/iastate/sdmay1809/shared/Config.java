@@ -91,27 +91,10 @@ public class Config {
 			b = new Builder<T>();
 		}
 		
+		Map<String, Object> propsMap = new HashMap<String, Object>();
+		
 		for(String key : cliProps.stringPropertyNames()) {
-			String[] parts = key.split("\\.", 2);
-			if(parts.length > 1) {
-				// TODO: recursively insert config option into b
-				if(b.configOptions.containsKey(parts[0])) {
-					Object value = b.configOptions.get(parts[0]);
-					if(value instanceof Map) {
-						// TODO: parse and insert String recursively
-					} else {
-						// TODO: Warn user of trying to replace existing value with nested object!
-					}
-				} else {
-					
-				}
-			} else {
-				if(b.configOptions.containsKey(parts[0])) {
-					// TODO: Warn user of trying to replace existing top level object!
-				} else {
-					b.setConfig(key, cliProps.getProperty(parts[0]));
-				}
-			}
+			propsMap = Utils.<Map<String, Object>>insert(key, cliProps.getProperty(key), propsMap);
 		}
 		
 		return b;
