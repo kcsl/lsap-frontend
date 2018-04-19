@@ -20,4 +20,5 @@ RssReader:
 
 Patcher:
   script:
+    - (cd JavaWorkspace/shared; mvn install -B -Dmaven.test.skip=true)
     - (cd JavaWorkspace/patchGeneration; mvn install -B && cat target/site/jacoco/index.html)
