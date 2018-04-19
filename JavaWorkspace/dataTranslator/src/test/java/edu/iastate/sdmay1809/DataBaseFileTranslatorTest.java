@@ -47,28 +47,40 @@ public class DataBaseFileTranslatorTest {
 		assertFalse(test);
 	}
 	
-//	@Test
-//	public void testAssetFolderCreation() throws IOException {
-//		folder.create();
-//		DataBaseFileTranslator dbt = new DataBaseFileTranslator(pathToSource.toString());
-//		assertTrue(dbt.run(folder.getRoot(), true));
-//		File root = new File(folder.getRoot().getAbsoluteFile() + "/132rc2");
-//		assertTrue(root.exists());
-//		File spin = new File(root.getAbsolutePath() + "/spin");
-//		File mutex = new File(root.getAbsolutePath() + "/mutex");
-//		assertTrue(spin.exists());
-//		assertTrue(mutex.exists());
-//		assertEquals(spin.list().length, 2);
-//		assertEquals(mutex.list().length, 2);
-//		
-//		for(File f : spin.listFiles()) {
-//			assertEquals(f.list().length, 6);
-//		}
-//		
-//		for(File f : mutex.listFiles()) {
-//			assertEquals(f.list().length, 6);
-//		}
-//	}
+	@Test
+	public void testAssetFolderCreation() throws IOException {
+		folder.create();
+		DataBaseFileTranslator dbt = new DataBaseFileTranslator(pathToSource.toString());
+		assertTrue(dbt.run(folder.getRoot(), true));
+		File root = new File(folder.getRoot().getAbsoluteFile() + "/132rc2");
+		assertTrue(root.exists());
+		File spin = new File(root.getAbsolutePath() + "/spin");
+		File mutex = new File(root.getAbsolutePath() + "/mutex");
+		assertTrue(spin.exists());
+		assertTrue(mutex.exists());
+		assertEquals(spin.list().length, 2);
+		assertEquals(mutex.list().length, 2);
+		
+		boolean foundMpg = false;
+		
+		for(File f : spin.listFiles()) {
+			assertEquals(f.list().length, 7);
+			for(File img : f.listFiles())
+				if(img.getName().equals("mpg.png"))
+					foundMpg = true;
+		}
+		
+		assertTrue(foundMpg);
+		foundMpg = false;
+		
+		for(File f : mutex.listFiles()) {
+			assertEquals(f.list().length, 7);
+			for(File img : f.listFiles())
+				if(img.getName().equals("mpg.png"))
+					foundMpg = true;
+		}
+		assertTrue(foundMpg);
+	}
 	
 //	@Test
 //	public void testDataCreation() throws IOException {

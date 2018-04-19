@@ -71,6 +71,15 @@ public class DataBaseFileTranslator extends InstanceTracker {
 				instance.put("type", f.getParentFile().getName());
 				String pathTo = versionNum + "/" + instance.getString("type") + "/" + instance.getString("id") + "/";
 				instance.put("mpg", pathTo + "mpg.png");
+				File mpgCpyDir = new File(outputFile + "/" + pathTo + "mpg.png");
+				File mpgFromDir = new File(f.getAbsolutePath() + "/mpg.png");
+				try {
+					mpgCpyDir.getParentFile().mkdirs();
+					Files.copy(mpgFromDir.toPath(), mpgCpyDir.toPath());
+				}
+				catch (Exception e) {
+					System.err.println("[ERROR] : Could not create asset structure for " + f.getName());
+				}
 				Map<String, String> graphToUUID = new HashMap<String,String>();
 				for(File graph : f.listFiles()) {
 					if((!graph.getName().startsWith("EFG") &&
