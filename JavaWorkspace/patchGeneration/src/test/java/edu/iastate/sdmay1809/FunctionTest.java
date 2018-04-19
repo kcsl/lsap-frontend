@@ -1,6 +1,6 @@
 package edu.iastate.sdmay1809;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
 import java.util.HashMap;
@@ -23,6 +23,24 @@ public class FunctionTest {
 		f2 = new Function("void __lockfunc _raw_spin_lock_nest_lock(raw_spinlock_t *lock)\n" + 
 				"								__acquires(lock);");
 		f3 = new Function("void __lockfunc _raw_spin_lock_bh(raw_spinlock_t *lock)		__acquires(lock);");
+		
+		Function.config = new PatchConfig("resources/testing/patchConfigTest.json");
+	}
+	
+	@Test
+	public void functionImproperFormat() throws Exception
+	{
+		try
+		{
+			new Function(null);
+			fail("Function should throw exception on null input.");
+		} catch (Exception e) {}
+		
+		try
+		{
+			new Function("notafunction");
+			fail("Function should throw exception on malformatted input.");
+		} catch (Exception e) {}
 	}
 	
 	@Test
@@ -90,7 +108,6 @@ public class FunctionTest {
 		assertEquals(params.get(0).getName(), "lock");
 	}
 	
-	@SuppressWarnings("unlikely-arg-type")
 	@Test
 	public void functionEquals() throws Exception
 	{
@@ -99,6 +116,16 @@ public class FunctionTest {
 		assertFalse(f1.equals(f3));
 		assertFalse(f1.equals(null));
 		assertTrue(f1.equals(new Macro("#define _raw_spin_lock_nest_lock(lock) func(lock)")));
+	}
+	
+	@Test
+	public void functionHashCode() throws Exception
+	{
+		assertEquals(f1.hashCode(), f1.hashCode());
+		assertEquals(f1.hashCode(), f2.hashCode());
+		assertThat(f1.hashCode(), not(equals(f3.hashCode())));
+		assertThat(f1.hashCode(), not(equals(null)));
+		assertEquals(f1.hashCode(), (new Macro("#define _raw_spin_lock_nest_lock(lock) func(lock)")).hashCode());
 	}
 	
 	@Test
@@ -114,5 +141,15 @@ public class FunctionTest {
 		assertTrue(Function.isLockingFunction(f2, criteria));
 		assertTrue(Function.isLockingFunction(f3, criteria));
 		assertFalse(Function.isLockingFunction(new Function("int noFunc(struct mutex *lock);"), criteria));
+	}
+	
+	@Test
+	public void functionToString() throws Exception
+	{
+		assertEquals(f1.toString(), "static inline void _raw_spin_lock_nest_lock(raw_spinlock_t* lock, struct lockdep_map* map) {}");
+		assertEquals(f2.toString(), "static inline void _raw_spin_lock_nest_lock(raw_spinlock_t* lock) {}");
+		assertEquals(f3.toString(), "static inline void _raw_spin_lock_bh(raw_spinlock_t* lock) {}");
+		assertEquals((new Function("int function();")).toString(), "static inline int function() {return 0;}");
+		assertEquals((new Function("struct mutex *function();")).toString(), "");
 	}
 }

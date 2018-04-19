@@ -1,7 +1,10 @@
 package edu.iastate.sdmay1809;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import java.util.HashMap;
 import java.util.List;
@@ -86,7 +89,6 @@ public class MacroTest {
 		assertEquals(params.get(0), "lockname");
 	}
 	
-	@SuppressWarnings("unlikely-arg-type")
 	@Test
 	public void macroEquals() throws Exception
 	{
@@ -95,6 +97,16 @@ public class MacroTest {
 		assertFalse(m1.equals(new Macro("#define otherMacro(someParam) doThing(someParam)")));
 		assertFalse(m1.equals(null));
 		assertTrue(m1.equals(new Function("int macro(int param);")));
+	}
+	
+	@Test
+	public void macroHashCode() throws Exception
+	{
+		assertEquals(m1.hashCode(), m1.hashCode());
+		assertEquals(m1.hashCode(), m2.hashCode());
+		assertThat(m1.hashCode(), not(equals((new Macro("#define otherMacro(someParam) doThing(someParam)")).hashCode())));	
+		assertThat(m1.hashCode(), not(equals(null)));
+		assertEquals(m1.hashCode(), (new Function("int macro(int param);")).hashCode());
 	}
 	
 	@Test
@@ -110,5 +122,23 @@ public class MacroTest {
 		assertTrue(Macro.isLockingMacro(m2, criteria));
 		assertTrue(Macro.isLockingMacro(m3, criteria));
 		assertFalse(Macro.isLockingMacro(new Macro("#define noMacro(someParam) doThing(someParam)"), criteria));
+	}
+	
+	@Test
+	public void macroToString() throws Exception
+	{
+		assertEquals(m1.toString(), "#define macro (lock, otherParam)");
+		assertEquals(m2.toString(), "#define macro (lock, otherParam)");
+		assertEquals(m3.toString(), "#define macro (lockname)");
+		
+		Function f = new Function("int function(int lock, struct mutex *lock2);");
+		
+		m1.setBodyFunction(f);
+		m2.setBodyFunction(f);
+		m3.setBodyFunction(f);
+		
+		assertEquals(m1.toString(), "#define macro (lock, otherParam) function(0, NULL)");
+		assertEquals(m2.toString(), "#define macro (lock, otherParam) function(0, NULL)");
+		assertEquals(m3.toString(), "#define macro (lockname) function(0, NULL)");
 	}
 }

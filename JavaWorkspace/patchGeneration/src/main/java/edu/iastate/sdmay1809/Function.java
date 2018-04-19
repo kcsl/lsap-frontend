@@ -80,25 +80,28 @@ public class Function implements Locker
 	{
 		if (f.modifiers.toLowerCase().contains("define") || f.modifiers.toLowerCase().contains("return")) return false;
 		
+		for (String s : criteria.keySet())
+		{
+			if (f.name.contains(s) != criteria.get(s)) return false;
+		}
+		
+		return f.hasValidReturnType();
+	}
+	
+	public boolean hasValidReturnType()
+	{
 		boolean isValidReturnType = false;
 		
 		for (String s : config.getFunctionReturnTypes())
 		{
-			if (f.modifiers.replaceAll("\\s*\\*\\s*", "* ").contains(s.replaceAll("\\s*\\*\\s*", "* ")))
+			if (modifiers.replaceAll("\\s*\\*\\s*", "* ").contains(s.replaceAll("\\s*\\*\\s*", "* ")))
 			{
 				isValidReturnType = true;
 				break;
 			}
 		}
 		
-		if (!isValidReturnType) return false;
-		
-		for (String s : criteria.keySet())
-		{
-			if (f.name.contains(s) != criteria.get(s)) return false;
-		}
-		
-		return true;
+		return isValidReturnType;
 	}
 	
 	@Override
@@ -117,7 +120,7 @@ public class Function implements Locker
 			}
 		}
 		
-		if (returnType == null || returnType == "") return "";
+		if (returnType == "") return "";
 		
 		String string = "static inline " + returnType + " " + name + "(" + parameters.stream().map(Object::toString).collect(Collectors.joining(", ")) + ") {";
 		

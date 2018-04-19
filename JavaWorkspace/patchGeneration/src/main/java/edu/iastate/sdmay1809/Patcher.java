@@ -178,7 +178,7 @@ public class Patcher {
 					if (!functionLine.toLowerCase().contains("define") && !functionLine.toLowerCase().contains("return"))
 					{
 						Function f = new Function(matcher.group());
-						if (Function.isLockingFunction(f, functionCriteriaMap) && f.toString().length() > 0)
+						if (Function.isLockingFunction(f, functionCriteriaMap) && f.hasValidReturnType())
 						{
 							if (verbose) System.out.println("\tFunction found in \"" + functionLine + "\"");
 							functions.add(f);
@@ -327,10 +327,16 @@ public class Patcher {
 			{
 				String line = fileSourceSplit[i];
 								
+				if (line.toLowerCase().contains("export_symbol"))
+				{
+					fileSourceSplit[i] = "//" + line;
+					continue;
+				}
+				
 				try	{ macro = new Macro(line); }
 				catch (Exception e) { if (verbose) System.err.println("PATCHER: Attempted to make macro from non-macro string \"" + line + "\". Skipping it."); continue; }
 				
-				if (locks.getValue1().contains(macro))
+				if (locks.getValue1().contains(macro) || locks.getValue0().contains(macro))
 				{
 					while(line.replaceFirst("//.*", "").trim().endsWith("\\"))
 					{
@@ -351,14 +357,14 @@ public class Patcher {
 			if (verbose) System.out.println("Commenting out patched functions...");
 			while (matcher.find())
 			{
-				String functionString = matcher.group();				
+				String functionString = matcher.group();
 				Function f;
 				
 				try { f = new Function(functionString); }
 				catch (Exception e) { if (debug || verbose) System.err.println("PATCHER: Unable to find function definition in \"" + functionString + "\". Skipping it."); continue; }
 				
-				if (locks.getValue0().contains(f))
-				{	
+				if ((locks.getValue0().contains(f) || locks.getValue1().contains(f)) && f.hasValidReturnType())
+				{						
 					String transfer = fileSource.substring(0, matcher.start());
 					String ignored = "";
 					
@@ -380,8 +386,32 @@ public class Patcher {
 					}
 					
 					functionString = "//" + functionString.replaceAll("\n", "\n//");
-					newSource += transfer + ignored + functionString;
 					fileSource = fileSource.substring(matcher.end());
+					
+					while(fileSource.length() > 0 && fileSource.charAt(0) != '{' && fileSource.charAt(0) != ';')
+					{
+						functionString += fileSource.charAt(0);
+						if (fileSource.charAt(0) == '\n') functionString += "//";
+						fileSource = fileSource.substring(1);
+					}
+					
+					if (fileSource.charAt(0) == '{')
+					{
+						int braceCount = 0;
+						
+						do
+						{
+							functionString += fileSource.charAt(0);
+							
+							if (fileSource.charAt(0) == '{') braceCount++;
+							if (fileSource.charAt(0) == '}') braceCount--;
+							if (fileSource.charAt(0) == '\n') functionString += "//";
+							
+							fileSource = fileSource.substring(1);
+						} while(braceCount > 0);
+					}
+					
+					newSource += transfer + ignored + functionString;
 					matcher = p.matcher(fileSource);
 					
 					if (verbose) System.out.println("\tCommented out function \"" + f.getName() + "\"");
@@ -395,7 +425,8 @@ public class Patcher {
 				System.out.println(newSource);
 			}
 			
-			String fileName = filePath.replaceFirst("\\.\\w+$", (debug ? ".txt" : ".h"));
+			String fileName = filePath;
+			if (debug) fileName = fileName.replaceFirst("\\.\\w+$", ".txt");
 			File directory = new File(Paths.get(outputPath, fileName).toString().replaceFirst("\\w+\\.\\w+$", ""));
 			if (!directory.exists()) directory.mkdirs();
 			Files.write(Paths.get(outputPath, fileName), Arrays.stream(newSource.split("\n")).collect(Collectors.toList()), Charset.forName("UTF-8"));

@@ -2,24 +2,20 @@
 	"MutexFunctionCriteria": {
 		"ignore_all_locks" : false,
 		"mutex" : true,
-		"lock" : true,
-		"mutex_lock_io_nested" : false,
-		"_is_" : false
+		"lock" : true
 	},
 	
 	"MutexMacroCriteria": {
 		"ignore_all_locks" : false,
-		"mutex" : true,
-		"lock" : true,
-		"nested" : false
+		"mutex" : true
 	},
 	
 	"MutexFunctionsToInclude": [
-	
+		"int function(void *lock);"
 	],
 	
 	"MutexMacrosToInclude": [
-	
+		"#define macro(lock) function(lock)"
 	],
 	
 	"SpinFunctionCriteria": {
@@ -28,26 +24,16 @@
 	
 	"SpinMacroCriteria": {
 		"ignore_all_locks" : false,
-		"lock" : true,
-		"_is_" : false,
-		"_can_" : false,
-		"_before_" : false,
-		"assert" : false,
-		"init" : false,
-		"_raw_spin_unlock_bh" : false,
-		"_raw_spin_unlock_irq" : false,
-		"_raw_spin_unlock_irqrestore" : false,
-		"attribute" : false
+		"lock" : true
 	},
 	
 	"SpinFunctionsToInclude": [
 		"void __raw_spin_lock(void *lock);",
 		"int __raw_spin_trylock(void *lock);",
-		"void __raw_spin_unlock(void *lock);"
 	],
 	
 	"SpinMacrosToInclude": [
-	
+		"#define macro(lock) __raw_spin_lock(lock)"
 	],
 	
 	"MutexPathsToRead": [
@@ -55,19 +41,15 @@
 	],
 	
 	"MutexPathsToChange": [
-		"include/linux/mutex.h",
-		"kernel/locking/mutex.c"
+		"include/linux/mutex.h"
 	],
 	
 	"SpinPathsToRead": [
-		"include/linux/spinlock.h",
-		"include/linux/spinlock_api_smp.h"
+		"include/linux/spinlock.h"
 	],
 	
 	"SpinPathsToChange": [
-		"include/linux/spinlock.h",
-		"include/linux/spinlock_api_smp.h",
-		"kernel/locking/spinlock.c"
+		"include/linux/spinlock.h"
 	],
 	
 	"FunctionReturnTypes" : [
