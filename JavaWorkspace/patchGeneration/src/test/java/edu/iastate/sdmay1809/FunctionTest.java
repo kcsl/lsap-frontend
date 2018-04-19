@@ -116,6 +116,10 @@ public class FunctionTest {
 		assertFalse(f1.equals(f3));
 		assertFalse(f1.equals(null));
 		assertTrue(f1.equals(new Macro("#define _raw_spin_lock_nest_lock(lock) func(lock)")));
+		assertFalse(f1.equals(new Parameter("int param")));
+		assertFalse(f1.equals(new Function("int __must_check\n" + 
+				"_raw_spin_lock_nest_lock(raw_spinlock_t *lock, struct lockdep_map *map)\n" + 
+				"								__acquires(lock);")));
 	}
 	
 	@Test
@@ -141,6 +145,17 @@ public class FunctionTest {
 		assertTrue(Function.isLockingFunction(f2, criteria));
 		assertTrue(Function.isLockingFunction(f3, criteria));
 		assertFalse(Function.isLockingFunction(new Function("int noFunc(struct mutex *lock);"), criteria));
+		assertFalse(Function.isLockingFunction(new Function("define int func(int lock);"), criteria));
+		assertFalse(Function.isLockingFunction(new Function("return func(int lock);"), criteria));
+	}
+	
+	@Test
+	public void functionHasValidReturnType() throws Exception
+	{
+		assertTrue(f1.hasValidReturnType());
+		assertTrue(f2.hasValidReturnType());
+		assertTrue(f3.hasValidReturnType());
+		assertFalse((new Function("return notfunc func(int param);")).hasValidReturnType());
 	}
 	
 	@Test
@@ -150,6 +165,17 @@ public class FunctionTest {
 		assertEquals(f2.toString(), "static inline void _raw_spin_lock_nest_lock(raw_spinlock_t* lock) {}");
 		assertEquals(f3.toString(), "static inline void _raw_spin_lock_bh(raw_spinlock_t* lock) {}");
 		assertEquals((new Function("int function();")).toString(), "static inline int function() {return 0;}");
+		assertEquals((new Function("struct patchTest *function();")).toString(), "static inline struct patchTest * function() {return NULL;}");
+		
+		PatchConfig tmp = Function.config;
+		Function.config = null;
+		
+		assertEquals(f1.toString(), "");
+		assertEquals(f2.toString(), "");
+		assertEquals(f3.toString(), "");
+		assertEquals((new Function("int function();")).toString().toString(), "");
 		assertEquals((new Function("struct mutex *function();")).toString(), "");
+		
+		Function.config = tmp;
 	}
 }

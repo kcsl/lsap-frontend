@@ -363,6 +363,11 @@ public class Patcher {
 				try { f = new Function(functionString); }
 				catch (Exception e) { if (debug || verbose) System.err.println("PATCHER: Unable to find function definition in \"" + functionString + "\". Skipping it."); continue; }
 				
+				if (f.getName().equals("mutex_lock"))
+				{
+					System.out.println();
+				}
+				
 				if ((locks.getValue0().contains(f) || locks.getValue1().contains(f)) && f.hasValidReturnType())
 				{						
 					String transfer = fileSource.substring(0, matcher.start());
@@ -387,6 +392,7 @@ public class Patcher {
 					
 					functionString = "//" + functionString.replaceAll("\n", "\n//");
 					fileSource = fileSource.substring(matcher.end());
+					fileSourceSplit = fileSource.split("\n");
 					
 					while(fileSource.length() > 0 && fileSource.charAt(0) != '{' && fileSource.charAt(0) != ';')
 					{

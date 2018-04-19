@@ -1,10 +1,7 @@
 package edu.iastate.sdmay1809;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -97,6 +94,8 @@ public class MacroTest {
 		assertFalse(m1.equals(new Macro("#define otherMacro(someParam) doThing(someParam)")));
 		assertFalse(m1.equals(null));
 		assertTrue(m1.equals(new Function("int macro(int param);")));
+		assertFalse(m1.equals(new Parameter("int param")));
+		assertFalse(m1.equals(new Macro("#define macro(lock, notOtherParam)")));
 	}
 	
 	@Test
@@ -140,5 +139,23 @@ public class MacroTest {
 		assertEquals(m1.toString(), "#define macro (lock, otherParam) function(0, NULL)");
 		assertEquals(m2.toString(), "#define macro (lock, otherParam) function(0, NULL)");
 		assertEquals(m3.toString(), "#define macro (lockname) function(0, NULL)");
+		assertEquals((new Macro("#define macro()", new Function("int function(int lock, struct mutex *lock2);"))).toString(), "#define macro () function(0, NULL)");
+	}
+	
+	@Test
+	public void macroMalformattedConstructor() throws Exception
+	{
+		try
+		{
+			new Macro(null);
+			fail("Macro should fail on null input");
+		} catch (Exception e){}
+		
+		try
+		{
+			new Macro("Not a macro");
+			fail("Macro should fail on non-macro input");
+		} catch (Exception e){}
+
 	}
 }

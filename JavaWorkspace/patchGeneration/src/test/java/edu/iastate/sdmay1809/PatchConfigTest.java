@@ -108,9 +108,10 @@ public class PatchConfigTest
 	{
 		Set<String> types = config.getFunctionReturnTypes();
 		
-		assertEquals(types.size(), 2);
+		assertEquals(types.size(), 3);
 		assertTrue(types.contains("int"));
 		assertTrue(types.contains("void"));
+		assertTrue(types.contains("struct patchTest *"));
 	}
 	
 	@Test

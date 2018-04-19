@@ -1,5 +1,7 @@
 package edu.iastate.sdmay1809;
 
+import edu.iastate.sdmay1809.shared.Utils;
+
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -88,18 +90,10 @@ public class PatchConfig
 				JSONObject criteriaObject;
 				Map<String, Boolean> curCriteria = new HashMap<String, Boolean>();
 				
-				try
+				criteriaObject = configObject.getJSONObject(s);
+				for (String key : criteriaObject.keySet())
 				{
-					criteriaObject = configObject.getJSONObject(s);
-					for (String key : criteriaObject.keySet())
-					{
-						curCriteria.put(key, criteriaObject.getBoolean(key));
-					}
-				}
-				
-				catch(JSONException e)
-				{
-					throw new Exception("CONFIG: Error parsing object \"" + s + "\" in config file!");
+					curCriteria.put(key, criteriaObject.getBoolean(key));
 				}
 				
 				criteria.put(s, curCriteria);
@@ -110,19 +104,11 @@ public class PatchConfig
 				JSONArray pathObject;
 				Set<String> curPaths = new HashSet<String>();
 				
-				try
-				{
-					pathObject = configObject.getJSONArray(s);
-					
-					for (Object path : pathObject)
-					{
-						curPaths.add((String) path);
-					}
-				}
+				pathObject = configObject.getJSONArray(s);
 				
-				catch(JSONException e)
+				for (Object path : pathObject)
 				{
-					throw new Exception("CONFIG: Error parsing object \"" + s + "\" in config file!");
+					curPaths.add((String) path);
 				}
 				
 				paths.put(s, curPaths);
@@ -130,19 +116,11 @@ public class PatchConfig
 			
 			JSONArray typeObject;
 			
-			try
-			{
-				typeObject = configObject.getJSONArray(FUNCTION_RETURN_TYPES);
-				
-				for (Object type : typeObject)
-				{
-					functionReturnTypes.add((String) type);
-				}
-			}
+			typeObject = configObject.getJSONArray(FUNCTION_RETURN_TYPES);
 			
-			catch(JSONException e)
+			for (Object type : typeObject)
 			{
-				throw new Exception("CONFIG Error parsing object \"" + FUNCTION_RETURN_TYPES + "\" in config file!");
+				functionReturnTypes.add((String) type);
 			}
 			
 			for (String function : functionLabels)
@@ -150,19 +128,11 @@ public class PatchConfig
 				JSONArray functionObject;
 				Set<Function> curFunctions = new HashSet<Function>();
 				
-				try
-				{
-					functionObject = configObject.getJSONArray(function);
-					
-					for (Object f : functionObject)
-					{
-						curFunctions.add(new Function((String) f));
-					}
-				}
+				functionObject = configObject.getJSONArray(function);
 				
-				catch(JSONException e)
+				for (Object f : functionObject)
 				{
-					throw new Exception("CONFIG: Error parsing object \"" + function + "\" in config file!");
+					curFunctions.add(new Function((String) f));
 				}
 				
 				functions.put(function, curFunctions);
@@ -173,19 +143,11 @@ public class PatchConfig
 				JSONArray macroObject;
 				Set<Macro> curMacros = new HashSet<Macro>();
 				
-				try
-				{
-					macroObject = configObject.getJSONArray(macro);
-					
-					for (Object m : macroObject)
-					{
-						curMacros.add(new Macro((String) m));
-					}
-				}
+				macroObject = configObject.getJSONArray(macro);
 				
-				catch(JSONException e)
+				for (Object m : macroObject)
 				{
-					throw new Exception("CONFIG: Error parsing object \"" + macro + "\" in config file!");
+					curMacros.add(new Macro((String) m));
 				}
 				
 				macros.put(macro, curMacros);
@@ -195,26 +157,26 @@ public class PatchConfig
 	
 	public Map<String, Boolean> getCriteria(String label)
 	{	
-		return criteria.getOrDefault(label, null);
+		return criteria.getOrDefault(label, new HashMap<String, Boolean>());
 	}
 	
 	public Set<String> getPaths(String label)
 	{
-		return paths.getOrDefault(label, null);
+		return paths.getOrDefault(label, new HashSet<String>());
 	}
 	
 	public Set<String> getFunctionReturnTypes()
 	{
-		return functionReturnTypes;
+		return Utils.coalesce(functionReturnTypes, new HashSet<String>());
 	}
 	
 	public Set<Function> getFunctions(String label)
 	{
-		return functions.getOrDefault(label, null);
+		return functions.getOrDefault(label, new HashSet<Function>());
 	}
 	
 	public Set<Macro> getMacros(String label)
 	{
-		return macros.getOrDefault(label, null);
+		return macros.getOrDefault(label, new HashSet<Macro>());
 	}
 }

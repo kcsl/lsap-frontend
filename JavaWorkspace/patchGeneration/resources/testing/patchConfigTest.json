@@ -54,6 +54,7 @@
 	
 	"FunctionReturnTypes" : [
 		"int",
-		"void"
+		"void",
+		"struct patchTest *"
 	]
 }
