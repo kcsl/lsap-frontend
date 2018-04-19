@@ -1,6 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <rss version="2.0"><channel><title>Latest Linux Kernel Versions</title><link>http://www.kernel.org</link><description>Latest Linux Kernel Versions</description><lastBuildDate>Fri, 09 Feb 2018 02:51:32 -0000</lastBuildDate><item><title>4.15: mainline</title><link>http://www.kernel.org/</link><description>
             &lt;table&gt;
+                &lt;tr&gt;&lt;th align="right"&gt;Version:&lt;/th&gt;&lt;td&gt;&lt;strong&gt;4.9-rc1&lt;/strong&gt; (mainline)&lt;/td&gt;&lt;/tr&gt;
+                &lt;tr&gt;&lt;th align="right"&gt;Released:&lt;/th&gt;&lt;td&gt;2018-01-28&lt;/td&gt;&lt;/tr&gt;
+            
+                &lt;tr&gt;&lt;th align="right"&gt;Source:&lt;/th&gt;&lt;td&gt;&lt;a href="https://cdn.kernel.org/pub/linux/kernel/v4.x/linux-4.15.tar.xz"&gt;linux-4.15.tar.xz&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+                &lt;tr&gt;&lt;th align="right"&gt;PGP Signature:&lt;/th&gt;&lt;td&gt;&lt;a href="https://cdn.kernel.org/pub/linux/kernel/v4.x/linux-4.15.tar.sign"&gt;linux-4.15.tar.sign&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+                &lt;tr&gt;&lt;th align="right"&gt;Patch:&lt;/th&gt;&lt;td&gt;&lt;a href="https://cdn.kernel.org/pub/linux/kernel/v4.x/patch-4.15.xz"&gt;full&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+            &lt;/table&gt;</description><pubDate>Sun, 28 Jan 2018 21:20:41 -0000</pubDate><guid isPermaLink="false">kernel.org,mainline,4.9-rc1,2018-01-28</guid></item><item><title>4.9-rc1: stable</title><link>http://www.kernel.org/</link><description>
+            &lt;table&gt;
+                &lt;tr&gt;&lt;th align="right"&gt;Version:&lt;/th&gt;&lt;td&gt;&lt;strong&gt;4.9-rc2&lt;/strong&gt; (mainline)&lt;/td&gt;&lt;/tr&gt;
+                &lt;tr&gt;&lt;th align="right"&gt;Released:&lt;/th&gt;&lt;td&gt;2018-01-28&lt;/td&gt;&lt;/tr&gt;
+            
+                &lt;tr&gt;&lt;th align="right"&gt;Source:&lt;/th&gt;&lt;td&gt;&lt;a href="https://cdn.kernel.org/pub/linux/kernel/v4.x/linux-4.15.tar.xz"&gt;linux-4.15.tar.xz&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+                &lt;tr&gt;&lt;th align="right"&gt;PGP Signature:&lt;/th&gt;&lt;td&gt;&lt;a href="https://cdn.kernel.org/pub/linux/kernel/v4.x/linux-4.15.tar.sign"&gt;linux-4.15.tar.sign&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+                &lt;tr&gt;&lt;th align="right"&gt;Patch:&lt;/th&gt;&lt;td&gt;&lt;a href="https://cdn.kernel.org/pub/linux/kernel/v4.x/patch-4.15.xz"&gt;full&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+            &lt;/table&gt;</description><pubDate>Sun, 28 Jan 2018 21:20:41 -0000</pubDate><guid isPermaLink="false">kernel.org,mainline,4.9-rc2,2018-01-28</guid></item><item><title>4.9-rc2: stable</title><link>http://www.kernel.org/</link><description>
+            &lt;table&gt;
                 &lt;tr&gt;&lt;th align="right"&gt;Version:&lt;/th&gt;&lt;td&gt;&lt;strong&gt;4.16&lt;/strong&gt; (mainline)&lt;/td&gt;&lt;/tr&gt;
                 &lt;tr&gt;&lt;th align="right"&gt;Released:&lt;/th&gt;&lt;td&gt;2018-01-28&lt;/td&gt;&lt;/tr&gt;
             

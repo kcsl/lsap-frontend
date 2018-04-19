@@ -36,7 +36,7 @@ public class KernelRssFeedTest {
 	
 	
 	@Test
-	public void kerentlRssFeedTestWithRc() {
+	public void kernelRssFeedTestWithRc() {
 		KernelRssFeed kernelRssReader; 
 		try {
 			kernelRssReader = new KernelRssFeed(feed);
@@ -57,7 +57,7 @@ public class KernelRssFeedTest {
 	
 	
 	@Test
-	public void kerentlRssFeedTestWithoutRc() {
+	public void kernelRssFeedTestWithoutRc() {
 		KernelRssFeed kernelRssReader; 
 		try {
 			kernelRssReader = new KernelRssFeed(feed, false);
@@ -74,6 +74,34 @@ public class KernelRssFeedTest {
 		}
 		
 		Assert.assertTrue(kernelRssReader.getNewestVersion().equals("4.16"));	
+	}
+	
+	@Test
+	public void testKerenlRssConstructors() {
+		String feedURL = "https://www.kernel.org/feeds/kdist.xml";
+		KernelRssFeed feed;
+		try {
+			feed = new KernelRssFeed(feedURL, false);
+		}
+		catch(Exception e) {
+			Assert.fail("Threw expection creating reader: " + e.getMessage());
+			return;
+		}
+		
+		Assert.assertEquals(feed.getFeed().getLink(), "http://www.kernel.org"); 
+		Assert.assertFalse(feed.getIncludeRCs());
+		
+		try {
+			feed = new KernelRssFeed(feedURL);
+		}
+		catch(Exception e) {
+			Assert.fail("Threw expection creating reader: " + e.getMessage());
+			return;
+		}
+		
+		Assert.assertEquals(feed.getFeed().getLink(), "http://www.kernel.org"); 
+		Assert.assertTrue(feed.getIncludeRCs());
+		
 	}
 
 }
