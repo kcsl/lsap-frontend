@@ -126,9 +126,9 @@ public class MacroTest {
 	@Test
 	public void macroToString() throws Exception
 	{
-		assertEquals(m1.toString(), "#define macro (lock, otherParam)");
-		assertEquals(m2.toString(), "#define macro (lock, otherParam)");
-		assertEquals(m3.toString(), "#define macro (lockname)");
+		assertEquals(m1.toString(), "#define macro(lock, otherParam)");
+		assertEquals(m2.toString(), "#define macro(lock, otherParam)");
+		assertEquals(m3.toString(), "#define macro(lockname)");
 		
 		Function f = new Function("int function(int lock, struct mutex *lock2);");
 		
@@ -136,10 +136,10 @@ public class MacroTest {
 		m2.setBodyFunction(f);
 		m3.setBodyFunction(f);
 		
-		assertEquals(m1.toString(), "#define macro (lock, otherParam) function(0, NULL)");
-		assertEquals(m2.toString(), "#define macro (lock, otherParam) function(0, NULL)");
-		assertEquals(m3.toString(), "#define macro (lockname) function(0, NULL)");
-		assertEquals((new Macro("#define macro()", new Function("int function(int lock, struct mutex *lock2);"))).toString(), "#define macro () function(0, NULL)");
+		assertEquals(m1.toString(), "#define macro(lock, otherParam) function(0, NULL)");
+		assertEquals(m2.toString(), "#define macro(lock, otherParam) function(0, NULL)");
+		assertEquals(m3.toString(), "#define macro(lockname) function(0, NULL)");
+		assertEquals((new Macro("#define macro()", new Function("int function(int lock, struct mutex *lock2);"))).toString(), "#define macro() function(0, NULL)");
 	}
 	
 	@Test

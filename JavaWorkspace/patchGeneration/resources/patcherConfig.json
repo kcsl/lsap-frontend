@@ -41,9 +41,9 @@
 	},
 	
 	"SpinFunctionsToInclude": [
-		"void __raw_spin_lock(void *lock);",
-		"int __raw_spin_trylock(void *lock);",
-		"void __raw_spin_unlock(void *lock);"
+		"static inline void __raw_spin_lock(raw_spinlock_t *lock);",
+		"static inline int __raw_spin_trylock(raw_spinlock_t *lock);",
+		"static inline void __raw_spin_unlock(raw_spinlock_t *lock);"
 	],
 	
 	"SpinMacrosToInclude": [

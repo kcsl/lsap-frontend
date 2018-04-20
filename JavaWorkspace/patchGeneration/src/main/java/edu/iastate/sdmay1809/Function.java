@@ -64,7 +64,15 @@ public class Function implements Locker
 		if (o == null) return false;
 		if (this == o) return true;
 		if (!Locker.class.isInstance(o)) return false;
-		if (Function.class.isInstance(o)) return name.equals(((Function) o).getName()) && modifiers.replaceAll("\\s*\\*\\s*", "* ").equals(((Function) o).getModifiers().replaceAll("\\s*\\*\\s*", "* "));
+		if (Function.class.isInstance(o)) 
+		{
+			if (parameters.size() != ((Function) o).parameters.size()) return false;
+			for (int i = 0; i < parameters.size(); i++)
+			{
+				if (!parameters.get(i).toString().equals(((Function) o).parameters.get(i).toString())) return false;
+			}
+			return name.equals(((Function) o).getName());
+		}
 		return name.equals(((Locker) o).getName());
 	}
 	

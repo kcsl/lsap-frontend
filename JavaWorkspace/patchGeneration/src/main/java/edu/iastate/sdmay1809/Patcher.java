@@ -358,17 +358,36 @@ public class Patcher {
 			while (matcher.find())
 			{
 				String functionString = matcher.group();
+				if (functionString.contains("__raw_spin_trylock"))
+				{
+					System.out.println();
+				}
 				Function f;
 				
 				try { f = new Function(functionString); }
 				catch (Exception e) { if (debug || verbose) System.err.println("PATCHER: Unable to find function definition in \"" + functionString + "\". Skipping it."); continue; }
 				
-				if (f.getName().equals("mutex_lock"))
+				boolean skip = true;
+				
+				for (Function lockFunc : locks.getValue0())
 				{
-					System.out.println();
+					if (lockFunc.getName().replace("_", "").equals(f.getName().replace("_", "")))
+					{
+						skip = false;
+						break;
+					}
 				}
 				
-				if ((locks.getValue0().contains(f) || locks.getValue1().contains(f)) && f.hasValidReturnType())
+				for (Macro lockMac : locks.getValue1())
+				{
+					if (lockMac.getName().replace("_", "").equals(f.getName().replace("_", "")))
+					{
+						skip = false;
+						break;
+					}
+				}
+				
+				if (!skip && f.hasValidReturnType())
 				{						
 					String transfer = fileSource.substring(0, matcher.start());
 					String ignored = "";

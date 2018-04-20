@@ -112,12 +112,12 @@ public class FunctionTest {
 	public void functionEquals() throws Exception
 	{
 		assertTrue(f1.equals(f1));
-		assertTrue(f1.equals(f2));
+		assertFalse(f1.equals(f2));
 		assertFalse(f1.equals(f3));
 		assertFalse(f1.equals(null));
 		assertTrue(f1.equals(new Macro("#define _raw_spin_lock_nest_lock(lock) func(lock)")));
 		assertFalse(f1.equals(new Parameter("int param")));
-		assertFalse(f1.equals(new Function("int __must_check\n" + 
+		assertTrue(f1.equals(new Function("int __must_check\n" + 
 				"_raw_spin_lock_nest_lock(raw_spinlock_t *lock, struct lockdep_map *map)\n" + 
 				"								__acquires(lock);")));
 	}
