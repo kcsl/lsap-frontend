@@ -144,10 +144,10 @@ public class DiffMapper {
 				r.seek(currOffset + (offset - lastOffset) - 40);
 			}
 
-			r.readFully(whitespaceBuffer, 0, 40);
+			int len = r.read(whitespaceBuffer, 0, 40);
 			buffer = new String(whitespaceBuffer);
 
-			r.seek(r.getFilePointer() - 40);
+			r.seek(r.getFilePointer() - len);
 			r.writeBytes(buffer.substring(0, buffer.lastIndexOf('\n') + 1));
 			r.writeBytes(buffer.substring(buffer.lastIndexOf('\n') + 1).replaceAll("[^\f\t\r\n]", " "));
 			r.writeBytes(content);
