@@ -181,7 +181,6 @@ public class Config {
 			}
 			ParameterizedType type = (ParameterizedType) getClass().getGenericSuperclass();
 			Class<?> configType = (Class<?>) type.getActualTypeArguments()[0];
-			
 			try {
 				return (T) configType.getDeclaredConstructor(getClass()).newInstance(this);
 			} catch (Exception e) {

@@ -26,7 +26,7 @@ public class DiffConfig extends Config {
 		Object types = configOptions.get("types");
 		if(types instanceof List) {
 			List<Object> list = (List<Object>) types;
-			List<String> convert = list.stream().map(o -> {
+			List<String> convert = list.stream().filter(o -> o != null).map(o -> {
 				return o.toString();
 			}).collect(Collectors.toList());
 			TYPES = convert.toArray(new String[0]);
