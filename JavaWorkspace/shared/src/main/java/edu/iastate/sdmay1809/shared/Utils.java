@@ -81,6 +81,41 @@ public class Utils {
 
 		return sb.toString();
 	}
+	
+	public static int execute(String[] commands, File dir, boolean redirectToStdOut) throws InterruptedException, IOException {
+		Runtime rt = Runtime.getRuntime();
+		ProcessBuilder pb = new ProcessBuilder(commands);
+		pb.directory(dir);
+		if(redirectToStdOut) {
+			System.out.print("Performing command: ");
+			for (String command : commands) {
+				System.out.print(command + " ");
+			}
+			System.out.print("\n");
+			pb.inheritIO();
+			Process p = pb.start();
+			return p.waitFor();
+		} else {
+			StringBuilder sb = new StringBuilder();
+			String line = null;
+
+			sb.append("Performing command: ");
+			for (String command : commands) {
+				sb.append(command + " ");
+			}
+			sb.append("\n");
+			Process pr = rt.exec(commands, null, dir);
+			BufferedReader input = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+
+			while ((line = input.readLine()) != null) {
+				sb.append(line + "\n");
+			}
+
+			int exitValue = pr.waitFor();
+			input.close();
+			return exitValue;
+		}
+	}
 
 	public static Map<String, Object> convertToMap(JSONObject obj) {
 		Map<String, Object> map = new HashMap<String, Object>();

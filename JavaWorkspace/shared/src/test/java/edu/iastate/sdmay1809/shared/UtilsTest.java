@@ -133,4 +133,19 @@ public class UtilsTest {
 			assertThat(execOutput, containsString("Process exited with value 0"));
 		}
 	}
+	
+	@Test
+	public void executeRedirectCompletesCorrectly() throws IOException, InterruptedException {
+		if(System.getProperty("os.name").equals("Windows")) {
+			int ret = Utils.execute(new String[] {"cd"}, null, false);
+			assertEquals(0, ret);
+			ret = Utils.execute(new String[] {"cd"}, null, true);
+			assertEquals(0, ret);
+		} else {
+			int ret = Utils.execute(new String[] {"pwd"}, null, false);
+			assertEquals(0, ret);
+			ret = Utils.execute(new String[] {"pwd"}, null, true);
+			assertEquals(0, ret);
+		}
+	}
 }
