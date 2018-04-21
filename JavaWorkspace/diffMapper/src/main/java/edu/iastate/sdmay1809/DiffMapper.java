@@ -175,7 +175,7 @@ public class DiffMapper {
 
 			// git checkout -b diff_map
 			execGitCreateBranch("diff_map", kernel_dir);
-		} catch(Exception e) {
+		} catch (Exception e) {
 			println("[ERROR] Couldn't complete git setup!");
 			println(e.getMessage());
 			throw new Exception("Couldn't complete git setup!");
@@ -205,8 +205,8 @@ public class DiffMapper {
 			execGitCreateBranch("diff_map_upgraded", kernel_dir);
 
 			// git rebase -s recursive -X theirs diff_map
-			execGitRebase("diff_map", kernel_dir);	
-		} catch(Exception e) {
+			execGitRebase("diff_map", kernel_dir);
+		} catch (Exception e) {
 			println("[ERROR] Couldn't complete git cleanup!");
 			println(e.getMessage());
 			throw new Exception("Couldn't complete git cleanup!");
@@ -214,27 +214,36 @@ public class DiffMapper {
 	}
 
 	private void execGitCheckoutTag(String tag, File dir) throws IOException, InterruptedException {
-			println(Utils.execute(new String[] { "git", "checkout", tag }, dir));
+		Utils.execute(new String[] { "git", "checkout", tag }, dir, allowPrintStatements);
 	}
 
 	private void execGitClean(File dir) throws IOException, InterruptedException {
-			println(Utils.execute(new String[] { "git", "clean", "-xdfq" }, dir));
+		Utils.execute(new String[] { "git", "clean", "-xdfq" }, dir, allowPrintStatements);
 	}
 
 	private void execGitCreateBranch(String branchName, File dir) throws IOException, InterruptedException {
-			println(Utils.execute(new String[] { "git", "checkout", "-b", branchName }, dir));
+		Utils.execute(new String[] { "git", "checkout", "-b", branchName }, dir, allowPrintStatements);
 	}
 
 	private void execGitReset(String commit, File dir) throws IOException, InterruptedException {
-			println(Utils.execute(new String[] { "git", "reset", commit }, dir));
+		Utils.execute(new String[] { "git", "reset", commit }, dir, allowPrintStatements);
 	}
 
 	private void execGitCommitAll(String message, File dir) throws IOException, InterruptedException {
-			println(Utils.execute(new String[] { "git", "commit", "-am", message }, dir));
+		Utils.execute(new String[] { "git", "commit", "-am", message }, dir, allowPrintStatements);
 	}
 
 	private void execGitRebase(String base, File dir) throws IOException, InterruptedException {
-		println(Utils.execute(new String[] { "git", "rebase", "-s", "recursive", "-X", "theirs", base }, dir));
+		int ret = Utils.execute(new String[] { "git", "rebase", "-s", "recursive", "-X", "theirs", base }, dir, allowPrintStatements);
+		int i = 0;
+		while(ret != 0 && ++i < 10) {
+			Utils.execute(new String[] { "git", "add", "." }, dir, allowPrintStatements);
+			ret = Utils.execute(new String[] { "git", "rebase", "--continue" }, dir, allowPrintStatements);
+		}
+		if(i >= 10) {
+			println("[ERROR]: Max Rebase Recovery Attempts Reached, exiting...");
+			return;
+		}
 	}
 
 	private void println(String msg) {

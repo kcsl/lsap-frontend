@@ -113,6 +113,9 @@ public class Utils {
 
 			int exitValue = pr.waitFor();
 			input.close();
+			sb.append("\nProcess exited with value " + exitValue + "\n");
+//			System.out.println(sb.toString());
+			
 			return exitValue;
 		}
 	}
