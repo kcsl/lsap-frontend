@@ -13,29 +13,27 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import edu.iastate.sdmay1809.shared.DiffConfig.DiffConfigBuilder;
-
 public class DiffConfigBuilderTest {
 	@Rule
 	public TemporaryFolder testFolder = new TemporaryFolder();
 	
-	DiffConfigBuilder builder;
+	DiffConfig.Builder builder;
 	
 	@Before
 	public void setUp() {
-		builder = DiffConfig.builder();
+		builder = DiffConfig.builder(DiffConfig.Builder.class);
 	}
 
 	@Test
 	public void builderDefaultConstructor() {
 		// builder() always constructs a DiffConfigBuilder class
-		assertThat(DiffConfig.builder(), instanceOf(DiffConfigBuilder.class));
+		assertThat(DiffConfig.builder(DiffConfig.Builder.class), instanceOf(DiffConfig.Builder.class));
 	}
 	
 	@Test
 	public void builderBaseConstructor() {
 		// builder(base) builds the same DiffConfig that the base builder builds
-		assertThat(DiffConfig.builder(builder), instanceOf(DiffConfigBuilder.class));
+		assertThat(DiffConfig.builder(DiffConfig.Builder.class, builder), instanceOf(DiffConfig.Builder.class));
 		builder = builder
 				.setOldTag("not_a_default_old_tag")
 				.setNewTag("not_a_default_new_tag")
@@ -45,7 +43,7 @@ public class DiffConfigBuilderTest {
 				.setTypes(new String[] {"not", "a", "default", "type", "list"});
 		
 		DiffConfig base = builder.build();
-		DiffConfig config = DiffConfig.builder(builder).build();
+		DiffConfig config = DiffConfig.builder(DiffConfig.Builder.class, builder).build();
 		
 		assertEquals(base.OLD_TAG, config.OLD_TAG);
 		assertEquals(base.NEW_TAG, config.NEW_TAG);
@@ -59,7 +57,7 @@ public class DiffConfigBuilderTest {
 	public void builderConstructsWithSlashUserDirEnding() {
 		String userDir = System.getProperty("user.dir");
 		System.setProperty("user.dir", "test/");
-		assertThat(DiffConfig.builder(), instanceOf(DiffConfigBuilder.class));
+		assertThat(DiffConfig.builder(DiffConfig.Builder.class), instanceOf(DiffConfig.Builder.class));
 		System.setProperty("user.dir", userDir);
 	}
 	
@@ -213,11 +211,11 @@ public class DiffConfigBuilderTest {
 	
 	@Test
 	public void builderFile() throws IOException {
-		String fullPath = setUpConfigFile("\"old_tag\": \"my_old_tag\",\"new_tag\": \"my_new_tag\","
+		File fullPath = setUpConfigFile("\"old_tag\": \"my_old_tag\",\"new_tag\": \"my_new_tag\","
 				+ "\"diff_test_dir\": \"my_diff_test_dir\"," + "\"kernel_dir\": \"my_kernel_dir\","
 				+ "\"result_dir\": \"my_result_dir\"," + "\"types\": [\"type1\", \"type2\"]\n}\n");
-		DiffConfig base = DiffConfig.builder().build();
-		DiffConfig file = DiffConfig.builder(fullPath).build();
+		DiffConfig base = DiffConfig.builder(DiffConfig.Builder.class).build();
+		DiffConfig file = DiffConfig.builder(DiffConfig.Builder.class, fullPath).build();
 		
 		assertEquals(base.OLD_TAG, file.OLD_TAG);
 		assertEquals(base.NEW_TAG, file.NEW_TAG);
@@ -246,16 +244,16 @@ public class DiffConfigBuilderTest {
 		assertArrayEquals(new String[] {"not", "a", "default", "type", "list"}, config.TYPES);
 	}
 	
-	private String setUpConfigFile(String content) throws IOException {
-		String cwd = System.getProperty("user.dir");
-		String rewind = cwd.replaceAll("(?:\\/(?:\\w|-)+)", "../");
+	private File setUpConfigFile(String content) throws IOException {
+//		String cwd = System.getProperty("user.dir");
+//		String rewind = cwd.replaceAll("(?:\\/(?:\\w|-)+)", "../");
 		File f = testFolder.newFile();
-		String fullPath = rewind + f.getAbsolutePath().substring(1);
+//		String fullPath = rewind + f.getAbsolutePath().substring(1);
 
 		BufferedWriter bw = new BufferedWriter(new FileWriter(f));
 		bw.write(content);
 		bw.close();
 
-		return fullPath;
+		return f;
 	}
 }

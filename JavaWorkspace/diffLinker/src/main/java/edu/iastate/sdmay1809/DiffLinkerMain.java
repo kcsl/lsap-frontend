@@ -14,7 +14,7 @@ public class DiffLinkerMain {
 	public static void main(String[] args) throws JSONException, IOException {
 		ArrayList<Long> timings = new ArrayList<Long>();
 
-		DiffConfig config = DiffConfig.builder(args).build();
+		DiffConfig config = DiffConfig.builder(DiffConfig.Builder.class, args).build();
 
 		timings.add(System.nanoTime());
 		InstanceTracker it = new InstanceTracker(config.RESULT_DIR);

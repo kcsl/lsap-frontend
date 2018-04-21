@@ -25,7 +25,7 @@ public class DiffLinkerTest {
 	
 	@Test
 	public void testInit() throws Exception {
-		DiffConfig config = DiffConfig.builder().build();
+		DiffConfig config = DiffConfig.builder(DiffConfig.Builder.class).build();
 		DiffLinker dl = new DiffLinker(config, false, 3);
 		assertTrue(dl != null);
 	}
@@ -37,7 +37,7 @@ public class DiffLinkerTest {
 		Path diffInstances = Paths.get(workspace.getAbsolutePath(), "diffmap", "diffInstanceMap.json");
 		Utils.execute(new String[] { "cp", "-R", ".", workspace.getAbsolutePath() }, setupWorkspace);
 		
-		DiffConfig config = DiffConfig.builder()
+		DiffConfig config = DiffConfig.builder(DiffConfig.Builder.class)
 				.setDiffTestDir(Paths.get(workspace.getAbsolutePath(), "diffmap/").toString())
 				.setKernelDir(Paths.get(workspace.getAbsolutePath(), "kernel/").toString()).setOldTag("v3.19-rc1")
 				.setNewTag("v4.13")
@@ -73,7 +73,7 @@ public class DiffLinkerTest {
 		Path diffInstances = Paths.get(workspace.getAbsolutePath(), "diffmap", "diffInstanceMap.json");
 		Utils.execute(new String[] { "cp", "-R", ".", workspace.getAbsolutePath() }, setupWorkspace);
 		
-		DiffConfig config = DiffConfig.builder()
+		DiffConfig config = DiffConfig.builder(DiffConfig.Builder.class)
 				.setDiffTestDir(Paths.get(workspace.getAbsolutePath(), "diffmap/").toString())
 				.setKernelDir(Paths.get(workspace.getAbsolutePath(), "kernel/").toString()).setOldTag("v3.19-rc1")
 				.setNewTag("v4.13")
@@ -106,7 +106,7 @@ public class DiffLinkerTest {
 		Path diffInteresting = Paths.get(workspace.getAbsolutePath(), "diffmap", "diffInteresting.json");
 		Utils.execute(new String[] { "cp", "-R", ".", workspace.getAbsolutePath() }, setupWorkspace);
 		
-		DiffConfig config = DiffConfig.builder()
+		DiffConfig config = DiffConfig.builder(DiffConfig.Builder.class)
 				.setDiffTestDir(Paths.get(workspace.getAbsolutePath(), "diffmap/").toString())
 				.setKernelDir(Paths.get(workspace.getAbsolutePath(), "kernel/").toString()).setOldTag("v3.19-rc1")
 				.setNewTag("v4.13")
