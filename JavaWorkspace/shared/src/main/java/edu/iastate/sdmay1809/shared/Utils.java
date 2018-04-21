@@ -94,7 +94,7 @@ public class Utils {
 		while (it.hasNext()) {
 			// Get the key and value stored at this point
 			String key = it.next();
-			Object val = obj.get(it.next());
+			Object val = obj.get(key);
 
 			// Convert it to List/Map equivalent if it is a JSON variant
 			Object eq = val;
@@ -212,7 +212,7 @@ public class Utils {
 					// TODO: Warn about overriding!
 					return container;
 				}
-				list.add(idx, value);
+				list.set(idx, value);
 				return container;
 			}
 		} else {
