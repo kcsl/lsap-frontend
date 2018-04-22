@@ -105,7 +105,7 @@ public class Macro implements Locker
 			for (int i = 0; i < bodyFunction.getParameters().size(); i++)
 			{
 				Parameter p = bodyFunction.getParameter(i);
-				if (p.getType().contains("*")) string += "((void*) 0)";
+				if (p.getType().contains("*")) string += "NULL";
 				else string += "0";
 				
 				if (i != bodyFunction.getParameters().size() - 1) string += ", ";

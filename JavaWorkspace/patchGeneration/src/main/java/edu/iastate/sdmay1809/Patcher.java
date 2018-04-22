@@ -358,7 +358,7 @@ public class Patcher {
 			while (matcher.find())
 			{
 				String functionString = matcher.group();
-				if (functionString.contains("__raw_spin_trylock"))
+				if (functionString.contains("_raw_spin_lock_irqsave"))
 				{
 					System.out.println();
 				}
@@ -367,27 +367,28 @@ public class Patcher {
 				try { f = new Function(functionString); }
 				catch (Exception e) { if (debug || verbose) System.err.println("PATCHER: Unable to find function definition in \"" + functionString + "\". Skipping it."); continue; }
 				
-				boolean skip = true;
-				
-				for (Function lockFunc : locks.getValue0())
-				{
-					if (lockFunc.getName().replace("_", "").equals(f.getName().replace("_", "")))
-					{
-						skip = false;
-						break;
-					}
-				}
-				
-				for (Macro lockMac : locks.getValue1())
-				{
-					if (lockMac.getName().replace("_", "").equals(f.getName().replace("_", "")))
-					{
-						skip = false;
-						break;
-					}
-				}
-				
-				if (!skip && f.hasValidReturnType())
+//				boolean skip = true;
+//				
+//				for (Function lockFunc : locks.getValue0())
+//				{
+//					if (lockFunc.getName().replace("_", "").equals(f.getName().replace("_", "")))
+//					{
+//						skip = false;
+//						break;
+//					}
+//				}
+//				
+//				for (Macro lockMac : locks.getValue1())
+//				{
+//					if (lockMac.getName().replace("_", "").equals(f.getName().replace("_", "")))
+//					{
+//						skip = false;
+//						break;
+//					}
+//				}
+//				
+//				if (!skip && f.hasValidReturnType())
+				if ((locks.getValue0().contains(f) || locks.getValue1().contains(f)) && f.hasValidReturnType())
 				{						
 					String transfer = fileSource.substring(0, matcher.start());
 					String ignored = "";

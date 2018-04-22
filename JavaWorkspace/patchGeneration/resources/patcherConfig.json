@@ -72,6 +72,7 @@
 	
 	"FunctionReturnTypes" : [
 		"int",
-		"void"
+		"void",
+		"long"
 	]
 }

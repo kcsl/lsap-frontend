@@ -605,7 +605,6 @@ static noinline void __sched __mutex_unlock_slowpath(struct mutex *lock, unsigne
  *
  * This function is similar to (but not equivalent to) up().
  */
-
 void __sched mutex_unlock(struct mutex *lock)
 {
 #ifndef CONFIG_DEBUG_LOCK_ALLOC
@@ -614,7 +613,6 @@ void __sched mutex_unlock(struct mutex *lock)
 #endif
 	__mutex_unlock_slowpath(lock, _RET_IP_);
 }
-
 EXPORT_SYMBOL(mutex_unlock);
 
 /**
@@ -904,7 +902,6 @@ __ww_mutex_lock(struct mutex *lock, long state, unsigned int subclass,
 }
 
 #ifdef CONFIG_DEBUG_LOCK_ALLOC
-
 void __sched
 mutex_lock_nested(struct mutex *lock, unsigned int subclass)
 {
@@ -918,7 +915,6 @@ _mutex_lock_nest_lock(struct mutex *lock, struct lockdep_map *nest)
 {
 	__mutex_lock(lock, TASK_UNINTERRUPTIBLE, 0, nest, _RET_IP_);
 }
-
 EXPORT_SYMBOL_GPL(_mutex_lock_nest_lock);
 
 int __sched
@@ -926,7 +922,6 @@ mutex_lock_killable_nested(struct mutex *lock, unsigned int subclass)
 {
 	return __mutex_lock(lock, TASK_KILLABLE, subclass, NULL, _RET_IP_);
 }
-
 EXPORT_SYMBOL_GPL(mutex_lock_killable_nested);
 
 int __sched
@@ -934,7 +929,6 @@ mutex_lock_interruptible_nested(struct mutex *lock, unsigned int subclass)
 {
 	return __mutex_lock(lock, TASK_INTERRUPTIBLE, subclass, NULL, _RET_IP_);
 }
-
 EXPORT_SYMBOL_GPL(mutex_lock_interruptible_nested);
 
 void __sched
@@ -1180,7 +1174,6 @@ __ww_mutex_lock_interruptible_slowpath(struct ww_mutex *lock,
  * This function must not be used in interrupt context. The
  * mutex must be released by the same task that acquired it.
  */
-
 int __sched mutex_trylock(struct mutex *lock)
 {
 	bool locked = __mutex_trylock(lock);
@@ -1190,7 +1183,6 @@ int __sched mutex_trylock(struct mutex *lock)
 
 	return locked;
 }
-
 EXPORT_SYMBOL(mutex_trylock);
 
 #ifndef CONFIG_DEBUG_LOCK_ALLOC
@@ -1233,7 +1225,6 @@ EXPORT_SYMBOL(ww_mutex_lock_interruptible);
  *
  * return true and hold lock if we dec to 0, return false otherwise
  */
-
 int atomic_dec_and_mutex_lock(atomic_t *cnt, struct mutex *lock)
 {
 	/* dec if we can't possibly hit 0 */
@@ -1249,5 +1240,4 @@ int atomic_dec_and_mutex_lock(atomic_t *cnt, struct mutex *lock)
 	/* we hit 0, and we hold the lock */
 	return 1;
 }
-
 EXPORT_SYMBOL(atomic_dec_and_mutex_lock);
