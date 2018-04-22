@@ -115,8 +115,11 @@ public class Patcher {
 		Pair<Set<Function>, Set<Macro>> mutexLocks = generateLSAPMutexHeaderFile();
 		Pair<Set<Function>, Set<Macro>> spinLocks = generateLSAPSpinHeaderFile();
 
+		addMutexIncludeStatements(mutexLocks);
+		addSpinIncludeStatements(spinLocks);
+
 		removeMutexDefinitions(mutexLocks);
-		removeSpinDefinitions(spinLocks);
+		removeSpinDefinitions(spinLocks);		
 	}
 
 	public Pair<Set<Function>, Set<Macro>> generateLSAPMutexHeaderFile() throws Exception
@@ -141,6 +144,16 @@ public class Patcher {
 		removeDefinitions(locks, config.getPaths(PatchConfig.SPIN_PATHS_TO_CHANGE), "spin");
 	}	
 
+	public void addMutexIncludeStatements(Pair<Set<Function>, Set<Macro>> locks) throws Exception
+	{
+		addIncludeStatements(locks, config.getPaths(PatchConfig.MUTEX_FILES_TO_INCLUDE_HEADER_IN), "mutex");
+	}
+	
+	public void addSpinIncludeStatements(Pair<Set<Function>, Set<Macro>> locks) throws Exception
+	{
+		addIncludeStatements(locks, config.getPaths(PatchConfig.SPIN_FILES_TO_INCLUDE_HEADER_IN), "spin");
+	}
+	
 	private Pair<Set<Function>, Set<Macro>> generateHeaderFile(Set<Function> includedFunctions, Set<Macro> includedMacros, Set<String> pathsToReadFrom, 
 			   Map<String, Boolean> functionCriteriaMap, Map<String, Boolean> macroCriteriaMap, String lockType) throws Exception
 	{
@@ -311,13 +324,21 @@ public class Patcher {
 			
 			try
 			{
-				fileSourceSplit = Files.readAllLines(Paths.get(kernelPath, filePath)).toArray(new String[0]);
+				fileSourceSplit = Files.readAllLines(Paths.get(outputPath, filePath)).toArray(new String[0]);
 			}
 			
 			catch (IOException e)
 			{
-				if (debug || verbose) System.err.println("PATCHER: Unable to read file \"" + filePath + "\"! Skipping it.");
-				continue;
+				try
+				{
+					fileSourceSplit = Files.readAllLines(Paths.get(kernelPath, filePath)).toArray(new String[0]);
+				}
+				
+				catch (IOException e2)
+				{
+					if (debug || verbose) System.err.println("PATCHER: Unable to read file \"" + filePath + "\"! Skipping it.");
+					continue;
+				}
 			}
 			
 			Macro macro;
@@ -367,27 +388,6 @@ public class Patcher {
 				try { f = new Function(functionString); }
 				catch (Exception e) { if (debug || verbose) System.err.println("PATCHER: Unable to find function definition in \"" + functionString + "\". Skipping it."); continue; }
 				
-//				boolean skip = true;
-//				
-//				for (Function lockFunc : locks.getValue0())
-//				{
-//					if (lockFunc.getName().replace("_", "").equals(f.getName().replace("_", "")))
-//					{
-//						skip = false;
-//						break;
-//					}
-//				}
-//				
-//				for (Macro lockMac : locks.getValue1())
-//				{
-//					if (lockMac.getName().replace("_", "").equals(f.getName().replace("_", "")))
-//					{
-//						skip = false;
-//						break;
-//					}
-//				}
-//				
-//				if (!skip && f.hasValidReturnType())
 				if ((locks.getValue0().contains(f) || locks.getValue1().contains(f)) && f.hasValidReturnType())
 				{						
 					String transfer = fileSource.substring(0, matcher.start());
@@ -456,6 +456,79 @@ public class Patcher {
 			File directory = new File(Paths.get(outputPath, fileName).toString().replaceFirst("\\w+\\.\\w+$", ""));
 			if (!directory.exists()) directory.mkdirs();
 			Files.write(Paths.get(outputPath, fileName), Arrays.stream(newSource.split("\n")).collect(Collectors.toList()), Charset.forName("UTF-8"));
+		}
+	}
+
+	private void addIncludeStatements(Pair<Set<Function>, Set<Macro>> locks, Set<String> filePaths, String lockType) throws IOException
+	{
+		for (String path : filePaths)
+		{
+			String fileContent;
+			String[] fileContentSplit;
+			try
+			{
+				fileContentSplit = Files.readAllLines(Paths.get(kernelPath, path), Charset.forName("UTF-8")).toArray(new String[0]);
+				fileContent = String.join("\n", fileContentSplit);
+			}
+			
+			catch (IOException e)
+			{
+				if (debug || verbose) System.err.println("PATCHER: Unable to read file \"" + path + "\"! Skipping it.");
+				continue;
+			}
+			
+			int firstMacroLine = 0;
+			int firstFunctionLine = 0;
+			
+			for (int i = 0; i < fileContentSplit.length; i++)
+			{
+				Macro m;
+				
+				try { m = new Macro(fileContentSplit[i].replace("//", "")); }
+				catch (Exception e) { continue; }
+				
+				if (locks.getValue0().contains(m) || locks.getValue1().contains(m))
+				{
+					firstMacroLine = i;
+					break;
+				}
+			}
+			
+			Matcher m = Pattern.compile("(\\w+\\s*(\\*)?\\s+(\\*)?\\s*)+\\w+\\s*\\([^\\)]*\\)").matcher(fileContent);
+			
+			while (m.find())
+			{
+				Function f;
+				
+				try { f = new Function(m.group().replaceAll("//", "")); }
+				catch (Exception e) { continue; }
+				
+				if ((locks.getValue0().contains(f) || locks.getValue1().contains(f)) && f.hasValidReturnType())
+				{
+					firstFunctionLine = fileContent.substring(0, m.start()).length() - fileContent.substring(0, m.start()).replace("\n", "").length() + 1;
+					break;
+				}
+			}
+			
+			int braceCount = 0;
+			int ifAndEndif = -1;
+			int insertLine = 0;
+			
+			for (int i = 0; i < Math.min(firstMacroLine, firstFunctionLine); i++)
+			{
+				String line = fileContentSplit[i];
+				
+				if (line.trim().toLowerCase().matches("\\s*#\\s*endif.*")) ifAndEndif--;
+				else if (line.trim().toLowerCase().matches("\\s*#\\s*if.*")) ifAndEndif++;
+				braceCount += line.length() - line.replace("{", "").length();
+				braceCount -= line.length() - line.replace("}", "").length();
+				
+				if (braceCount == 0 && ifAndEndif == 0) insertLine = i;
+			}
+			
+			fileContentSplit[insertLine] = fileContentSplit[insertLine] + "\n#include <linux/lsap_" + lockType.toLowerCase() + "_lock.h>";
+
+			Files.write(Paths.get(outputPath, path), Arrays.stream(fileContentSplit).collect(Collectors.toList()), Charset.forName("UTF-8"));
 		}
 	}
 }

@@ -74,5 +74,13 @@
 		"int",
 		"void",
 		"long"
-	]
+	],
+	
+	"MutexFilesToIncludeHeaderIn" : [
+		"include/linux/mutex.h"
+	],
+	
+	"SpinFilesToIncludeHeaderIn" : [
+		"include/linux/spinlock.h"
+	]	
 }

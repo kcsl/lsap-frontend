@@ -30,7 +30,8 @@ public class PatchConfig
 	public static String MUTEX_MACROS_TO_INCLUDE = "MutexMacrosToInclude";
 	public static String SPIN_FUNCTIONS_TO_INCLUDE = "SpinFunctionsToInclude";
 	public static String SPIN_MACROS_TO_INCLUDE = "SpinMacrosToInclude";
-	
+	public static String MUTEX_FILES_TO_INCLUDE_HEADER_IN = "MutexFilesToIncludeHeaderIn";
+	public static String SPIN_FILES_TO_INCLUDE_HEADER_IN = "SpinFilesToIncludeHeaderIn";
 	
 	private Map<String, Map<String, Boolean>> criteria;
 	private Map<String, Set<String>> paths;
@@ -75,7 +76,9 @@ public class PatchConfig
 		String[] pathLabels = { MUTEX_PATHS_TO_READ,
 								MUTEX_PATHS_TO_CHANGE,
 								SPIN_PATHS_TO_READ,
-								SPIN_PATHS_TO_CHANGE };
+								SPIN_PATHS_TO_CHANGE,
+								MUTEX_FILES_TO_INCLUDE_HEADER_IN,
+								SPIN_FILES_TO_INCLUDE_HEADER_IN };
 		
 		String[] functionLabels = { MUTEX_FUNCTIONS_TO_INCLUDE,
 									SPIN_FUNCTIONS_TO_INCLUDE };

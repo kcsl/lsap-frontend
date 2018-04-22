@@ -3,7 +3,6 @@ package edu.iastate.sdmay1809;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.*;
 
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -26,7 +25,7 @@ public class PatchConfigTest
 		try
 		{
 			config = new PatchConfig("fileThatDoesntExist.goodLuckFindingThis");
-			config = new PatchConfig("resources/kernel/include/linux/mutex.h");
+			config = new PatchConfig("resources/testing/patchTest/mutex.h");
 		}
 		
 		catch (Exception e) 
@@ -48,9 +47,7 @@ public class PatchConfigTest
 	{
 		Map<String, Boolean> criteria = config.getCriteria(PatchConfig.MUTEX_FUNCTION_CRITERIA);
 		
-		assertEquals(criteria.size(), 3);
-		assertTrue(criteria.keySet().contains("ignore_all_locks"));
-		assertFalse(criteria.get("ignore_all_locks"));
+		assertEquals(criteria.size(), 2);
 		assertTrue(criteria.keySet().contains("mutex"));
 		assertTrue(criteria.get("mutex"));
 		assertTrue(criteria.keySet().contains("lock"));
@@ -58,23 +55,19 @@ public class PatchConfigTest
 		
 		criteria = config.getCriteria(PatchConfig.MUTEX_MACRO_CRITERIA);
 		
-		assertEquals(criteria.size(), 2);
-		assertTrue(criteria.keySet().contains("ignore_all_locks"));
-		assertFalse(criteria.get("ignore_all_locks"));
+		assertEquals(criteria.size(), 1);
 		assertTrue(criteria.keySet().contains("mutex"));
 		assertTrue(criteria.get("mutex"));
 
 		criteria = config.getCriteria(PatchConfig.SPIN_FUNCTION_CRITERIA);
 		
 		assertEquals(criteria.size(), 1);
-		assertTrue(criteria.keySet().contains("ignore_all_locks"));
-		assertTrue(criteria.get("ignore_all_locks"));
+		assertTrue(criteria.keySet().contains("spin"));
+		assertTrue(criteria.get("spin"));
 		
 		criteria = config.getCriteria(PatchConfig.SPIN_MACRO_CRITERIA);
 		
-		assertEquals(criteria.size(), 2);
-		assertTrue(criteria.keySet().contains("ignore_all_locks"));
-		assertFalse(criteria.get("ignore_all_locks"));
+		assertEquals(criteria.size(), 1);
 		assertTrue(criteria.keySet().contains("lock"));
 		assertTrue(criteria.get("lock"));
 	}
@@ -85,22 +78,32 @@ public class PatchConfigTest
 		Set<String> paths = config.getPaths(PatchConfig.MUTEX_PATHS_TO_READ);
 		
 		assertEquals(paths.size(), 1);
-		assertTrue(paths.contains("include/linux/mutex.h"));
+		assertTrue(paths.contains("patchTest/mutex.h"));
 		
 		paths = config.getPaths(PatchConfig.MUTEX_PATHS_TO_CHANGE);
 		
 		assertEquals(paths.size(), 1);
-		assertTrue(paths.contains("include/linux/mutex.h"));
+		assertTrue(paths.contains("patchTest/mutex.h"));
 		
+		paths = config.getPaths(PatchConfig.MUTEX_FILES_TO_INCLUDE_HEADER_IN);
+		
+		assertEquals(paths.size(), 1);
+		assertTrue(paths.contains("patchTest/mutex.h"));
+
 		paths = config.getPaths(PatchConfig.SPIN_PATHS_TO_READ);
 		
 		assertEquals(paths.size(), 1);
-		assertTrue(paths.contains("include/linux/spinlock.h"));
+		assertTrue(paths.contains("patchTest/spinlock.h"));
 		
 		paths = config.getPaths(PatchConfig.SPIN_PATHS_TO_CHANGE);
 		
 		assertEquals(paths.size(), 1);
-		assertTrue(paths.contains("include/linux/spinlock.h"));
+		assertTrue(paths.contains("patchTest/spinlock.h"));
+		
+		paths = config.getPaths(PatchConfig.SPIN_FILES_TO_INCLUDE_HEADER_IN);
+		
+		assertEquals(paths.size(), 1);
+		assertTrue(paths.contains("patchTest/spinlock.h"));
 	}
 	
 	@Test
@@ -108,10 +111,11 @@ public class PatchConfigTest
 	{
 		Set<String> types = config.getFunctionReturnTypes();
 		
-		assertEquals(types.size(), 3);
+		assertEquals(types.size(), 4);
 		assertTrue(types.contains("int"));
 		assertTrue(types.contains("void"));
 		assertTrue(types.contains("struct patchTest *"));
+		assertTrue(types.contains("long"));
 	}
 	
 	@Test
@@ -124,15 +128,8 @@ public class PatchConfigTest
 		
 		functions = config.getFunctions(PatchConfig.SPIN_FUNCTIONS_TO_INCLUDE);
 		
-		Iterator<Function> iterator = functions.iterator();
-		Function f = iterator.next();
-		
-		assertEquals(functions.size(), 2);
-		assertTrue(f.getName().equals("__raw_spin_lock") || f.getName().equals("__raw_spin_trylock"));
-		
-		f = iterator.next();
-		
-		assertTrue(f.getName().equals("__raw_spin_lock") || f.getName().equals("__raw_spin_trylock"));
+		assertEquals(functions.size(), 1);
+		assertEquals(functions.iterator().next().getName(), "function");
 	}
 	
 	@Test

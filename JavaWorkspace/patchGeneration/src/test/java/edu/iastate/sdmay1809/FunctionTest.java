@@ -109,6 +109,14 @@ public class FunctionTest {
 	}
 	
 	@Test
+	public void functionGetModifiers()
+	{
+		assertEquals(f1.getModifiers(), "void __lockfunc");
+		assertEquals(f2.getModifiers(), "void __lockfunc");
+		assertEquals(f3.getModifiers(), "void __lockfunc");
+	}
+	
+	@Test
 	public void functionEquals() throws Exception
 	{
 		assertTrue(f1.equals(f1));
@@ -119,6 +127,9 @@ public class FunctionTest {
 		assertFalse(f1.equals(new Parameter("int param")));
 		assertTrue(f1.equals(new Function("int __must_check\n" + 
 				"_raw_spin_lock_nest_lock(raw_spinlock_t *lock, struct lockdep_map *map)\n" + 
+				"								__acquires(lock);")));
+		assertFalse(f1.equals(new Function("int __must_check\n" + 
+				"_raw_spin_lock_nest_lock(int lock, struct lockdep_map *map)\n" + 
 				"								__acquires(lock);")));
 	}
 	
@@ -166,6 +177,7 @@ public class FunctionTest {
 		assertEquals(f3.toString(), "static inline void _raw_spin_lock_bh(raw_spinlock_t* lock) {}");
 		assertEquals((new Function("int function();")).toString(), "static inline int function() {return 0;}");
 		assertEquals((new Function("struct patchTest *function();")).toString(), "static inline struct patchTest * function() {return NULL;}");
+		assertEquals((new Function("struct wrongType *function();")).toString(), "");
 		
 		PatchConfig tmp = Function.config;
 		Function.config = null;
@@ -175,6 +187,7 @@ public class FunctionTest {
 		assertEquals(f3.toString(), "");
 		assertEquals((new Function("int function();")).toString().toString(), "");
 		assertEquals((new Function("struct mutex *function();")).toString(), "");
+		assertEquals((new Function("struct wrongType *function();")).toString(), "");
 		
 		Function.config = tmp;
 	}

@@ -1,12 +1,10 @@
 {
 	"MutexFunctionCriteria": {
-		"ignore_all_locks" : false,
 		"mutex" : true,
 		"lock" : true
 	},
 	
 	"MutexMacroCriteria": {
-		"ignore_all_locks" : false,
 		"mutex" : true
 	},
 	
@@ -19,42 +17,49 @@
 	],
 	
 	"SpinFunctionCriteria": {
-		"ignore_all_locks" : true
+		"spin" : true
 	},
 	
 	"SpinMacroCriteria": {
-		"ignore_all_locks" : false,
 		"lock" : true
 	},
 	
 	"SpinFunctionsToInclude": [
-		"void __raw_spin_lock(void *lock);",
-		"int __raw_spin_trylock(void *lock);",
+		"int function(void *lock);"
 	],
 	
 	"SpinMacrosToInclude": [
-		"#define macro(lock) __raw_spin_lock(lock)"
+		"#define macro(lock) function(lock)"
 	],
 	
 	"MutexPathsToRead": [
-		"include/linux/mutex.h"
+		"patchTest/mutex.h"
 	],
 	
 	"MutexPathsToChange": [
-		"include/linux/mutex.h"
+		"patchTest/mutex.h"
 	],
 	
 	"SpinPathsToRead": [
-		"include/linux/spinlock.h"
+		"patchTest/spinlock.h"
 	],
 	
 	"SpinPathsToChange": [
-		"include/linux/spinlock.h"
+		"patchTest/spinlock.h"
+	],
+	
+	"MutexFilesToIncludeHeaderIn" : [
+		"patchTest/mutex.h"
+	],
+	
+	"SpinFilesToIncludeHeaderIn" : [
+		"patchTest/spinlock.h"
 	],
 	
 	"FunctionReturnTypes" : [
 		"int",
 		"void",
-		"struct patchTest *"
+		"struct patchTest *",
+		"long"
 	]
 }
