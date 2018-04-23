@@ -33,27 +33,37 @@
 	],
 	
 	"MutexPathsToRead": [
-		"patchTest/mutex.h"
+		"patchTest/mutex.h",
+		"patchTest/mutex2.h",
+		"aFileThatDoesntExist.h"
 	],
 	
 	"MutexPathsToChange": [
-		"patchTest/mutex.h"
+		"patchTest/mutex.h",
+		"patchTest/mutex2.h",
+		"aFileThatDoesntExist.h"
 	],
 	
 	"SpinPathsToRead": [
-		"patchTest/spinlock.h"
+		"patchTest/spinlock.h",
+		"patchTest/spinlock2.h",
+		"aFileThatDoesntExist.h"
 	],
 	
 	"SpinPathsToChange": [
-		"patchTest/spinlock.h"
+		"patchTest/spinlock.h",
+		"patchTest/spinlock2.h",
+		"aFileThatDoesntExist.h"
 	],
 	
 	"MutexFilesToIncludeHeaderIn" : [
-		"patchTest/mutex.h"
+		"patchTest/mutex.h",
+		"aFileThatDoesntExist.h"
 	],
 	
 	"SpinFilesToIncludeHeaderIn" : [
-		"patchTest/spinlock.h"
+		"patchTest/spinlock.h",
+		"aFileThatDoesntExist.h"
 	],
 	
 	"FunctionReturnTypes" : [

@@ -317,7 +317,8 @@ public class Patcher {
 		for (String filePath : paths)
 		{
 			if (verbose) System.out.println("Editing file \"" + filePath + "\"...");
-
+			if (debug) filePath = filePath.replaceFirst("\\.\\w+$", ".txt");
+			
 			String fileSource = "";
 			String[] fileSourceSplit;
 			String newSource = "";
@@ -379,10 +380,6 @@ public class Patcher {
 			while (matcher.find())
 			{
 				String functionString = matcher.group();
-				if (functionString.contains("_raw_spin_lock_irqsave"))
-				{
-					System.out.println();
-				}
 				Function f;
 				
 				try { f = new Function(functionString); }
@@ -407,7 +404,7 @@ public class Patcher {
 							}
 						}
 						
-						functionString = Pattern.compile("\n").splitAsStream(String.join("\n", functionSplit)).filter(s -> s != null && !s.isEmpty()).collect(Collectors.joining("\n"));
+						functionString = Pattern.compile("\n").splitAsStream(String.join("\n", functionSplit)).filter(s -> !s.isEmpty()).collect(Collectors.joining("\n"));
 					}
 					
 					functionString = "//" + functionString.replaceAll("\n", "\n//");
@@ -528,7 +525,11 @@ public class Patcher {
 			
 			fileContentSplit[insertLine] = fileContentSplit[insertLine] + "\n#include <linux/lsap_" + lockType.toLowerCase() + "_lock.h>";
 
-			Files.write(Paths.get(outputPath, path), Arrays.stream(fileContentSplit).collect(Collectors.toList()), Charset.forName("UTF-8"));
+			String fileName = path;
+			if (debug) fileName = fileName.replaceFirst("\\.\\w+$", ".txt");
+			File directory = new File(Paths.get(outputPath, fileName).toString().replaceFirst("\\w+\\.\\w+$", ""));
+			if (!directory.exists()) directory.mkdirs();
+			Files.write(Paths.get(outputPath, fileName), Arrays.stream(fileContentSplit).collect(Collectors.toList()), Charset.forName("UTF-8"));
 		}
 	}
 }

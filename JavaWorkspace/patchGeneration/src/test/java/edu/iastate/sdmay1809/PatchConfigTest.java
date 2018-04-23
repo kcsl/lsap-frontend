@@ -77,33 +77,43 @@ public class PatchConfigTest
 	{
 		Set<String> paths = config.getPaths(PatchConfig.MUTEX_PATHS_TO_READ);
 		
-		assertEquals(paths.size(), 1);
+		assertEquals(paths.size(), 3);
 		assertTrue(paths.contains("patchTest/mutex.h"));
+		assertTrue(paths.contains("patchTest/mutex2.h"));
+		assertTrue(paths.contains("aFileThatDoesntExist.h"));
 		
 		paths = config.getPaths(PatchConfig.MUTEX_PATHS_TO_CHANGE);
 		
-		assertEquals(paths.size(), 1);
+		assertEquals(paths.size(), 3);
 		assertTrue(paths.contains("patchTest/mutex.h"));
+		assertTrue(paths.contains("patchTest/mutex2.h"));
+		assertTrue(paths.contains("aFileThatDoesntExist.h"));
 		
 		paths = config.getPaths(PatchConfig.MUTEX_FILES_TO_INCLUDE_HEADER_IN);
 		
-		assertEquals(paths.size(), 1);
+		assertEquals(paths.size(), 2);
 		assertTrue(paths.contains("patchTest/mutex.h"));
+		assertTrue(paths.contains("aFileThatDoesntExist.h"));
 
 		paths = config.getPaths(PatchConfig.SPIN_PATHS_TO_READ);
 		
-		assertEquals(paths.size(), 1);
+		assertEquals(paths.size(), 3);
 		assertTrue(paths.contains("patchTest/spinlock.h"));
+		assertTrue(paths.contains("patchTest/spinlock2.h"));
+		assertTrue(paths.contains("aFileThatDoesntExist.h"));
 		
 		paths = config.getPaths(PatchConfig.SPIN_PATHS_TO_CHANGE);
 		
-		assertEquals(paths.size(), 1);
+		assertEquals(paths.size(), 3);
 		assertTrue(paths.contains("patchTest/spinlock.h"));
+		assertTrue(paths.contains("patchTest/spinlock2.h"));
+		assertTrue(paths.contains("aFileThatDoesntExist.h"));
 		
 		paths = config.getPaths(PatchConfig.SPIN_FILES_TO_INCLUDE_HEADER_IN);
 		
-		assertEquals(paths.size(), 1);
+		assertEquals(paths.size(), 2);
 		assertTrue(paths.contains("patchTest/spinlock.h"));
+		assertTrue(paths.contains("aFileThatDoesntExist.h"));
 	}
 	
 	@Test

@@ -50,9 +50,7 @@ public class PatcherMain
 							    .desc("The config file containing configuration options for the Patcher. By default, it is \"resources/patcherConfig.json\"")
 							    .build());
 		options.addOption("h", "help", false, "Prints additional help");
-		
-		args = "-kp resources/414Kernel/ -o resources/patch/414PatchDebug/".split("\\s");
-		
+				
 		CommandLine cmd = parser.parse(options, args);
 		
 		if (cmd.hasOption('h'))
@@ -63,7 +61,7 @@ public class PatcherMain
 		}
 		
 		Patcher patcher = new Patcher(
-										cmd.getOptionValue("config", "resources/patcherConfig.json"), 														// Config location
+										cmd.getOptionValue("config-file", "resources/patcherConfig.json"), 														// Config location
 										cmd.getOptionValue("kernel-path", "resources/kernel/"), 															// Kernel Path
 										cmd.hasOption("debug") ? cmd.getOptionValue("debug", cmd.getOptionValue("output", "resources/patch/real/")) 
 															   : cmd.getOptionValue("output", "resources/patch/real"), 										// Output Path
