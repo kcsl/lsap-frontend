@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>edu.iastate.sdmay1809</groupId>
 	<artifactId>diffLinker</artifactId>
-	<version>0.1.0</version>
+	<version>0.1.1</version>
 	<name>DiffLinker</name>
 	<description>Link Results of previous runs together</description>
 	<build>
@@ -148,7 +148,7 @@
 		<dependency>
 			<groupId>edu.iastate.sdmay1809</groupId>
 			<artifactId>shared</artifactId>
-			<version>1.1.0</version>
+			<version>2.0.0</version>
 		</dependency>
 	</dependencies>
 	<properties>

@@ -20,7 +20,7 @@ public class DiffMapperTest {
 
 	@Test
 	public void testInit() {
-		DiffMapper dm = new DiffMapper(DiffConfig.builder().build(), false);
+		DiffMapper dm = new DiffMapper(DiffConfig.builder(DiffConfig.Builder.class).build(), false);
 		assertTrue(dm != null);
 	}
 
@@ -34,7 +34,7 @@ public class DiffMapperTest {
 		// Git Setup!
 		Utils.execute(new String[] { "cp", "-R", ".notgit/", "kernel/.git/" }, workspace);
 
-		DiffConfig config = DiffConfig.builder()
+		DiffConfig config = DiffConfig.builder(DiffConfig.Builder.class)
 				.setDiffTestDir(Paths.get(workspace.getAbsolutePath(), "diffmap/").toString())
 				.setKernelDir(Paths.get(workspace.getAbsolutePath(), "kernel/").toString()).setOldTag("v3.19-rc1")
 				.setNewTag("v3.20")
@@ -57,7 +57,7 @@ public class DiffMapperTest {
 		// Git Setup!
 		System.out.println(Utils.execute(new String[] { "cp", "-R", ".notgit/", "kernel/.git/" }, workspace));
 
-		DiffConfig config = DiffConfig.builder()
+		DiffConfig config = DiffConfig.builder(DiffConfig.Builder.class)
 				.setDiffTestDir(Paths.get(workspace.getAbsolutePath(), "diffmap/").toString())
 				.setKernelDir(Paths.get(workspace.getAbsolutePath(), "kernel/").toString()).setOldTag("v3.19-rc1")
 				.setNewTag("v3.20")
@@ -80,7 +80,7 @@ public class DiffMapperTest {
 		// Git Setup!
 		Utils.execute(new String[] { "cp", "-R", ".notgit/", "kernel/.git/" }, workspace);
 
-		DiffConfig config = DiffConfig.builder()
+		DiffConfig config = DiffConfig.builder(DiffConfig.Builder.class)
 				.setDiffTestDir(Paths.get(workspace.getAbsolutePath(), "diffmap/").toString())
 				.setKernelDir(Paths.get(workspace.getAbsolutePath(), "kernel/").toString()).setOldTag("v3.17-rc1")
 				.setNewTag("v3.18-rc1")
