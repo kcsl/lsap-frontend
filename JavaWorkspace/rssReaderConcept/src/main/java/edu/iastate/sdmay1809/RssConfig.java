@@ -19,7 +19,7 @@ public class RssConfig extends Config {
 		if(ro instanceof Boolean) {
 			this.RUN_ONCE = (Boolean)ro;
 		} else {
-			this.RUN_ONCE = ro.toString().equals("true");
+			this.RUN_ONCE = ro.toString().equalsIgnoreCase("true");
 		}
 		
 		Object wp = configOptions.get("wait_period");
