@@ -27,7 +27,9 @@ public class Config {
 
 	public Config(Builder<? extends Config> builder) {
 		configOptions = new HashMap<String, Object>();
-		configOptions.putAll(builder.configOptions);
+		if(builder != null) {
+			configOptions.putAll(builder.configOptions);
+		}
 	}
 
 	public static <C extends Config, T extends Builder<C>> T builder(Class<T> builder) {

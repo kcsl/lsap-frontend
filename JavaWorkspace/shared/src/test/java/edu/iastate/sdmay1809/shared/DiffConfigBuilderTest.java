@@ -245,10 +245,7 @@ public class DiffConfigBuilderTest {
 	}
 	
 	private File setUpConfigFile(String content) throws IOException {
-//		String cwd = System.getProperty("user.dir");
-//		String rewind = cwd.replaceAll("(?:\\/(?:\\w|-)+)", "../");
 		File f = testFolder.newFile();
-//		String fullPath = rewind + f.getAbsolutePath().substring(1);
 
 		BufferedWriter bw = new BufferedWriter(new FileWriter(f));
 		bw.write(content);
