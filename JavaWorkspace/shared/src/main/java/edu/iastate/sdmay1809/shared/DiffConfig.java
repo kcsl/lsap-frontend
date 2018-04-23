@@ -45,7 +45,7 @@ public class DiffConfig extends Config {
 			configOptions.putIfAbsent("kernel_dir", Paths.get(cwd, "kernel").toString());
 			configOptions.putIfAbsent("result_dir", Paths.get(cwd, "diffmap", "results").toString());
 			configOptions.putIfAbsent("types", Arrays.asList(new String[] { "mutex", "spin" }));
-		};
+		}
 		
 		public Builder() {
 			super();

@@ -23,7 +23,7 @@ import org.json.JSONObject;
 
 public class Config {
 
-	Map<String, Object> configOptions;
+	protected Map<String, Object> configOptions;
 
 	public Config(Builder<? extends Config> builder) {
 		configOptions = new HashMap<String, Object>();
@@ -73,7 +73,7 @@ public class Config {
 		Option propertyOption = Option.builder("D").argName("property=value").hasArgs().valueSeparator().numberOfArgs(2)
 				.desc("use value for given property").build();
 		Option dryRunOption = Option.builder("n").longOpt("dry-run").hasArg(false)
-				.desc("See a summary of what the DiffMapper will do. No action will be performed.").build();
+				.desc("See a summary of what the Program will do. No action will be performed.").build();
 		options.addOption(configFileOption);
 		options.addOption(propertyOption);
 		options.addOption(dryRunOption);
@@ -124,7 +124,7 @@ public class Config {
 
 	public static class Builder<T extends Config> {
 
-		Map<String, Object> configOptions;
+		protected Map<String, Object> configOptions;
 
 		public Builder() {
 			this.configOptions = new HashMap<String, Object>();
@@ -156,10 +156,10 @@ public class Config {
 						Files.readAllLines(Paths.get(file.getAbsolutePath()), Charset.forName("UTF-8")));
 				contentObject = new JSONObject(contents);
 			} catch (IOException e) {
-				System.err.println("WARN: DiffConfig file could not be read, using default values");
+				System.err.println("WARN: Config file could not be read, using default values");
 				return;
 			} catch (JSONException e) {
-				System.err.println("WARN: DiffConfig file was not a valid JSON object, using default values");
+				System.err.println("WARN: Config file was not a valid JSON object, using default values");
 				return;
 			}
 

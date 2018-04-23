@@ -16,6 +16,7 @@ DiffLinker:
     
 RssReader:
   script:
+    - (cd JavaWorkspace/shared; mvn install -B -Dmaven.test.skip=true)
     - (cd JavaWorkspace/rssReaderConcept; mvn install -B && cat target/site/jacoco/index.html)
 
 Patcher:
