@@ -3,6 +3,7 @@ package edu.iastate.sdmay1809;
 import java.io.File;
 import java.io.FileWriter;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.io.IOException;
 
 import org.json.JSONObject;
@@ -23,7 +24,7 @@ public class DataBaseFileTranslator extends InstanceTracker {
 		super(sourceDirectory);
 		InstanceParserManager.put(new DatabaseObjectParser());
 		File f = new File(sourceDirectory);
-		DiffConfig config = DiffConfig.builder(	f.getParentFile().getParent() + "/config.json").build();
+		DiffConfig config = DiffConfig.builder(DiffConfig.Builder.class, Paths.get(f.getParentFile().getParent(), "config.json").toFile()).build();
 		versionNum = config.NEW_TAG.replaceAll("\\-|\\.", "");
 	}
 	
