@@ -11,10 +11,9 @@ import com.rometools.rome.io.SyndFeedInput;
 import com.rometools.rome.io.XmlReader;
 
 public class KernelRssFeed {
-	SyndFeed feed;
-	String newestVersion = "";
-	boolean checkedNewestVersion = false;
-	boolean includeRCs;
+	private SyndFeed feed;
+	private String newestVersion = "";
+	private boolean includeRCs;
 	
 	
 	public KernelRssFeed(String url, boolean includeRCs) throws IllegalArgumentException, MalformedURLException, FeedException, IOException {
@@ -122,5 +121,13 @@ public class KernelRssFeed {
 				return vn2;
 		}
 		return vn1;
+	}
+	
+	public SyndFeed getFeed() {
+		return feed;
+	}
+	
+	public boolean getIncludeRCs() {
+		return includeRCs;
 	}
 }

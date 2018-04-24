@@ -17,36 +17,35 @@ import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 public class RepositoryManager {
 	Git git;
 	File directory;
-	public RepositoryManager(String workspace) throws IOException, InvalidRemoteException, TransportException, GitAPIException {
+
+	public RepositoryManager(String workspace)
+			throws InvalidRemoteException, TransportException, IOException, GitAPIException {
+		this(workspace, "https://github.com/torvalds/linux.git");
+	}
+
+	public RepositoryManager(String workspace, String url)
+			throws IOException, InvalidRemoteException, TransportException, GitAPIException {
 		directory = new File(workspace + "/kernel");
-		if( directory.exists()) {
+		if (directory.exists()) {
 			FileRepositoryBuilder builder = new FileRepositoryBuilder();
-			Repository repo = builder.findGitDir(directory)
-			  .setMustExist(true)
-			  .readEnvironment() 
-			  .build();
-			
-			git = Git.wrap(repo);			
-		}
-		else {
+			Repository repo = builder.findGitDir(directory).setMustExist(true).readEnvironment().build();
+
+			git = Git.wrap(repo);
+		} else {
 			System.out.println("Cloning linux kernel for the first time\nThis may take some time");
-			
-			git = Git.cloneRepository()
-					  .setCloneSubmodules( true )
-					  .setURI( "https://github.com/torvalds/linux.git" )
-					  .setDirectory( directory )
-					  .call();
-	
+
+			git = Git.cloneRepository().setCloneSubmodules(true).setURI(url).setDirectory(directory).call();
+
 			System.out.println("Finished Cloning!");
 		}
-		
+
 	}
-	
-	public void UpdateRepoToTag(String tag) throws RefAlreadyExistsException, RefNotFoundException, InvalidRefNameException, CheckoutConflictException, GitAPIException {
+
+	public void UpdateRepoToTag(String tag) throws RefAlreadyExistsException, RefNotFoundException,
+			InvalidRefNameException, CheckoutConflictException, GitAPIException {
 		git.checkout().setName("master").call();
 		git.pull().call();
 		git.checkout().setName(tag).call();
 	}
-	
 
 }

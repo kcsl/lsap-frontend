@@ -5,6 +5,10 @@ linux-kernel-3.17-rc1/
 linux-kernel-3.18-rc1/
 linux-kernel-3.19-rc1/
 
+## Website ignores
+site/dist/
+node_modules/
+
 ## Eclipse Workspace Ignores
 
 ### Basic Files

@@ -25,6 +25,8 @@ import { LinkCardComponent } from './links/link-card/link-card.component';
 import { LinksPageComponent } from './links/links-page/links-page.component';
 import {AngularFireStorageModule} from 'angularfire2/storage';
 import {HomeComponent} from './home/home.component';
+import {SharedService} from './services/shared.service';
+import {LinksPageService} from './services/links_page.service';
 
 
 @NgModule({
@@ -48,18 +50,14 @@ import {HomeComponent} from './home/home.component';
     CustomFormsModule,
     NgbModule.forRoot(),
     RouterModule.forRoot([
-      {
-          path: '',
-          component: HomeComponent
-      },
-      {
-        path: 'v/:versionStripped',
-        component: HomeComponent
-      },
-      {
-        path: 'login',
-        component: LoginComponent
-      }
+        { path: '', component: HomeComponent, pathMatch: 'full' },
+        { path: 'v/:versionStripped', component: HomeComponent,
+            children: [
+                { path: '', component: LinksComponent, pathMatch: 'full' },
+                { path: 'i', redirectTo: '', pathMatch: 'full' },
+                { path: 'i/:id', component: LinksPageComponent }
+            ]
+        }
     ])
   ],
   providers: [
@@ -69,7 +67,9 @@ import {HomeComponent} from './home/home.component';
     AdminAuthGuard,
     FilterService,
     LinksService,
-    NavbarService
+    NavbarService,
+    SharedService,
+    LinksPageService
   ],
   bootstrap: [AppComponent]
 })

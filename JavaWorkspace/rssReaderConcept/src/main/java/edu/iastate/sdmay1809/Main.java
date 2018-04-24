@@ -7,23 +7,26 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
 
+
 import com.rometools.rome.io.FeedException;
 
 public class Main {
 	static long lastTime;
-	static final String workspace = System.getProperty("user.home") + "/Workspace";
 	public static void main(String[] args) throws IllegalArgumentException, MalformedURLException, FeedException, IOException, InterruptedException, InvalidRemoteException, TransportException, GitAPIException {
-		KernelRssFeed feed = new KernelRssFeed("https://www.kernel.org/feeds/kdist.xml", false);
-		RepositoryManager manager = new RepositoryManager(workspace);
-		while(true) {
+		
+		RssConfig config = RssConfig.builder(RssConfig.Builder.class, args).build();
+		
+		KernelRssFeed feed = new KernelRssFeed(config.FEED_URL, false);
+		RepositoryManager manager = new RepositoryManager(config.WORKSPACE, config.GIT_URL);
+		do {
 			String oldVersion = feed.getNewestVersion();
 			if(feed.isNewVersionAvailiable()) {
 				System.out.println("New version: " + feed.getNewestVersion());
 				manager.UpdateRepoToTag("v" + feed.getNewestVersion());
-				ConfigWriter cw = new ConfigWriter(oldVersion, feed.getNewestVersion(), workspace);
+				ConfigWriter cw = new ConfigWriter(oldVersion, feed.getNewestVersion(), config.WORKSPACE);
 				cw.write();
 			}
-			Thread.sleep(30000);
-		}
+			Thread.sleep(config.WAIT_PERIOD);
+		} while(!config.RUN_ONCE);
 	}
 }
