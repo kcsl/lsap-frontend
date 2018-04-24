@@ -13,18 +13,18 @@ public class FunctionTest {
 	Function f1;
 	Function f2;
 	Function f3;
+	PatchConfig config;
 	
 	@Before
 	public void setUp() throws Exception
 	{
-		f1 = new Function("void __lockfunc\n" + 
+		config = new PatchConfig("resources/testing/patchConfigTest.json");
+		f1 = new Function(config, "void __lockfunc\n" + 
 				"_raw_spin_lock_nest_lock(raw_spinlock_t *lock, struct lockdep_map *map)\n" + 
 				"								__acquires(lock);");
-		f2 = new Function("void __lockfunc _raw_spin_lock_nest_lock(raw_spinlock_t *lock)\n" + 
+		f2 = new Function(config, "void __lockfunc _raw_spin_lock_nest_lock(raw_spinlock_t *lock)\n" + 
 				"								__acquires(lock);");
-		f3 = new Function("void __lockfunc _raw_spin_lock_bh(raw_spinlock_t *lock)		__acquires(lock);");
-		
-		Function.config = new PatchConfig("resources/testing/patchConfigTest.json");
+		f3 = new Function(config, "void __lockfunc _raw_spin_lock_bh(raw_spinlock_t *lock)		__acquires(lock);");		
 	}
 	
 	@Test
@@ -32,13 +32,13 @@ public class FunctionTest {
 	{
 		try
 		{
-			new Function(null);
+			new Function(config, null);
 			fail("Function should throw exception on null input.");
 		} catch (Exception e) {}
 		
 		try
 		{
-			new Function("notafunction");
+			new Function(config, "notafunction");
 			fail("Function should throw exception on malformatted input.");
 		} catch (Exception e) {}
 	}
@@ -125,10 +125,10 @@ public class FunctionTest {
 		assertFalse(f1.equals(null));
 		assertTrue(f1.equals(new Macro("#define _raw_spin_lock_nest_lock(lock) func(lock)")));
 		assertFalse(f1.equals(new Parameter("int param")));
-		assertTrue(f1.equals(new Function("int __must_check\n" + 
+		assertTrue(f1.equals(new Function(config, "int __must_check\n" + 
 				"_raw_spin_lock_nest_lock(raw_spinlock_t *lock, struct lockdep_map *map)\n" + 
 				"								__acquires(lock);")));
-		assertFalse(f1.equals(new Function("int __must_check\n" + 
+		assertFalse(f1.equals(new Function(config, "int __must_check\n" + 
 				"_raw_spin_lock_nest_lock(int lock, struct lockdep_map *map)\n" + 
 				"								__acquires(lock);")));
 	}
@@ -155,9 +155,9 @@ public class FunctionTest {
 		assertTrue(Function.isLockingFunction(f1, criteria));
 		assertTrue(Function.isLockingFunction(f2, criteria));
 		assertTrue(Function.isLockingFunction(f3, criteria));
-		assertFalse(Function.isLockingFunction(new Function("int noFunc(struct mutex *lock);"), criteria));
-		assertFalse(Function.isLockingFunction(new Function("define int func(int lock);"), criteria));
-		assertFalse(Function.isLockingFunction(new Function("return func(int lock);"), criteria));
+		assertFalse(Function.isLockingFunction(new Function(config, "int noFunc(struct mutex *lock);"), criteria));
+		assertFalse(Function.isLockingFunction(new Function(config, "define int func(int lock);"), criteria));
+		assertFalse(Function.isLockingFunction(new Function(config, "return func(int lock);"), criteria));
 	}
 	
 	@Test
@@ -166,7 +166,7 @@ public class FunctionTest {
 		assertTrue(f1.hasValidReturnType());
 		assertTrue(f2.hasValidReturnType());
 		assertTrue(f3.hasValidReturnType());
-		assertFalse((new Function("return notfunc func(int param);")).hasValidReturnType());
+		assertFalse((new Function(config, "return notfunc func(int param);")).hasValidReturnType());
 	}
 	
 	@Test
@@ -175,20 +175,12 @@ public class FunctionTest {
 		assertEquals(f1.toString(), "static inline void _raw_spin_lock_nest_lock(raw_spinlock_t* lock, struct lockdep_map* map) {}");
 		assertEquals(f2.toString(), "static inline void _raw_spin_lock_nest_lock(raw_spinlock_t* lock) {}");
 		assertEquals(f3.toString(), "static inline void _raw_spin_lock_bh(raw_spinlock_t* lock) {}");
-		assertEquals((new Function("int function();")).toString(), "static inline int function() {return 0;}");
-		assertEquals((new Function("struct patchTest *function();")).toString(), "static inline struct patchTest * function() {return NULL;}");
-		assertEquals((new Function("struct wrongType *function();")).toString(), "");
+		assertEquals((new Function(config, "int function();")).toString(), "static inline int function() {return 0;}");
+		assertEquals((new Function(config, "struct patchTest *function();")).toString(), "static inline struct patchTest * function() {return NULL;}");
+		assertEquals((new Function(config, "struct wrongType *function();")).toString(), "");
 		
-		PatchConfig tmp = Function.config;
-		Function.config = null;
-		
-		assertEquals(f1.toString(), "");
-		assertEquals(f2.toString(), "");
-		assertEquals(f3.toString(), "");
-		assertEquals((new Function("int function();")).toString().toString(), "");
-		assertEquals((new Function("struct mutex *function();")).toString(), "");
-		assertEquals((new Function("struct wrongType *function();")).toString(), "");
-		
-		Function.config = tmp;
+		assertEquals((new Function(null, "int function();")).toString().toString(), "");
+		assertEquals((new Function(null, "struct mutex *function();")).toString(), "");
+		assertEquals((new Function(null, "struct wrongType *function();")).toString(), "");		
 	}
 }

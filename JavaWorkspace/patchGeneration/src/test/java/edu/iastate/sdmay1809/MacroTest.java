@@ -13,10 +13,12 @@ public class MacroTest {
 	Macro m1;
 	Macro m2;
 	Macro m3;
+	PatchConfig config;
 	
 	@Before
 	public void setUp() throws Exception
 	{
+		config = new PatchConfig("resources/testing/patchConfigTest.json");
 		m1 = new Macro("# define macro( lock, otherParam ) something(lock)");
 		m2 = new Macro("#define macro (lock, otherParam) something");
 		m3 = new Macro("#DEFINE macro ( lockname ) \\\n" + 
@@ -93,7 +95,7 @@ public class MacroTest {
 		assertTrue(m1.equals(m2));
 		assertFalse(m1.equals(new Macro("#define otherMacro(someParam) doThing(someParam)")));
 		assertFalse(m1.equals(null));
-		assertTrue(m1.equals(new Function("int macro(int param);")));
+		assertTrue(m1.equals(new Function(config, "int macro(int param);")));
 		assertFalse(m1.equals(new Parameter("int param")));
 		assertFalse(m1.equals(new Macro("#define macro(lock, notOtherParam)")));
 	}
@@ -105,7 +107,7 @@ public class MacroTest {
 		assertEquals(m1.hashCode(), m2.hashCode());
 		assertThat(m1.hashCode(), not(equals((new Macro("#define otherMacro(someParam) doThing(someParam)")).hashCode())));	
 		assertThat(m1.hashCode(), not(equals(null)));
-		assertEquals(m1.hashCode(), (new Function("int macro(int param);")).hashCode());
+		assertEquals(m1.hashCode(), (new Function(config, "int macro(int param);")).hashCode());
 	}
 	
 	@Test
@@ -130,7 +132,7 @@ public class MacroTest {
 		assertEquals(m2.toString(), "#define macro(lock, otherParam)");
 		assertEquals(m3.toString(), "#define macro(lockname)");
 		
-		Function f = new Function("int function(int lock, struct mutex *lock2);");
+		Function f = new Function(config, "int function(int lock, struct mutex *lock2);");
 		
 		m1.setBodyFunction(f);
 		m2.setBodyFunction(f);
@@ -139,7 +141,7 @@ public class MacroTest {
 		assertEquals(m1.toString(), "#define macro(lock, otherParam) function(0, NULL)");
 		assertEquals(m2.toString(), "#define macro(lock, otherParam) function(0, NULL)");
 		assertEquals(m3.toString(), "#define macro(lockname) function(0, NULL)");
-		assertEquals((new Macro("#define macro()", new Function("int function(int lock, struct mutex *lock2);"))).toString(), "#define macro() function(0, NULL)");
+		assertEquals((new Macro("#define macro()", new Function(config, "int function(int lock, struct mutex *lock2);"))).toString(), "#define macro() function(0, NULL)");
 	}
 	
 	@Test

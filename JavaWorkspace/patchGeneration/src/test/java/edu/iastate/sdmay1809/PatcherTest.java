@@ -262,8 +262,6 @@ public class PatcherTest {
 		deleteFiles();
 		
 		assertThat(patcher, instanceOf(Patcher.class));
-		assertNotNull(Function.config);
-		assertNotNull(Macro.config);
 		assertFalse(Files.exists(Paths.get("resources/testing/testKernel/patchOutput/patchTest/mutex.h")));
 		assertFalse(Files.exists(Paths.get("resources/testing/testKernel/patchOutput/patchTest/spinlock.h")));
 		assertFalse(Files.exists(Paths.get("resources/testing/testKernel/patchOutput/patchTest/lsap_mutex_lock.h")));
@@ -275,8 +273,6 @@ public class PatcherTest {
 		
 		patcher = new Patcher(CONFIG_PATH, KERNEL_PATH, OUTPUT_PATH, false);
 		assertThat(patcher, instanceOf(Patcher.class));
-		assertNotNull(Function.config);
-		assertNotNull(Macro.config);
 		assertFalse(Files.exists(Paths.get("resources/testing/testKernel/patchOutput/patchTest/mutex.h")));
 		assertFalse(Files.exists(Paths.get("resources/testing/testKernel/patchOutput/patchTest/spinlock.h")));
 		assertFalse(Files.exists(Paths.get("resources/testing/testKernel/patchOutput/patchTest/lsap_mutex_lock.h")));
@@ -288,8 +284,6 @@ public class PatcherTest {
 		
 		patcher = new Patcher(CONFIG_PATH, KERNEL_PATH, OUTPUT_PATH);
 		assertThat(patcher, instanceOf(Patcher.class));
-		assertNotNull(Function.config);
-		assertNotNull(Macro.config);
 		assertFalse(Files.exists(Paths.get("resources/testing/testKernel/patchOutput/patchTest/mutex.h")));
 		assertFalse(Files.exists(Paths.get("resources/testing/testKernel/patchOutput/patchTest/spinlock.h")));
 		assertFalse(Files.exists(Paths.get("resources/testing/testKernel/patchOutput/patchTest/lsap_mutex_lock.h")));
@@ -301,8 +295,6 @@ public class PatcherTest {
 		
 		patcher = new Patcher(CONFIG_PATH);
 		assertThat(patcher, instanceOf(Patcher.class));
-		assertNotNull(Function.config);
-		assertNotNull(Macro.config);
 		assertFalse(Files.exists(Paths.get("resources/testing/testKernel/patchOutput/patchTest/mutex.h")));
 		assertFalse(Files.exists(Paths.get("resources/testing/testKernel/patchOutput/patchTest/spinlock.h")));
 		assertFalse(Files.exists(Paths.get("resources/testing/testKernel/patchOutput/patchTest/lsap_mutex_lock.h")));

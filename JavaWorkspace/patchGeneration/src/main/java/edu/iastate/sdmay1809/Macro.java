@@ -8,8 +8,6 @@ import java.util.regex.Pattern;
 
 public class Macro implements Locker
 {
-	public static PatchConfig config;
-	
 	private String name;
 	private List<String> parameters;
 	private Function bodyFunction;
@@ -77,10 +75,7 @@ public class Macro implements Locker
 	
 	@Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + name.hashCode();
-        return result;
+		return name.hashCode();
 	}
 	
 	public static boolean isLockingMacro(Macro m, Map<String, Boolean> criteria)

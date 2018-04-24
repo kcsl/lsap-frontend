@@ -135,7 +135,7 @@ public class PatchConfig
 				
 				for (Object f : functionObject)
 				{
-					curFunctions.add(new Function((String) f));
+					curFunctions.add(new Function(this, (String) f));
 				}
 				
 				functions.put(function, curFunctions);

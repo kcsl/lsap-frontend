@@ -53,10 +53,7 @@ public class Patcher {
 		this.kernelPath = "resources/";
 		this.outputPath = "resources/testing/patch/real/";
 		this.debug = false;
-		this.verbose = false;
-		
-		Function.config = config;
-		Macro.config = config;
+		this.verbose = false;		
 	}
 
 	public void patch() throws Exception
@@ -190,7 +187,7 @@ public class Patcher {
 					String functionLine = matcher.group();
 					if (!functionLine.toLowerCase().contains("define") && !functionLine.toLowerCase().contains("return"))
 					{
-						Function f = new Function(matcher.group());
+						Function f = new Function(config, matcher.group());
 						if (Function.isLockingFunction(f, functionCriteriaMap) && f.hasValidReturnType())
 						{
 							if (verbose) System.out.println("\tFunction found in \"" + functionLine + "\"");
@@ -382,7 +379,7 @@ public class Patcher {
 				String functionString = matcher.group();
 				Function f;
 				
-				try { f = new Function(functionString); }
+				try { f = new Function(config, functionString); }
 				catch (Exception e) { if (debug || verbose) System.err.println("PATCHER: Unable to find function definition in \"" + functionString + "\". Skipping it."); continue; }
 				
 				if ((locks.getValue0().contains(f) || locks.getValue1().contains(f)) && f.hasValidReturnType())
@@ -497,7 +494,7 @@ public class Patcher {
 			{
 				Function f;
 				
-				try { f = new Function(m.group().replaceAll("//", "")); }
+				try { f = new Function(config, m.group().replaceAll("//", "")); }
 				catch (Exception e) { continue; }
 				
 				if ((locks.getValue0().contains(f) || locks.getValue1().contains(f)) && f.hasValidReturnType())

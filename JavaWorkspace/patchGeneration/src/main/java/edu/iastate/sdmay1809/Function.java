@@ -9,14 +9,15 @@ import java.util.stream.Collectors;
 
 public class Function implements Locker
 {
-	public static PatchConfig config = null;
-	
 	private String name;
 	private String modifiers;
 	private List<Parameter> parameters;
+	private PatchConfig config;
 	
-	public Function(String functionDefinition) throws Exception
+	public Function(PatchConfig config, String functionDefinition) throws Exception
 	{
+		this.config = config;
+		
 		if (functionDefinition == null) throw new Exception("FUNCTION: Unable to find a function definition in \"" + functionDefinition + "\"!");
 		
 		Matcher m = Pattern.compile("^\\s*(\\w+\\s*(\\*)?\\s+(\\*)?\\s*)+\\w+\\s*\\([^\\)]*\\)").matcher(functionDefinition);
@@ -78,10 +79,7 @@ public class Function implements Locker
 	
 	@Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + name.hashCode();
-        return result;
+        return name.hashCode();
 	}
 	
 	public static boolean isLockingFunction(Function f, Map<String, Boolean> criteria)
