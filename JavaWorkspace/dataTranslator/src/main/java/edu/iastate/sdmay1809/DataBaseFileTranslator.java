@@ -2,7 +2,10 @@ package edu.iastate.sdmay1809;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.io.IOException;
+
 import org.json.JSONObject;
 
 import edu.iastate.sdmay1809.shared.DiffConfig;
@@ -21,7 +24,7 @@ public class DataBaseFileTranslator extends InstanceTracker {
 		super(sourceDirectory);
 		InstanceParserManager.put(new DatabaseObjectParser());
 		File f = new File(sourceDirectory);
-		DiffConfig config = DiffConfig.builder(	f.getParentFile().getParent() + "/config.json").build();
+		DiffConfig config = DiffConfig.builder(DiffConfig.Builder.class, Paths.get(f.getParentFile().getParent(), "config.json").toFile()).build();
 		versionNum = config.NEW_TAG.replaceAll("\\-|\\.", "");
 	}
 	
@@ -38,7 +41,7 @@ public class DataBaseFileTranslator extends InstanceTracker {
 		boolean retVal = true;
 
 		
-		JSONObject versionObject = createVersionObject(instances);	
+		JSONObject versionObject = createVersionObject(instances, outputFile.getAbsolutePath());	
 
 		System.out.println("instances: " + instances.length + ", instanceMap:" + versionObject.length());
 
@@ -59,7 +62,7 @@ public class DataBaseFileTranslator extends InstanceTracker {
 		fw.close();
 	}	
 	
-	protected JSONObject createVersionObject(File[] instances) {
+	protected JSONObject createVersionObject(File[] instances, String outputFile) {
 		JSONObject versionObject = new JSONObject();
 		for (File f : instances) {
 			try {
@@ -69,6 +72,15 @@ public class DataBaseFileTranslator extends InstanceTracker {
 				instance.put("type", f.getParentFile().getName());
 				String pathTo = versionNum + "/" + instance.getString("type") + "/" + instance.getString("id") + "/";
 				instance.put("mpg", pathTo + "mpg.png");
+				File mpgCpyDir = new File(outputFile + "/" + pathTo + "mpg.png");
+				File mpgFromDir = new File(f.getAbsolutePath() + "/mpg.png");
+				try {
+					mpgCpyDir.getParentFile().mkdirs();
+					Files.copy(mpgFromDir.toPath(), mpgCpyDir.toPath());
+				}
+				catch (Exception e) {
+					System.err.println("[ERROR] : Could not create asset structure for " + f.getName());
+				}
 				Map<String, String> graphToUUID = new HashMap<String,String>();
 				for(File graph : f.listFiles()) {
 					if((!graph.getName().startsWith("EFG") &&
@@ -88,6 +100,17 @@ public class DataBaseFileTranslator extends InstanceTracker {
 					String fixedType = graphType.equals("CFG") ? "cfg" : "pcg";
 					String dir = versionNum + "/" + instance.getString("type") + "/" +
 						instance.getString("id") + "/" + fixedType + "_" + uuid + ".png";
+					
+					File copyFile = new File(outputFile + "/" + dir);
+					
+					try {
+						copyFile.getParentFile().mkdirs();
+						Files.copy(graph.toPath(), copyFile.toPath());
+					}
+					catch (Exception e) {
+						System.err.println("[ERROR] : Could not create asset structure for " + f.getName());
+					}
+					
 					if(graphType.toLowerCase().equals("cfg")) {
 						cfg.put(uuid, dir);
 					}
@@ -101,7 +124,9 @@ public class DataBaseFileTranslator extends InstanceTracker {
 				versionObject.put(instance.getString("id"), instance);
 			} catch (Exception e) {
 				System.err.println("[ERROR] : Threw exception when parsing " + f.getName());
-
+				for(StackTraceElement s: e.getStackTrace()) {
+					System.err.println(s.toString());
+				}
 			}
 		}
 		return versionObject;
