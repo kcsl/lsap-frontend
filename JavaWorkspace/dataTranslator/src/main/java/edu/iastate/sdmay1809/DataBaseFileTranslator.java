@@ -27,7 +27,7 @@ public class DataBaseFileTranslator extends InstanceTracker {
 		InstanceParserManager.put(new DatabaseObjectParserV2());
 		File f = new File(sourceDirectory);
 		DiffConfig config = DiffConfig.builder(DiffConfig.Builder.class, Paths.get(f.getParentFile().getParent(), "config.json").toFile()).build();
-		versionNum = config.NEW_TAG.replaceAll("\\-|\\.", "");
+		versionNum = config.NEW_TAG.replaceAll("\\-|\\.|v", "");
 	}
 	
 	@Override

@@ -11,7 +11,6 @@ public class DatabaseObjectParserV1 extends InstanceParserV1 {
 		inst.put("instance_id", inst.get("id"));
 		inst.remove("id");
 		inst.put("title", inst.get("name"));
-		inst.remove("name");
 		String [] list = ((String) inst.get("filename")).split("\\/");
 		inst.put("driver", list[list.length-1]);
 		return inst;
