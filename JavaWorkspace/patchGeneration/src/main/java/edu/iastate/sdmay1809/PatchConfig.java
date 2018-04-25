@@ -1,7 +1,6 @@
 package edu.iastate.sdmay1809;
 
 import java.io.File;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -35,7 +34,7 @@ public class PatchConfig extends Config{
 	public static String MUTEX_FILES_TO_INCLUDE_HEADER_IN;
 	public static String SPIN_FILES_TO_INCLUDE_HEADER_IN;
 	
-	protected PatchConfig(Builder builder)
+	public PatchConfig(Builder builder)
 	{
 		super(builder);
 		
@@ -88,7 +87,7 @@ public class PatchConfig extends Config{
 		
 		try
 		{
-			cmd = parser.parse(options, args);
+			cmd = parser.parse(options, Config.getKnownArgs(options, args));
 		}
 		
 		catch (ParseException e)
@@ -109,7 +108,6 @@ public class PatchConfig extends Config{
 
 	public static class Builder extends Config.Builder<PatchConfig> {
 		{
-			String cwd = System.getProperty("user.dir");
 			configOptions.putIfAbsent("mutex_function_criteria", "MutexFunctionCriteria");
 			configOptions.putIfAbsent("mutex_macro_criteria", "MutexMacroCriteria");
 			configOptions.putIfAbsent("spin_function_criteria", "SpinFunctionCriteria");
@@ -125,8 +123,8 @@ public class PatchConfig extends Config{
 			configOptions.putIfAbsent("spin_macros_to_include", "SpinMacrosToInclude");			
 			configOptions.putIfAbsent("mutex_files_to_include_header_in", "MutexFilesToIncludeHeaderIn");
 			configOptions.putIfAbsent("spin_files_to_include_header_in", "SpinFilesToIncludeHeaderIn");
-			configOptions.putIfAbsent("kernel_dir", Paths.get(cwd, "resources/kernel/"));
-			configOptions.putIfAbsent("output_dir", Paths.get(cwd, "resources/patch/"));
+			configOptions.putIfAbsent("kernel_dir", "resources/kernel/");
+			configOptions.putIfAbsent("output_dir", "resources/patch/");
 			configOptions.putIfAbsent("debug", false);
 			configOptions.putIfAbsent("verbose", false);
 		}
@@ -136,7 +134,7 @@ public class PatchConfig extends Config{
 		}
 		
 		public Builder(File file) {
-			super();
+			super(file);
 		}
 		
 		public Builder(Builder base) {
@@ -146,12 +144,12 @@ public class PatchConfig extends Config{
 	
 	public String kernelPath()
 	{
-		return (String) configOptions.get("kernel_dir");
+		return configOptions.get("kernel_dir").toString();
 	}
 	
 	public String outputPath()
 	{
-		return (String) configOptions.get("output_dir");
+		return configOptions.get("output_dir").toString();
 	}
 	
 	public boolean debug()

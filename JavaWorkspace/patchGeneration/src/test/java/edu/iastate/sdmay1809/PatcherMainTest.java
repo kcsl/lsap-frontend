@@ -9,10 +9,15 @@ import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.contrib.java.lang.system.ExpectedSystemExit;
 
 public class PatcherMainTest 
 {
+	@Rule
+	public final ExpectedSystemExit exit = ExpectedSystemExit.none();
+	
 	@Test
 	public void patcherMainConstructor() throws Exception
 	{
@@ -24,9 +29,11 @@ public class PatcherMainTest
 	@Test
 	public void patcherMainHelp() throws Exception
 	{
+		exit.expectSystemExitWithStatus(0);
+		
 		deleteFiles();
 		
-		PatcherMain.main("-c resources/testing/patchConfigTest.json -kp resources/testing/testKernel/ -o resources/testing/testKernel/patchOutput/ -h".split("\\s"));
+		PatcherMain.main("-c resources/testing/patchConfigTest.json -k resources/testing/testKernel/ -o resources/testing/testKernel/patchOutput/ -h".split("\\s"));
 		
 		assertFalse(Files.exists(Paths.get("resources/testing/testKernel/patchOutput/patchTest/mutex.h")));
 		assertFalse(Files.exists(Paths.get("resources/testing/testKernel/patchOutput/patchTest/spinlock.h")));
@@ -41,7 +48,7 @@ public class PatcherMainTest
 	{
 		deleteFiles();
 		
-		PatcherMain.main("-c resources/testing/patchConfigTest.json -kp resources/testing/testKernel/ -o resources/testing/testKernel/patchOutput/".split("\\s"));
+		PatcherMain.main("-c resources/testing/patchConfigTest.json -k resources/testing/testKernel/ -o resources/testing/testKernel/patchOutput/".split("\\s"));
 		
 		assertTrue(Files.exists(Paths.get("resources/testing/testKernel/patchOutput/patchTest/mutex.h")));
 		assertTrue(Files.exists(Paths.get("resources/testing/testKernel/patchOutput/patchTest/spinlock.h")));
@@ -56,7 +63,7 @@ public class PatcherMainTest
 	{
 		deleteFiles();
 		
-		PatcherMain.main("-c resources/testing/patchConfigTest.json -kp resources/testing/testKernel/ -o resources/testing/testKernel/patchOutput/ -d".split("\\s"));
+		PatcherMain.main("-c resources/testing/patchConfigTest.json -k resources/testing/testKernel/ -d resources/testing/testKernel/patchOutput/".split("\\s"));
 		
 		assertTrue(Files.exists(Paths.get("resources/testing/testKernel/patchOutput/patchTest/mutex.txt")));
 		assertTrue(Files.exists(Paths.get("resources/testing/testKernel/patchOutput/patchTest/spinlock.txt")));
@@ -70,7 +77,7 @@ public class PatcherMainTest
 		assertFalse(Files.exists(Paths.get("resources/testing/testKernel/patchOutput/include/linux/lsap_mutex_lock.txt")));
 		assertFalse(Files.exists(Paths.get("resources/testing/testKernel/patchOutput/include/linux/lsap_spin_lock.txt")));		
 		
-		PatcherMain.main("-c resources/testing/patchConfigTest.json -kp resources/testing/testKernel/ -d resources/testing/testKernel/patchOutput/".split("\\s"));
+		PatcherMain.main("-c resources/testing/patchConfigTest.json -k resources/testing/testKernel/ -d resources/testing/testKernel/patchOutput/".split("\\s"));
 		
 		assertTrue(Files.exists(Paths.get("resources/testing/testKernel/patchOutput/patchTest/mutex.txt")));
 		assertTrue(Files.exists(Paths.get("resources/testing/testKernel/patchOutput/patchTest/spinlock.txt")));
@@ -87,7 +94,7 @@ public class PatcherMainTest
 		System.setErr(new PrintStream(errContent));
 		deleteFiles();
 		
-		PatcherMain.main("-c resources/testing/patchConfigTest.json -kp resources/testing/testKernel/ -d resources/testing/testKernel/patchOutput/ -v".split("\\s"));
+		PatcherMain.main("-c resources/testing/patchConfigTest.json -k resources/testing/testKernel/ -d resources/testing/testKernel/patchOutput/ -v".split("\\s"));
 		
 		assertTrue(Files.exists(Paths.get("resources/testing/testKernel/patchOutput/patchTest/mutex.txt")));
 		assertTrue(Files.exists(Paths.get("resources/testing/testKernel/patchOutput/patchTest/spinlock.txt")));
