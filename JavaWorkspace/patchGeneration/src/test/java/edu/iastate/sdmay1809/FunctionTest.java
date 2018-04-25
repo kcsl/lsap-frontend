@@ -1,8 +1,14 @@
 package edu.iastate.sdmay1809;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.not;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 
@@ -18,7 +24,8 @@ public class FunctionTest {
 	@Before
 	public void setUp() throws Exception
 	{
-		config = new PatchConfig("resources/testing/patchConfigTest.json");
+		config = PatchConfig.builder(PatchConfig.Builder.class, new File("resources/testing/patchConfigTest.json")).build();
+		
 		f1 = new Function(config, "void __lockfunc\n" + 
 				"_raw_spin_lock_nest_lock(raw_spinlock_t *lock, struct lockdep_map *map)\n" + 
 				"								__acquires(lock);");

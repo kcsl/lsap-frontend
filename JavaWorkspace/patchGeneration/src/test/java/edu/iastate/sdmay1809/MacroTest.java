@@ -1,8 +1,14 @@
 package edu.iastate.sdmay1809;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.not;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 
@@ -18,7 +24,8 @@ public class MacroTest {
 	@Before
 	public void setUp() throws Exception
 	{
-		config = new PatchConfig("resources/testing/patchConfigTest.json");
+		config = PatchConfig.builder(PatchConfig.Builder.class, new File("resources/testing/patchConfigTest.json")).build();
+		
 		m1 = new Macro("# define macro( lock, otherParam ) something(lock)");
 		m2 = new Macro("#define macro (lock, otherParam) something");
 		m3 = new Macro("#DEFINE macro ( lockname ) \\\n" + 

@@ -1,8 +1,12 @@
 package edu.iastate.sdmay1809;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
+import java.io.File;
 import java.util.Map;
 import java.util.Set;
 
@@ -16,7 +20,7 @@ public class PatchConfigTest
 	@Before
 	public void setUp() throws Exception
 	{
-		config = new PatchConfig("resources/testing/patchConfigTest.json");
+		config = PatchConfig.builder(PatchConfig.Builder.class, new File("resources/testing/patchConfigTest.json")).build();
 	}
 		
 	@Test
@@ -24,8 +28,8 @@ public class PatchConfigTest
 	{
 		try
 		{
-			config = new PatchConfig("fileThatDoesntExist.goodLuckFindingThis");
-			config = new PatchConfig("resources/testing/patchTest/mutex.h");
+			config = PatchConfig.builder(PatchConfig.Builder.class, new File("fileThatDoesntExist.goodLuckFindingThis")).build();
+			config = PatchConfig.builder(PatchConfig.Builder.class, new File("resources/testing/patchTest/mutex.h")).build();
 		}
 		
 		catch (Exception e) 
@@ -33,7 +37,7 @@ public class PatchConfigTest
 			fail("Exception thrown on improper/no file found.");
 		}
 		
-		config = new PatchConfig("resources/testing/patchConfigTest.json");
+		config = PatchConfig.builder(PatchConfig.Builder.class, new File("resources/testing/patchConfigTest.json")).build();
 	}
 	
 	@Test

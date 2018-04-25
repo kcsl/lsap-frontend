@@ -24,36 +24,14 @@ public class Patcher {
 	private String outputPath;
 	private boolean debug;
 	private boolean verbose;
-	
-	public Patcher(String configPath, String kernelPath, String outputPath, boolean debug, boolean verbose) throws Exception
+		
+	public Patcher(PatchConfig config) throws Exception
 	{
-		this(configPath, kernelPath, outputPath, debug);
-		this.verbose = verbose;
-	}
-
-	public Patcher(String configPath, String kernelPath, String outputPath, boolean debug) throws Exception
-	{
-		this(configPath, kernelPath, outputPath);
-		this.debug = debug;
-		this.verbose = false;
-	}
-
-	public Patcher(String configPath, String kernelPath, String outputPath) throws Exception
-	{
-		this(configPath);
-		this.kernelPath = kernelPath;
-		this.outputPath = outputPath;
-		this.debug = false;
-		this.verbose = false;
-	}
-	
-	public Patcher(String configPath) throws Exception
-	{
-		config = new PatchConfig(configPath);
-		this.kernelPath = "resources/";
-		this.outputPath = "resources/testing/patch/real/";
-		this.debug = false;
-		this.verbose = false;		
+		this.config = config;
+		this.kernelPath = config.kernelPath();
+		this.outputPath = config.outputPath();
+		this.debug = config.debug();
+		this.verbose = config.verbose();	
 	}
 
 	public void patch() throws Exception

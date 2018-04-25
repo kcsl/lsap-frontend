@@ -253,7 +253,7 @@ public class PatcherTest {
 	@Before
 	public void setUp() throws Exception
 	{
-		patcher = new Patcher(CONFIG_PATH, KERNEL_PATH, OUTPUT_PATH, false, false);
+		patcher = new Patcher(PatchConfig.builder(new String[] {"-c", CONFIG_PATH, "-k", KERNEL_PATH, "-o", OUTPUT_PATH}).build());
 	}
 	
 	@Test
@@ -269,42 +269,7 @@ public class PatcherTest {
 		assertFalse(Files.exists(Paths.get("resources/testing/testKernel/patchOutput/patchTest/mutex.txt")));
 		assertFalse(Files.exists(Paths.get("resources/testing/testKernel/patchOutput/patchTest/spinlock.txt")));
 		assertFalse(Files.exists(Paths.get("resources/testing/testKernel/patchOutput/patchTest/lsap_mutex_lock.txt")));
-		assertFalse(Files.exists(Paths.get("resources/testing/testKernel/patchOutput/patchTest/lsap_spin_lock.txt")));
-		
-		patcher = new Patcher(CONFIG_PATH, KERNEL_PATH, OUTPUT_PATH, false);
-		assertThat(patcher, instanceOf(Patcher.class));
-		assertFalse(Files.exists(Paths.get("resources/testing/testKernel/patchOutput/patchTest/mutex.h")));
-		assertFalse(Files.exists(Paths.get("resources/testing/testKernel/patchOutput/patchTest/spinlock.h")));
-		assertFalse(Files.exists(Paths.get("resources/testing/testKernel/patchOutput/patchTest/lsap_mutex_lock.h")));
-		assertFalse(Files.exists(Paths.get("resources/testing/testKernel/patchOutput/patchTest/lsap_spin_lock.h")));
-		assertFalse(Files.exists(Paths.get("resources/testing/testKernel/patchOutput/patchTest/mutex.txt")));
-		assertFalse(Files.exists(Paths.get("resources/testing/testKernel/patchOutput/patchTest/spinlock.txt")));
-		assertFalse(Files.exists(Paths.get("resources/testing/testKernel/patchOutput/patchTest/lsap_mutex_lock.txt")));
-		assertFalse(Files.exists(Paths.get("resources/testing/testKernel/patchOutput/patchTest/lsap_spin_lock.txt")));
-		
-		patcher = new Patcher(CONFIG_PATH, KERNEL_PATH, OUTPUT_PATH);
-		assertThat(patcher, instanceOf(Patcher.class));
-		assertFalse(Files.exists(Paths.get("resources/testing/testKernel/patchOutput/patchTest/mutex.h")));
-		assertFalse(Files.exists(Paths.get("resources/testing/testKernel/patchOutput/patchTest/spinlock.h")));
-		assertFalse(Files.exists(Paths.get("resources/testing/testKernel/patchOutput/patchTest/lsap_mutex_lock.h")));
-		assertFalse(Files.exists(Paths.get("resources/testing/testKernel/patchOutput/patchTest/lsap_spin_lock.h")));
-		assertFalse(Files.exists(Paths.get("resources/testing/testKernel/patchOutput/patchTest/mutex.txt")));
-		assertFalse(Files.exists(Paths.get("resources/testing/testKernel/patchOutput/patchTest/spinlock.txt")));
-		assertFalse(Files.exists(Paths.get("resources/testing/testKernel/patchOutput/patchTest/lsap_mutex_lock.txt")));
-		assertFalse(Files.exists(Paths.get("resources/testing/testKernel/patchOutput/patchTest/lsap_spin_lock.txt")));
-		
-		patcher = new Patcher(CONFIG_PATH);
-		assertThat(patcher, instanceOf(Patcher.class));
-		assertFalse(Files.exists(Paths.get("resources/testing/testKernel/patchOutput/patchTest/mutex.h")));
-		assertFalse(Files.exists(Paths.get("resources/testing/testKernel/patchOutput/patchTest/spinlock.h")));
-		assertFalse(Files.exists(Paths.get("resources/testing/testKernel/patchOutput/patchTest/lsap_mutex_lock.h")));
-		assertFalse(Files.exists(Paths.get("resources/testing/testKernel/patchOutput/patchTest/lsap_spin_lock.h")));
-		assertFalse(Files.exists(Paths.get("resources/testing/testKernel/patchOutput/patchTest/mutex.txt")));
-		assertFalse(Files.exists(Paths.get("resources/testing/testKernel/patchOutput/patchTest/spinlock.txt")));
-		assertFalse(Files.exists(Paths.get("resources/testing/testKernel/patchOutput/patchTest/lsap_mutex_lock.txt")));
-		assertFalse(Files.exists(Paths.get("resources/testing/testKernel/patchOutput/patchTest/lsap_spin_lock.txt")));
-		
-		patcher = new Patcher(CONFIG_PATH, KERNEL_PATH, OUTPUT_PATH, false, false);
+		assertFalse(Files.exists(Paths.get("resources/testing/testKernel/patchOutput/patchTest/lsap_spin_lock.txt")));				
 	}
 	
 	@Test
@@ -324,7 +289,7 @@ public class PatcherTest {
 		String fileContent = String.join("\n", Files.readAllLines(Paths.get("resources/testing/testKernel/patchOutput/include/linux/lsap_mutex_lock.h")).toArray(new String[0]));
 		assertEquals(fileContent, LSAP_MUTEX_CONTENT);
 		
-		patcher = new Patcher(CONFIG_PATH, KERNEL_PATH, OUTPUT_PATH, true);
+		patcher = new Patcher(PatchConfig.builder(new String[] {"-c", CONFIG_PATH, "-k", KERNEL_PATH, "-d", OUTPUT_PATH}).build());
 		locks = patcher.generateLSAPMutexHeaderFile();
 		
 		assertNotNull(locks);
@@ -336,7 +301,7 @@ public class PatcherTest {
 		assertEquals(fileContent, LSAP_MUTEX_CONTENT);
 		
 		deleteFiles();
-		patcher = new Patcher(CONFIG_PATH, KERNEL_PATH, OUTPUT_PATH, false, false);
+		patcher = new Patcher(PatchConfig.builder(new String[] {"-c", CONFIG_PATH, "-k", KERNEL_PATH, "-o", OUTPUT_PATH}).build());
 	}
 
 	@Test
@@ -356,7 +321,7 @@ public class PatcherTest {
 		String fileContent = String.join("\n", Files.readAllLines(Paths.get("resources/testing/testKernel/patchOutput/include/linux/lsap_spin_lock.h")).toArray(new String[0]));
 		assertEquals(fileContent, LSAP_SPIN_CONTENT);
 		
-		patcher = new Patcher(CONFIG_PATH, KERNEL_PATH, OUTPUT_PATH, true);
+		patcher = new Patcher(PatchConfig.builder(new String[] {"-c", CONFIG_PATH, "-k", KERNEL_PATH, "-d", OUTPUT_PATH}).build());
 		locks = patcher.generateLSAPSpinHeaderFile();
 		
 		assertNotNull(locks);
@@ -368,7 +333,7 @@ public class PatcherTest {
 		assertEquals(fileContent, LSAP_SPIN_CONTENT);
 		 
 		deleteFiles();
-		patcher = new Patcher(CONFIG_PATH, KERNEL_PATH, OUTPUT_PATH, false, false);
+		patcher = new Patcher(PatchConfig.builder(new String[] {"-c", CONFIG_PATH, "-k", KERNEL_PATH, "-o", OUTPUT_PATH}).build());
 	}
 	
 	@Test
@@ -387,7 +352,7 @@ public class PatcherTest {
 		assertEquals(fileContent, MUTEX_INCLUDE_CONTENT);
 		
 		deleteFiles();
-		patcher = new Patcher(CONFIG_PATH, KERNEL_PATH, OUTPUT_PATH, true);
+		patcher = new Patcher(PatchConfig.builder(new String[] {"-c", CONFIG_PATH, "-k", KERNEL_PATH, "-d", OUTPUT_PATH}).build());
 		locks = patcher.generateLSAPMutexHeaderFile();
 		patcher.addMutexIncludeStatements(locks);
 		
@@ -398,7 +363,7 @@ public class PatcherTest {
 		assertEquals(fileContent, MUTEX_INCLUDE_CONTENT);
 		 
 		deleteFiles();
-		patcher = new Patcher(CONFIG_PATH, KERNEL_PATH, OUTPUT_PATH, false, false);
+		patcher = new Patcher(PatchConfig.builder(new String[] {"-c", CONFIG_PATH, "-k", KERNEL_PATH, "-o", OUTPUT_PATH}).build());
 	}
 	
 	@Test
@@ -417,7 +382,7 @@ public class PatcherTest {
 		assertEquals(fileContent, SPIN_INCLUDE_CONTENT);
 		
 		deleteFiles();
-		patcher = new Patcher(CONFIG_PATH, KERNEL_PATH, OUTPUT_PATH, true);
+		patcher = new Patcher(PatchConfig.builder(new String[] {"-c", CONFIG_PATH, "-k", KERNEL_PATH, "-d", OUTPUT_PATH}).build());
 		locks = patcher.generateLSAPSpinHeaderFile();
 		patcher.addSpinIncludeStatements(locks);
 		
@@ -428,7 +393,7 @@ public class PatcherTest {
 		assertEquals(fileContent, SPIN_INCLUDE_CONTENT);
 		 
 		deleteFiles();
-		patcher = new Patcher(CONFIG_PATH, KERNEL_PATH, OUTPUT_PATH, false, false);
+		patcher = new Patcher(PatchConfig.builder(new String[] {"-c", CONFIG_PATH, "-k", KERNEL_PATH, "-o", OUTPUT_PATH}).build());
 	}
 
 	@Test
@@ -448,7 +413,7 @@ public class PatcherTest {
 		assertEquals(fileContent, MUTEX_PATCHED_CONTENT);
 		
 		deleteFiles();
-		patcher = new Patcher(CONFIG_PATH, KERNEL_PATH, OUTPUT_PATH, true);
+		patcher = new Patcher(PatchConfig.builder(new String[] {"-c", CONFIG_PATH, "-k", KERNEL_PATH, "-d", OUTPUT_PATH}).build());
 		locks = patcher.generateLSAPMutexHeaderFile();
 		patcher.addMutexIncludeStatements(locks);
 		patcher.removeMutexDefinitions(locks);
@@ -460,7 +425,7 @@ public class PatcherTest {
 		assertEquals(fileContent, MUTEX_PATCHED_CONTENT);
 		 
 		deleteFiles();
-		patcher = new Patcher(CONFIG_PATH, KERNEL_PATH, OUTPUT_PATH, false, false);
+		patcher = new Patcher(PatchConfig.builder(new String[] {"-c", CONFIG_PATH, "-k", KERNEL_PATH, "-o", OUTPUT_PATH}).build());
 	}
 
 	@Test
@@ -480,7 +445,7 @@ public class PatcherTest {
 		assertEquals(fileContent, SPIN_PATCHED_CONTENT);
 		
 		deleteFiles();
-		patcher = new Patcher(CONFIG_PATH, KERNEL_PATH, OUTPUT_PATH, true);
+		patcher = new Patcher(PatchConfig.builder(new String[] {"-c", CONFIG_PATH, "-k", KERNEL_PATH, "-d", OUTPUT_PATH}).build());
 		locks = patcher.generateLSAPSpinHeaderFile();
 		patcher.addSpinIncludeStatements(locks);
 		patcher.removeSpinDefinitions(locks);
@@ -492,7 +457,7 @@ public class PatcherTest {
 		assertEquals(fileContent, SPIN_PATCHED_CONTENT);
 		 
 		deleteFiles();
-		patcher = new Patcher(CONFIG_PATH, KERNEL_PATH, OUTPUT_PATH, false, false);
+		patcher = new Patcher(PatchConfig.builder(new String[] {"-c", CONFIG_PATH, "-k", KERNEL_PATH, "-o", OUTPUT_PATH}).build());
 	}
 	
 	@Test
@@ -515,7 +480,7 @@ public class PatcherTest {
 		assertEquals(fileContent, LSAP_SPIN_CONTENT);
 
 		deleteFiles();
-		patcher = new Patcher(CONFIG_PATH, KERNEL_PATH, OUTPUT_PATH, true);
+		patcher = new Patcher(PatchConfig.builder(new String[] {"-c", CONFIG_PATH, "-k", KERNEL_PATH, "-d", OUTPUT_PATH}).build());
 
 		patcher.patch();
 		assertTrue(Files.exists(Paths.get("resources/testing/testKernel/patchOutput/patchTest/spinlock.txt")));
@@ -532,7 +497,7 @@ public class PatcherTest {
 		assertEquals(fileContent, LSAP_SPIN_CONTENT);
 		
 		deleteFiles();
-		patcher = new Patcher(CONFIG_PATH, KERNEL_PATH, OUTPUT_PATH, false, false);
+		patcher = new Patcher(PatchConfig.builder(new String[] {"-c", CONFIG_PATH, "-k", KERNEL_PATH, "-o", OUTPUT_PATH}).build());
 	}
 
 	private void deleteFiles() throws IOException
