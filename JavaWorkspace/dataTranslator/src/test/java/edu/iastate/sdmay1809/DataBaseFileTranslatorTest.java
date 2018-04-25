@@ -36,6 +36,13 @@ public class DataBaseFileTranslatorTest {
 	
 	@Test 
 	public void testFileOverride() throws IOException, InterruptedException {
+		File setupWorkspace1 = Paths.get("resources", "4.13-results", "results", "kerenel").toAbsolutePath().toFile();
+		
+		File r = Paths.get("resources", "4.13-results").toFile();
+		
+		DataBaseFileTranslator dbt1 = new DataBaseFileTranslator("resources/4.13-results/results/kerenel/");
+		dbt1.run(r, true);
+		
 		File workspace = folder.newFolder();
 		File setupWorkspace = Paths.get("resources", "translatorTestFiles", "kernel", "results").toAbsolutePath().toFile();
 		Utils.execute(new String[] { "cp", "-R", ".", workspace.getAbsolutePath() }, setupWorkspace);
