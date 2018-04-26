@@ -40,7 +40,7 @@ public class DataBaseFileTranslatorTest {
 		File setupWorkspace = Paths.get("resources", "translatorTestFiles", "kernel", "results").toAbsolutePath().toFile();
 		Utils.execute(new String[] { "cp", "-R", ".", workspace.getAbsolutePath() }, setupWorkspace);
 		
-		DataBaseFileTranslator dbt = new DataBaseFileTranslator(workspace.getAbsolutePath());
+		DataBaseFileTranslator dbt = new DataBaseFileTranslator(workspace.getAbsolutePath(), "132rc2");
 		boolean test0 = dbt.run(workspace, false);
 		boolean test = dbt.run(workspace, false);
 		assertTrue(test0);
@@ -50,7 +50,7 @@ public class DataBaseFileTranslatorTest {
 	@Test
 	public void testAssetFolderCreation() throws IOException {
 		folder.create();
-		DataBaseFileTranslator dbt = new DataBaseFileTranslator(pathToSource.toString());
+		DataBaseFileTranslator dbt = new DataBaseFileTranslator(pathToSource.toString(), "132rc2");
 		assertTrue(dbt.run(folder.getRoot(), true));
 		File root = new File(folder.getRoot().getAbsoluteFile() + "/132rc2");
 		assertTrue(root.exists());
@@ -84,7 +84,7 @@ public class DataBaseFileTranslatorTest {
 
 	@Test
 	public void testDataCreation() {
-		DataBaseFileTranslator dbt = new DataBaseFileTranslator(pathToSource.toString());
+		DataBaseFileTranslator dbt = new DataBaseFileTranslator(pathToSource.toString(), "132rc2");
 		assertTrue(dbt.run(pathToSaveDir.toFile(), true));
 		assertTrue(savedFile.exists());
 		String fileData = "";
@@ -150,6 +150,7 @@ public class DataBaseFileTranslatorTest {
 		}
 
 	}
+	
 
 	@AfterClass
 	public static void cleanUp() {

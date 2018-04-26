@@ -8,7 +8,6 @@ import java.io.IOException;
 
 import org.json.JSONObject;
 
-import edu.iastate.sdmay1809.shared.DiffConfig;
 import edu.iastate.sdmay1809.shared.InstanceTracker.InstanceParserManager;
 import edu.iastate.sdmay1809.shared.InstanceTracker.InstanceTracker;
 
@@ -20,14 +19,13 @@ public class DataBaseFileTranslator extends InstanceTracker {
 
 	String versionNum;
 	
-	public DataBaseFileTranslator(String sourceDirectory) {
+	public DataBaseFileTranslator(String sourceDirectory, String versionNum) {
 		super(sourceDirectory);
 		InstanceParserManager.clear();
 		InstanceParserManager.put(new DatabaseObjectParserV1());
 		InstanceParserManager.put(new DatabaseObjectParserV2());
 		File f = new File(sourceDirectory);
-		DiffConfig config = DiffConfig.builder(DiffConfig.Builder.class, Paths.get(f.getParentFile().getParent(), "config.json").toFile()).build();
-		versionNum = config.NEW_TAG.replaceAll("\\-|\\.|v", "");
+		this.versionNum = versionNum.replaceAll("\\-|\\.|v", "");
 	}
 	
 	@Override
