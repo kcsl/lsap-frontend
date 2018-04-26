@@ -11,7 +11,7 @@ public class DataTranslatorMain {
 	public static void main(String[] args) throws JSONException, IOException, Exception {
 		DiffConfig config = DiffConfig.builder(DiffConfig.Builder.class, args).build();
 		
-		DataBaseFileTranslator dt = new DataBaseFileTranslator(config.RESULT_DIR, config.NEW_TAG);
+		DataBaseFileTranslator dt = new DataBaseFileTranslator(config.NEW_RESULT_DIR, config.NEW_TAG);
 		File output = new File(config.DIFF_TEST_DIR);
 		dt.run(output, false);
 		
