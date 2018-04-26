@@ -1,0 +1,75 @@
+{
+	"MutexFunctionCriteria": {
+		"mutex" : true,
+		"lock" : true
+	},
+	
+	"MutexMacroCriteria": {
+		"mutex" : true
+	},
+	
+	"MutexFunctionsToInclude": [
+		"int function(void *lock);"
+	],
+	
+	"MutexMacrosToInclude": [
+		"#define macro(lock) function(lock)"
+	],
+	
+	"SpinFunctionCriteria": {
+		"spin" : true
+	},
+	
+	"SpinMacroCriteria": {
+		"lock" : true
+	},
+	
+	"SpinFunctionsToInclude": [
+		"int function(void *lock);"
+	],
+	
+	"SpinMacrosToInclude": [
+		"#define macro(lock) function(lock)"
+	],
+	
+	"MutexPathsToRead": [
+		"patchTest/mutex.h",
+		"patchTest/mutex2.h",
+		"aFileThatDoesntExist.h"
+	],
+	
+	"MutexPathsToChange": [
+		"patchTest/mutex.h",
+		"patchTest/mutex2.h",
+		"aFileThatDoesntExist.h"
+	],
+	
+	"SpinPathsToRead": [
+		"patchTest/spinlock.h",
+		"patchTest/spinlock2.h",
+		"aFileThatDoesntExist.h"
+	],
+	
+	"SpinPathsToChange": [
+		"patchTest/spinlock.h",
+		"patchTest/spinlock2.h",
+		"aFileThatDoesntExist.h"
+	],
+	
+	"MutexFilesToIncludeHeaderIn" : [
+		"patchTest/mutex.h",
+		"aFileThatDoesntExist.h"
+	],
+	
+	"SpinFilesToIncludeHeaderIn" : [
+		"patchTest/spinlock.h",
+		"aFileThatDoesntExist.h"
+	],
+	
+	"FunctionReturnTypes" : [
+		"int",
+		"void",
+		"struct patchTest *",
+		"long"
+	]
+}

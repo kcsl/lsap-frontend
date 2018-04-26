@@ -39,6 +39,8 @@ public class DiffConfigBuilderTest {
 				.setNewTag("not_a_default_new_tag")
 				.setDiffTestDir("not_a_default_diff_test_dir")
 				.setKernelDir("not_a_kernel_dir")
+				.setNewResultDir("not_a_new_result")
+				.setOldResultDir("not_an_old_result")
 				.setResultDir("not_a_default_result_dir")
 				.setTypes(new String[] {"not", "a", "default", "type", "list"});
 		
@@ -49,6 +51,8 @@ public class DiffConfigBuilderTest {
 		assertEquals(base.NEW_TAG, config.NEW_TAG);
 		assertEquals(base.DIFF_TEST_DIR, config.DIFF_TEST_DIR);
 		assertEquals(base.KERNEL_DIR, config.KERNEL_DIR);
+		assertEquals(base.OLD_RESULT_DIR, config.OLD_RESULT_DIR);
+		assertEquals(base.NEW_RESULT_DIR, config.NEW_RESULT_DIR);
 		assertEquals(base.RESULT_DIR, config.RESULT_DIR);
 		assertArrayEquals(base.TYPES, config.TYPES);
 	}
@@ -161,6 +165,46 @@ public class DiffConfigBuilderTest {
 		
 		// The last parameter entry is used when chaining the same one.
 		assertEquals(nonDefault2, b4.RESULT_DIR);
+	}
+
+	@Test
+	public void builderNewResultDir() {
+		String nonDefault = "non-default";
+		String nonDefault2 = "non-default2";
+
+		DiffConfig b2 = builder.setNewResultDir(nonDefault).build();
+		DiffConfig b3 = builder.setNewResultDir(null).build();
+		DiffConfig b4 = builder.setNewResultDir(nonDefault).setNewResultDir(null).setNewResultDir(nonDefault2).build();
+		
+		// setting a non-null value changes it
+		assertEquals(nonDefault, b2.NEW_RESULT_DIR);
+		
+		// setting a null value does not change it
+		assertNotNull(b3.NEW_RESULT_DIR);
+		assertEquals(b2.NEW_RESULT_DIR, b3.NEW_RESULT_DIR);
+		
+		// The last parameter entry is used when chaining the same one.
+		assertEquals(nonDefault2, b4.NEW_RESULT_DIR);
+	}
+	
+	@Test
+	public void builderOldResultDir() {
+		String nonDefault = "non-default";
+		String nonDefault2 = "non-default2";
+
+		DiffConfig b2 = builder.setOldResultDir(nonDefault).build();
+		DiffConfig b3 = builder.setOldResultDir(null).build();
+		DiffConfig b4 = builder.setOldResultDir(nonDefault).setOldResultDir(null).setOldResultDir(nonDefault2).build();
+		
+		// setting a non-null value changes it
+		assertEquals(nonDefault, b2.OLD_RESULT_DIR);
+		
+		// setting a null value does not change it
+		assertNotNull(b3.OLD_RESULT_DIR);
+		assertEquals(b2.OLD_RESULT_DIR, b3.OLD_RESULT_DIR);
+		
+		// The last parameter entry is used when chaining the same one.
+		assertEquals(nonDefault2, b4.OLD_RESULT_DIR);
 	}
 	
 	@Test

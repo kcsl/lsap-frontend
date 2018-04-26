@@ -1,0 +1,47 @@
+#ifndef __LINUX_SPINLOCK_H
+#define __LINUX_SPINLOCK_H
+
+#include <someFile.h>
+
+#define noRemoveSingleLineMacro(lock) macroBody(lock)
+#define noRemoveMultiLineMacro(lock)	\
+		do { 							\
+			lock->doSomething();		\
+		} while (0);
+
+static inline void noRemoveSingleLineFunctionPrototype(struct mutex *lock);
+static inline
+	void noRemoveMultiLineFunctionPrototype(struct mutex *lock)
+	__acquires(lock);
+static inline int noRemoveMultiLineFunctionImplementation(struct mutex *lock)
+{
+	return lock->doSomething();
+}
+
+/*
+ * This is a comment.
+ */
+#define spinlockSingleLineMacroToRemove(lock) macroBody(lock)
+#define spinlockMultiLineMacroToRemove(lock) 	\
+		do {									\
+			lock->doSomething();				\
+		} while (0);
+
+static inline void single_line_spin_lock_function_to_remove(struct mutex *lock);
+static inline
+	void multi_line_spin_lock_function_to_remove(struct mutex *lock)
+	__acquires(lock);
+static inline int spin_lock_function_implementation_to_remove(struct mutex *lock)
+{
+	return lock->doSomething();
+}
+EXPORT_SYMBOL(spin_lock_function_implementation_to_remove);
+
+static inline struct patchTest *function(void *lock)
+{
+	return NULL;
+}
+
+#define macro(lock) function(lock)
+
+#endif /* __LINUX_MUTEX_H */

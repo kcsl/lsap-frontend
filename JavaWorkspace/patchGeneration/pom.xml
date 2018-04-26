@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>edu.iastate.sdmay1809</groupId>
 	<artifactId>patchGeneration</artifactId>
-	<version>0.1.0</version>
+	<version>0.2.0</version>
 	<name>Patcher</name>
 	<description>Generates the LSAP patch</description>
 	<build>
@@ -133,11 +133,28 @@
 			<version>1.17.1</version>
 			<scope>test</scope>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.javatuples/javatuples -->
+		<dependency>
+		    <groupId>org.javatuples</groupId>
+		    <artifactId>javatuples</artifactId>
+		    <version>1.2</version>
+		</dependency>
 		<dependency>
 			<groupId>org.jacoco</groupId>
 			<artifactId>jacoco-maven-plugin</artifactId>
 			<version>0.8.1</version>
 			<scope>test</scope>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.json/json -->
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>20180130</version>
+		</dependency>
+		<dependency>
+			<groupId>edu.iastate.sdmay1809</groupId>
+			<artifactId>shared</artifactId>
+			<version>2.1.0</version>
 		</dependency>
 	</dependencies>
 	<properties>

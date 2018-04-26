@@ -1,143 +1,193 @@
 package edu.iastate.sdmay1809;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.not;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
-import java.util.ArrayList;
-import java.util.HashSet;
+import java.io.File;
+import java.util.HashMap;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
 
 public class FunctionTest {
-	Function function;
-	Function otherFunction;
-	String exampleFunction;
-	String otherExampleFunction;
+	Function f1;
+	Function f2;
+	Function f3;
+	PatchConfig config;
 	
 	@Before
 	public void setUp() throws Exception
 	{
-		function = new Function("int aFunction(int parameter1, struct mutex *lock) {");
-		otherFunction = new Function("extern __must_check void function2(struct mutex *lock) {");
+		config = PatchConfig.builder(PatchConfig.Builder.class, new File("resources/testing/patchConfigTest.json")).build();
+		
+		f1 = new Function(config, "void __lockfunc\n" + 
+				"_raw_spin_lock_nest_lock(raw_spinlock_t *lock, struct lockdep_map *map)\n" + 
+				"								__acquires(lock);");
+		f2 = new Function(config, "void __lockfunc _raw_spin_lock_nest_lock(raw_spinlock_t *lock)\n" + 
+				"								__acquires(lock);");
+		f3 = new Function(config, "void __lockfunc _raw_spin_lock_bh(raw_spinlock_t *lock)		__acquires(lock);");		
+	}
+	
+	@Test
+	public void functionImproperFormat() throws Exception
+	{
+		try
+		{
+			new Function(config, null);
+			fail("Function should throw exception on null input.");
+		} catch (Exception e) {}
+		
+		try
+		{
+			new Function(config, "notafunction");
+			fail("Function should throw exception on malformatted input.");
+		} catch (Exception e) {}
 	}
 	
 	@Test
 	public void functionConstructor()
 	{
-		assertThat(function, instanceOf(Function.class));
-		assertThat(otherFunction, instanceOf(Function.class));
+		assertThat(f1, instanceOf(Function.class));
+		assertThat(f2, instanceOf(Function.class));
+		assertThat(f3, instanceOf(Function.class));
 		
-		try
-		{
-			Function f = new Function("something that's not a function");
-			fail("No exception thrown on malformatted function: " + f.getName());
-		}
-		
-		catch(Exception e)
-		{
-			
-		}
+		assertTrue(Locker.class.isInstance(f1));
+		assertTrue(Locker.class.isInstance(f2));
+		assertTrue(Locker.class.isInstance(f3));
 	}
 	
 	@Test
-	public void functionReturnType()
+	public void functionGetName()
 	{
-		assertEquals(function.getType(), "int");
-		assertEquals(otherFunction.getType(), "void");
+		assertEquals(f1.getName(), "_raw_spin_lock_nest_lock");
+		assertEquals(f2.getName(), "_raw_spin_lock_nest_lock");
+		assertEquals(f3.getName(), "_raw_spin_lock_bh");
 	}
 	
 	@Test
-	public void functionName()
+	public void functionGetParameter()
 	{
-		assertEquals(function.getName(), "aFunction");
-		assertEquals(otherFunction.getName(), "function2");
-	}
-	
-	@Test
-	public void functionParameters()
-	{
-		assertEquals(function.getParameter(-1), null);
-		assertEquals(function.getParameter(2), null);
-		
-		assertEquals(function.getParameter(0).getType(), "int");
-		assertEquals(function.getParameter(0).getName(), "parameter1");
-		
-		assertEquals(function.getParameter(1).getType(), "struct mutex *");
-		assertEquals(function.getParameter(1).getName(), "lock");
-		
-		ArrayList<Parameter> parameters = function.getParameters();
-		
-		assertEquals(parameters.get(0).getType(), "int");
-		assertEquals(parameters.get(0).getName(), "parameter1");
-		
-		assertEquals(parameters.get(1).getType(), "struct mutex *");
-		assertEquals(parameters.get(1).getName(), "lock");
-	}
-	
-	@Test
-	public void functionContains() throws Exception
-	{
-		HashSet<Function> functions = new HashSet<Function>();
-		
-		functions.add(function);
-		functions.add(otherFunction);
-		functions.add(new Function("int anotherFunction() {"));
-		
-		assertTrue(Function.contains(functions, "aFunction"));
-		assertTrue(Function.contains(functions, "function2"));
-		assertTrue(Function.contains(functions, "anotherFunction"));
+		assertEquals(f1.getParameter(-1), null);
+		assertEquals(f1.getParameter(0).getType(), "raw_spinlock_t*");
+		assertEquals(f1.getParameter(0).getName(), "lock");
+		assertEquals(f1.getParameter(1).getType(), "struct lockdep_map*");
+		assertEquals(f1.getParameter(1).getName(), "map");
+		assertEquals(f1.getParameter(2), null);
 
-		assertFalse(Function.contains(functions, "bFunction"));
-		assertFalse(Function.contains(functions, "function3"));
-		assertFalse(Function.contains(functions, "yetAnotherFunction"));
+		assertEquals(f2.getParameter(-1), null);
+		assertEquals(f2.getParameter(0).getType(), "raw_spinlock_t*");
+		assertEquals(f2.getParameter(0).getName(), "lock");
+		assertEquals(f2.getParameter(1), null);
+		
+		assertEquals(f3.getParameter(-1), null);
+		assertEquals(f3.getParameter(0).getType(), "raw_spinlock_t*");
+		assertEquals(f3.getParameter(0).getName(), "lock");
+		assertEquals(f3.getParameter(1), null);
 	}
 	
 	@Test
-	public void functionCompateTo()
+	public void functionGetParameters()
 	{
-		assertTrue(function.compareTo(otherFunction) < 0);
-		assertTrue(otherFunction.compareTo(function) > 0);
+		List<Parameter> params = f1.getParameters();
+
+		assertEquals(params.size(), 2);
+		assertEquals(params.get(0).getType(), "raw_spinlock_t*");
+		assertEquals(params.get(0).getName(), "lock");
+		assertEquals(params.get(1).getType(), "struct lockdep_map*");
+		assertEquals(params.get(1).getName(), "map");
+		
+		params = f2.getParameters();
+		
+		assertEquals(params.size(), 1);
+		assertEquals(params.get(0).getType(), "raw_spinlock_t*");
+		assertEquals(params.get(0).getName(), "lock");
+		
+		params = f3.getParameters();
+
+		assertEquals(params.size(), 1);
+		assertEquals(params.get(0).getType(), "raw_spinlock_t*");
+		assertEquals(params.get(0).getName(), "lock");
 	}
 	
 	@Test
-	public void functionConvertToStaticInline() throws Exception
+	public void functionGetModifiers()
 	{
-		assertEquals(function.convertToStaticInline(), "static inline int aFunction(int parameter1, struct mutex *lock){return 0;}");
-		assertEquals(otherFunction.convertToStaticInline(), "static inline void function2(struct mutex *lock){}");
-		assertEquals((new Function("static inline struct mutex *func3() {return NULL;}")).convertToStaticInline(), "static inline struct mutex * func3(){return NULL;}");
+		assertEquals(f1.getModifiers(), "void __lockfunc");
+		assertEquals(f2.getModifiers(), "void __lockfunc");
+		assertEquals(f3.getModifiers(), "void __lockfunc");
 	}
 	
 	@Test
 	public void functionEquals() throws Exception
 	{
-		assertTrue(function.equals(function));
-		assertTrue(function.equals(new Function("int aFunction(int parameter1, struct mutex *lock) {")));
-		assertFalse(function.equals(new Criteria("something", true)));
+		assertTrue(f1.equals(f1));
+		assertFalse(f1.equals(f2));
+		assertFalse(f1.equals(f3));
+		assertFalse(f1.equals(null));
+		assertTrue(f1.equals(new Macro("#define _raw_spin_lock_nest_lock(lock) func(lock)")));
+		assertFalse(f1.equals(new Parameter("int param")));
+		assertTrue(f1.equals(new Function(config, "int __must_check\n" + 
+				"_raw_spin_lock_nest_lock(raw_spinlock_t *lock, struct lockdep_map *map)\n" + 
+				"								__acquires(lock);")));
+		assertFalse(f1.equals(new Function(config, "int __must_check\n" + 
+				"_raw_spin_lock_nest_lock(int lock, struct lockdep_map *map)\n" + 
+				"								__acquires(lock);")));
 	}
 	
 	@Test
-	public void functionGetFunctionName()
+	public void functionHashCode() throws Exception
 	{
-		assertTrue(Function.getFunctionName(" extern int func(int someParam)").equals("func"));
-		assertTrue(Function.getFunctionName("extern void func(double someParam)").equals("func"));
-		assertTrue(Function.getFunctionName(" extern int __must_check func(struct mutex *lock)").equals("func"));
-		assertTrue(Function.getFunctionName("extern void __must_check func()").equals("func"));
-		assertTrue(Function.getFunctionName("int func(int someParam)").equals("func"));
-		assertTrue(Function.getFunctionName(" void func(double someParam)").equals("func"));
-		assertTrue(Function.getFunctionName("int __must_check func(struct mutex *lock)").equals("func"));
-		assertTrue(Function.getFunctionName(" void __must_check func()").equals("func"));
-		
-		assertEquals(Function.getFunctionName(" extern int func;"), null);
-		assertEquals(Function.getFunctionName("extern void func;"), null);
-		assertEquals(Function.getFunctionName(" extern int __must_check func;"), null);
-		assertEquals(Function.getFunctionName("extern void __must_check func;"), null);
-		assertEquals(Function.getFunctionName(" int func;"), null);
-		assertEquals(Function.getFunctionName("void func;"), null);
-		assertEquals(Function.getFunctionName(" int __must_check func;"), null);
-		assertEquals(Function.getFunctionName("void __must_check func;"), null);
-		assertEquals(Function.getFunctionName(" return var != NULL;"), null);
-		assertEquals(Function.getFunctionName(null), null);
+		assertEquals(f1.hashCode(), f1.hashCode());
+		assertEquals(f1.hashCode(), f2.hashCode());
+		assertThat(f1.hashCode(), not(equals(f3.hashCode())));
+		assertThat(f1.hashCode(), not(equals(null)));
+		assertEquals(f1.hashCode(), (new Macro("#define _raw_spin_lock_nest_lock(lock) func(lock)")).hashCode());
 	}
-
+	
+	@Test
+	public void functionIsLockingFunction() throws Exception
+	{
+		HashMap<String, Boolean> criteria = new HashMap<String, Boolean>();
+		
+		criteria.put("spin", true);
+		criteria.put("lock", true);
+		criteria.put("no", false);
+		
+		assertTrue(Function.isLockingFunction(f1, criteria));
+		assertTrue(Function.isLockingFunction(f2, criteria));
+		assertTrue(Function.isLockingFunction(f3, criteria));
+		assertFalse(Function.isLockingFunction(new Function(config, "int noFunc(struct mutex *lock);"), criteria));
+		assertFalse(Function.isLockingFunction(new Function(config, "define int func(int lock);"), criteria));
+		assertFalse(Function.isLockingFunction(new Function(config, "return func(int lock);"), criteria));
+	}
+	
+	@Test
+	public void functionHasValidReturnType() throws Exception
+	{
+		assertTrue(f1.hasValidReturnType());
+		assertTrue(f2.hasValidReturnType());
+		assertTrue(f3.hasValidReturnType());
+		assertFalse((new Function(config, "return notfunc func(int param);")).hasValidReturnType());
+	}
+	
+	@Test
+	public void functionToString() throws Exception
+	{
+		assertEquals(f1.toString(), "static inline void _raw_spin_lock_nest_lock(raw_spinlock_t* lock, struct lockdep_map* map) {}");
+		assertEquals(f2.toString(), "static inline void _raw_spin_lock_nest_lock(raw_spinlock_t* lock) {}");
+		assertEquals(f3.toString(), "static inline void _raw_spin_lock_bh(raw_spinlock_t* lock) {}");
+		assertEquals((new Function(config, "int function();")).toString(), "static inline int function() {return 0;}");
+		assertEquals((new Function(config, "struct patchTest *function();")).toString(), "static inline struct patchTest * function() {return NULL;}");
+		assertEquals((new Function(config, "struct wrongType *function();")).toString(), "");
+		
+		assertEquals((new Function(null, "int function();")).toString().toString(), "");
+		assertEquals((new Function(null, "struct mutex *function();")).toString(), "");
+		assertEquals((new Function(null, "struct wrongType *function();")).toString(), "");		
+	}
 }

@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: GPL-2.0 */
 /*
  * Mutexes: blocking mutual exclusion locks
  *
@@ -146,8 +147,6 @@ static inline int mutex_is_locked(struct mutex *lock)
 	 */
 	return __mutex_owner(lock) != NULL;
 }
-
-#include <linux/atmutexlock.h>
 
 /*
  * See kernel/locking/mutex.c for detailed documentation of these APIs.

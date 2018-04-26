@@ -1,127 +1,139 @@
 package edu.iastate.sdmay1809;
 
 import java.util.ArrayList;
-import java.util.Set;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
-/**
- * This class defines a C function including return type and parameter names and types
- */
-public class Function implements Comparable<Function>
+public class Function implements Locker
 {
-	// Private variables for the function's return type, name and parameters
-	private String returnType;
-	private String functionName;
-	private ArrayList<Parameter> parameters;
+	private String name;
+	private String modifiers;
+	private List<Parameter> parameters;
+	private PatchConfig config;
 	
-	// Constructor. Pass in a line that contains a function declaration
-	public Function(String functionLine) throws Exception
+	public Function(PatchConfig config, String functionDefinition) throws Exception
 	{
-		functionName = getFunctionName(functionLine);
+		this.config = config;
 		
-		if (functionName == null) throw new Exception("String doesn't represent a function definition!");
+		if (functionDefinition == null) throw new Exception("FUNCTION: Unable to find a function definition in \"" + functionDefinition + "\"!");
 		
+		Matcher m = Pattern.compile("^\\s*(\\w+\\s*(\\*)?\\s+(\\*)?\\s*)+\\w+\\s*\\([^\\)]*\\)").matcher(functionDefinition);
+		if (!m.find()) throw new Exception("FUNCTION: Unable to find a function definition in \"" + functionDefinition + "\"!");
+		
+		functionDefinition = m.group();
+		functionDefinition = functionDefinition.replace("\n", " ");
 		parameters = new ArrayList<Parameter>();
 		
-		returnType = functionLine.replaceFirst(functionName + ".*$", "")
-								 .replaceFirst("^\\s*(extern\\s+)?(static\\s+)?(inline\\s+)?(?=(struct\\s+)?\\w+(\\s*\\*\\s*|\\s+))", "")
-								 .replace("__must_check", "")
-								 .trim();
+		name = functionDefinition.replaceFirst("^\\s*(\\w+\\s*(\\*)?\\s+(\\*)?\\s*)+(?=\\w+\\s*\\()", "").replaceFirst("\\([^\\)]*\\)\\s*.*\\s*$", "").trim();
+		String[] paramList = functionDefinition.replaceFirst("^.*" + name + "\\s*\\(", "").replaceFirst("\\).*$", "").trim().split(",");
 		
-		for (String parameter : functionLine.replaceFirst("^.*\\(", "").replaceFirst("\\).*$", "").trim().split(",", -1))
+		for (String param : paramList)
 		{
-			if (!parameter.trim().equals("")) parameters.add(new Parameter(parameter.trim()));
+			if (param.trim().length() > 0) parameters.add(new Parameter(param));
 		}
-	}
-	
-	// Get the function return type
-	public String getType()
-	{
-		return returnType;
-	}
-	
-	// Get the function name
-	public String getName()
-	{
-		return functionName;
-	}
-	
-	// Get an individual parameter at a given index
-	public Parameter getParameter(int index)
-	{
-		if (index >= parameters.size() || index < 0) return null;
 		
-		return parameters.get(index);
+		modifiers = functionDefinition.replaceFirst(name + ".*$", "").trim();
 	}
 	
-	// Get a list of parameters
-	public ArrayList<Parameter> getParameters()
+	@Override
+	public String getName() {
+		return name;
+	}
+	
+	public String getModifiers()
+	{
+		return modifiers;
+	}
+	
+	public Parameter getParameter(int i)
+	{
+		if (i < 0 || i >= parameters.size()) return null;
+		return parameters.get(i);
+	}
+	
+	public List<Parameter> getParameters()
 	{
 		return parameters;
-	}
-	
-	// This function generates a string for declaring a function
-	public String convertToStaticInline()
-	{
-		// Generate the first part of the string
-		String line = "static inline " + returnType + " " + functionName + "(";
-		
-		// For each parameter, print the parameter type and name
-		for (int i = 0; i < parameters.size(); i++)
-		{
-			String type = parameters.get(i).getType();
-			String name = parameters.get(i).getName();
-			
-			if (i > 0) line += ", ";
-			
-			line += type;
-			
-			// If the parameter type isn't a pointer, we need space between the type and parameter name
-			if (type.charAt(type.length() - 1) != '*') line += " ";
-			line += name;
-		}
-		
-		// End of parameters, start of body
-		line += "){";
-		
-		// Empty body
-		if (returnType.charAt(returnType.length() - 1) == '*') line += "return NULL;}";	// Pointer return type, return NULL
-		else if (returnType.equals("void")) line += "}";								// Void return type, don't return
-		else line += "return 0;}";														// Non-pointer return type, return 0
-		
-		return line;
-	}
-	
-	// This function determines whether a list of functions contains a function with a given name
-	public static boolean contains(Set<Function> functions, String name)
-	{
-		// Iterate through all functions in the list. Return true if the desired name is found
-		for (Function f : functions)
-		{
-			if (f.getName().equals(name)) return true;
-		}
-		
-		return false;
-	}
-
-	@Override
-	public int compareTo(Function f) {
-		return functionName.compareTo(f.functionName);
 	}
 	
 	@Override
 	public boolean equals(Object o)
 	{
-		if (o == this) return true;
-		if (o.getClass() != Function.class) return false;
-		
-		return this.getName().equals(((Function)o).getName());
+		if (o == null) return false;
+		if (this == o) return true;
+		if (!Locker.class.isInstance(o)) return false;
+		if (Function.class.isInstance(o)) 
+		{
+			if (parameters.size() != ((Function) o).parameters.size()) return false;
+			for (int i = 0; i < parameters.size(); i++)
+			{
+				if (!parameters.get(i).toString().equals(((Function) o).parameters.get(i).toString())) return false;
+			}
+			return name.equals(((Function) o).getName());
+		}
+		return name.equals(((Locker) o).getName());
 	}
 	
-	public static String getFunctionName(String line)
+	@Override
+    public int hashCode() {
+        return name.hashCode();
+	}
+	
+	public static boolean isLockingFunction(Function f, Map<String, Boolean> criteria)
 	{
-		if (line == null) return null;
-		else line = line.replaceAll("__must_check", "");
-		if (!line.matches("^\\s*(?!return)(extern\\s+)?(static\\s+)?(inline\\s+)?(struct\\s+)?\\w+(\\s*\\*\\s*|\\s+)\\w+\\s*\\(.*$")) return null;
-		return line.replaceFirst("^\\s*(?!return)(extern\\s+)?(static\\s+)?(inline\\s+)?(struct\\s+)?\\w+(\\s*\\*\\s*|\\s+)", "").replaceFirst("\\s*\\(.*$", "").trim();
+		if (f.modifiers.toLowerCase().contains("define") || f.modifiers.toLowerCase().contains("return")) return false;
+		
+		for (String s : criteria.keySet())
+		{
+			if (f.name.contains(s) != criteria.get(s)) return false;
+		}
+		
+		return f.hasValidReturnType();
+	}
+	
+	public boolean hasValidReturnType()
+	{
+		boolean isValidReturnType = false;
+		
+		for (String s : config.getFunctionReturnTypes())
+		{
+			if (modifiers.replaceAll("\\s*\\*\\s*", "* ").contains(s.replaceAll("\\s*\\*\\s*", "* ")))
+			{
+				isValidReturnType = true;
+				break;
+			}
+		}
+		
+		return isValidReturnType;
+	}
+	
+	@Override
+	public String toString()
+	{
+		if (config == null) return "";
+		
+		String returnType = "";
+		
+		for (String type : config.getFunctionReturnTypes())
+		{
+			if (modifiers.replaceAll("\\s*\\*\\s*", " * ").contains(type.replaceAll("\\s*\\*\\s*", " * ")))
+			{
+				returnType = type;
+				break;
+			}
+		}
+		
+		if (returnType == "") return "";
+		
+		String string = "static inline " + returnType + " " + name + "(" + parameters.stream().map(Object::toString).collect(Collectors.joining(", ")) + ") {";
+		
+		if (returnType.contains("*")) string += "return NULL;}";
+		else if (returnType.contains("void")) string += "}";
+		else string += "return 0;}";
+		
+		return string;
 	}
 }

@@ -7,9 +7,13 @@ import java.lang.reflect.ParameterizedType;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -80,14 +84,14 @@ public class Config {
 		options.addOption(helpMenuOption);
 		CommandLineParser parser = new DefaultParser();
 		CommandLine cmd = null;
-
+		
 		try {
-			cmd = parser.parse(options, args);
+			cmd = parser.parse(options, getKnownArgs(options, args));
 		} catch (ParseException e) {
 			System.err.println("[FATAL]: " + e.getMessage());
 			System.exit(0);
 		}
-
+		
 		if (cmd.hasOption("h")) {
 			HelpFormatter helpMenu = new HelpFormatter();
 			helpMenu.printHelp("java -jar <jarfile> [OPTIONS]", options);
@@ -189,6 +193,41 @@ public class Config {
 				return (T) Config.builder(Config.Builder.class).build();
 			}
 		}
+	}
+	
+	public static String[] getKnownArgs(Options options, String[] args)
+	{
+		List<String> unknownArgs = new ArrayList<String>();
+		List<String> origArgs = Arrays.stream(args).collect(Collectors.toList());
+		String[] argsCopy = origArgs.toArray(new String[0]);
+		
+		CommandLine cmd = null;
+		
+		while (argsCopy.length > 0)
+		{
+			try {
+				cmd = new DefaultParser().parse(options, argsCopy, true);
+			} catch (ParseException e) {
+				System.err.println("[FATAL]: " + e.getMessage());
+				System.exit(0);
+			}
+			
+			argsCopy = cmd.getArgList().toArray(new String[0]);
+			
+			for (int i = 0; i < cmd.getArgList().size(); i++)
+			{
+				if (cmd.getArgList().get(i).startsWith("-") && i != 0) break;
+				
+				unknownArgs.add(argsCopy[i]);
+				argsCopy[i] = null;
+			}
+			
+			argsCopy = Arrays.stream(argsCopy).filter(s -> s != null).collect(Collectors.toList()).toArray(new String[0]);
+		}
+		
+		origArgs.removeAll(unknownArgs);
+		
+		return origArgs.toArray(new String[0]);
 	}
 
 }

@@ -41,7 +41,7 @@ public class DiffLinkerMainTest {
 		String[] args = new String[] {
 				"-Ddiff_test_dir=" + Paths.get(workspace.getAbsolutePath(), "diffmap/").toString(),
 				"-Dkernel_dir=" + Paths.get(workspace.getAbsolutePath(), "kernel/").toString(),
-				"-Dresult_dir=" + Paths.get(workspace.getAbsolutePath(), "diffmap", "413_results").toString(),
+				"-Dnew_result_dir=" + Paths.get(workspace.getAbsolutePath(), "diffmap", "413_results").toString(),
 				"-Dold_tag=v3.19-rc1", "-Dnew_tag=v4.13", "-Dtypes.1=spin" };
 
 		DiffLinkerMain.main(args);
