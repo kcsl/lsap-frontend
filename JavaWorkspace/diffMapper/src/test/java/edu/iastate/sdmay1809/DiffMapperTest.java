@@ -38,7 +38,7 @@ public class DiffMapperTest {
 				.setDiffTestDir(Paths.get(workspace.getAbsolutePath(), "diffmap/").toString())
 				.setKernelDir(Paths.get(workspace.getAbsolutePath(), "kernel/").toString()).setOldTag("v3.19-rc1")
 				.setNewTag("v3.20")
-				.setResultDir(Paths.get(workspace.getAbsolutePath(), "diffmap", "results").toString()).build();
+				.setOldResultDir(Paths.get(workspace.getAbsolutePath(), "diffmap", "results").toString()).build();
 
 		DiffMapper dm = new DiffMapper(config, false);
 		int placed = dm.run("oldInstanceMap.json");
@@ -61,7 +61,7 @@ public class DiffMapperTest {
 				.setDiffTestDir(Paths.get(workspace.getAbsolutePath(), "diffmap/").toString())
 				.setKernelDir(Paths.get(workspace.getAbsolutePath(), "kernel/").toString()).setOldTag("v3.19-rc1")
 				.setNewTag("v3.20")
-				.setResultDir(Paths.get(workspace.getAbsolutePath(), "diffmap", "results").toString()).build();
+				.setOldResultDir(Paths.get(workspace.getAbsolutePath(), "diffmap", "results").toString()).build();
 
 		DiffMapper dm = new DiffMapper(config, true);
 		int placed = dm.run("oldInstanceMap.json");
@@ -84,7 +84,7 @@ public class DiffMapperTest {
 				.setDiffTestDir(Paths.get(workspace.getAbsolutePath(), "diffmap/").toString())
 				.setKernelDir(Paths.get(workspace.getAbsolutePath(), "kernel/").toString()).setOldTag("v3.17-rc1")
 				.setNewTag("v3.18-rc1")
-				.setResultDir(Paths.get(workspace.getAbsolutePath(), "diffmap", "results").toString()).build();
+				.setOldResultDir(Paths.get(workspace.getAbsolutePath(), "diffmap", "results").toString()).build();
 
 		DiffMapper dm = new DiffMapper(config, false);
 		int placed = dm.run("oldInstanceMap.json");

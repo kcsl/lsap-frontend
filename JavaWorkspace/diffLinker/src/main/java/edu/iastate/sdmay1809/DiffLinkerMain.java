@@ -17,7 +17,7 @@ public class DiffLinkerMain {
 		DiffConfig config = DiffConfig.builder(DiffConfig.Builder.class, args).build();
 
 		timings.add(System.nanoTime());
-		InstanceTracker it = new InstanceTracker(config.RESULT_DIR);
+		InstanceTracker it = new InstanceTracker(config.NEW_RESULT_DIR);
 		it.run(Paths.get(config.DIFF_TEST_DIR, "newInstanceMap.json").toFile(), false);
 
 		timings.add(System.nanoTime());
