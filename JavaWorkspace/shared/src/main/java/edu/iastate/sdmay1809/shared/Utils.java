@@ -59,6 +59,9 @@ public class Utils {
 	public static String execute(String[] commands, File dir) throws IOException, InterruptedException {
 		StringBuilder sb = new StringBuilder();
 		String line = null;
+		if(System.getProperty("os.name").contains("Windows")) {
+			commands = Utils.concatenate(new String[] {"cmd", "/c"}, commands);
+		}
 
 		sb.append("Performing command: ");
 		for (String command : commands) {
@@ -81,10 +84,14 @@ public class Utils {
 
 		return sb.toString();
 	}
-	
+
 	public static int execute(String[] commands, File dir, boolean redirectToStdOut) throws InterruptedException, IOException {
 		Runtime rt = Runtime.getRuntime();
-		ProcessBuilder pb = new ProcessBuilder(commands);
+		ProcessBuilder pb;
+		if(System.getProperty("os.name").contains("Windows")) {
+			commands = Utils.concatenate(new String[] {"cmd", "/c"}, commands);
+		}
+		pb = new ProcessBuilder(commands);
 		pb.directory(dir);
 		if(redirectToStdOut) {
 			System.out.print("Performing command: ");
@@ -114,8 +121,8 @@ public class Utils {
 			int exitValue = pr.waitFor();
 			input.close();
 			sb.append("\nProcess exited with value " + exitValue + "\n");
-//			System.out.println(sb.toString());
-			
+			System.out.println(sb.toString());
+
 			return exitValue;
 		}
 	}
@@ -277,7 +284,7 @@ public class Utils {
 		if (!(container instanceof List) && !(container instanceof Map)) {
 			throw new IllegalArgumentException("Container must be a map or list!");
 		}
-		
+
 		int idx = -1;
 		try {
 			idx = Integer.parseInt(parts[0]);
@@ -293,8 +300,8 @@ public class Utils {
 			} catch (Exception e) {
 				idx2 = -1;
 			}
-			
-			
+
+
 			Object val;
 			if (Utils.<T>contains(container, parts[0], idx2)) {
 				val = Utils.<T>get(container, parts[0], idx2);
@@ -327,7 +334,7 @@ public class Utils {
 				Utils.<T>put(container, parts[0], idx, value);
 			}
 		}
-		
+
 		return container;
 	}
 }

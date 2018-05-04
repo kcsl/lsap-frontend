@@ -38,6 +38,9 @@ public class RssReaderMainTest {
 				"-Dwait_period=1",
 				"-Dworkspace="+ testFolder.newFolder().getAbsolutePath()
 		};
+		if(System.getProperty("os.name").contains("Windows")) {
+			args[0] = "-Dfeed_url=file:///" + Paths.get(System.getProperty("user.dir"), "testFeed.xml").toString();
+		}
 		
 		Main.main(args);
 	}

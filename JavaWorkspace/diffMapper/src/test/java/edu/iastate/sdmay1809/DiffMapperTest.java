@@ -29,10 +29,18 @@ public class DiffMapperTest {
 		// Setup Test Workspace!
 		File workspace = testFolder.newFolder();
 		File baseDir = Paths.get("resources", "testing", "DiffMapper", "runSingleInstance").toAbsolutePath().toFile();
-		Utils.execute(new String[] { "cp", "-R", ".", workspace.getAbsolutePath() }, baseDir);
+		if(System.getProperty("os.name").contains("Windows")) {
+			Utils.execute(new String[] {"robocopy", baseDir.getAbsolutePath(), workspace.getAbsolutePath(), "/s", "/e"}, baseDir, true);
+		} else {
+			Utils.execute(new String[] { "cp", "-R", ".", workspace.getAbsolutePath() }, baseDir, true);
+		}
 
 		// Git Setup!
-		Utils.execute(new String[] { "cp", "-R", ".notgit/", "kernel/.git/" }, workspace);
+		if(System.getProperty("os.name").contains("Windows")) {
+			Utils.execute(new String[] {"robocopy", ".notgit/", "kernel/.git/", "/s", "/e"}, workspace, true);
+		} else {
+			Utils.execute(new String[] { "cp", "-R", ".notgit/", "kernel/.git/" }, workspace, true);
+		}
 
 		DiffConfig config = DiffConfig.builder(DiffConfig.Builder.class)
 				.setDiffTestDir(Paths.get(workspace.getAbsolutePath(), "diffmap/").toString())
@@ -51,12 +59,18 @@ public class DiffMapperTest {
 		// Setup Test Workspace!
 		File workspace = testFolder.newFolder();
 		File baseDir = Paths.get("resources", "testing", "DiffMapper", "runSingleInstance").toAbsolutePath().toFile();
-		System.out.println(Utils.execute(new String[] { "cp", "-R", ".", workspace.getAbsolutePath() }, baseDir));
-		
+		if(System.getProperty("os.name").contains("Windows")) {
+			Utils.execute(new String[] {"robocopy", baseDir.getAbsolutePath(), workspace.getAbsolutePath(), "/s", "/e"}, baseDir, true);
+		} else {
+			Utils.execute(new String[] { "cp", "-R", ".", workspace.getAbsolutePath() }, baseDir, true);
+		}
 
 		// Git Setup!
-		System.out.println(Utils.execute(new String[] { "cp", "-R", ".notgit/", "kernel/.git/" }, workspace));
-
+		if(System.getProperty("os.name").contains("Windows")) {
+			Utils.execute(new String[] {"robocopy", ".notgit/", "kernel/.git/", "/s", "/e"}, workspace, true);
+		} else {
+			Utils.execute(new String[] { "cp", "-R", ".notgit/", "kernel/.git/" }, workspace, true);
+		}
 		DiffConfig config = DiffConfig.builder(DiffConfig.Builder.class)
 				.setDiffTestDir(Paths.get(workspace.getAbsolutePath(), "diffmap/").toString())
 				.setKernelDir(Paths.get(workspace.getAbsolutePath(), "kernel/").toString()).setOldTag("v3.19-rc1")
@@ -75,10 +89,19 @@ public class DiffMapperTest {
 		File workspace = testFolder.newFolder();
 		File baseDir = Paths.get("resources", "testing", "DiffMapper", "runMultipleInstancesSingleFile")
 				.toAbsolutePath().toFile();
-		Utils.execute(new String[] { "cp", "-R", ".", workspace.getAbsolutePath() }, baseDir);
+		if(System.getProperty("os.name").contains("Windows")) {
+			Utils.execute(new String[] {"robocopy", baseDir.getAbsolutePath(), workspace.getAbsolutePath(), "/s", "/e"}, baseDir, true);
+		} else {
+			Utils.execute(new String[] { "cp", "-R", ".", workspace.getAbsolutePath() }, baseDir, true);
+		}
 
 		// Git Setup!
-		Utils.execute(new String[] { "cp", "-R", ".notgit/", "kernel/.git/" }, workspace);
+		
+		if(System.getProperty("os.name").contains("Windows")) {
+			Utils.execute(new String[] {"robocopy", ".notgit/", "kernel/.git/", "/s", "/e"}, workspace, true);
+		} else {
+			Utils.execute(new String[] { "cp", "-R", ".notgit/", "kernel/.git/" }, workspace, true);
+		}
 
 		DiffConfig config = DiffConfig.builder(DiffConfig.Builder.class)
 				.setDiffTestDir(Paths.get(workspace.getAbsolutePath(), "diffmap/").toString())

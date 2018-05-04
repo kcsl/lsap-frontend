@@ -168,13 +168,13 @@ public class DiffMapper {
 
 		try {
 			// git checkout <old_tag>
-			execGitCheckoutTag(config.OLD_TAG, kernel_dir);
+			execGitCheckout(config.OLD_TAG, kernel_dir, false);
 
 			// git clean -xdfq
 			execGitClean(kernel_dir);
 
 			// git checkout -b diff_map
-			execGitCreateBranch("diff_map", kernel_dir);
+			execGitCheckout("diff_map", kernel_dir, true);
 		} catch (Exception e) {
 			println("[ERROR] Couldn't complete git setup!");
 			println(e.getMessage());
@@ -190,7 +190,7 @@ public class DiffMapper {
 			execGitCommitAll("add metadata", kernel_dir);
 
 			// git checkout <new_tag>
-			execGitCheckoutTag(config.NEW_TAG, kernel_dir);
+			execGitCheckout(config.NEW_TAG, kernel_dir, false);
 
 			// git clean -xdfq
 			execGitClean(kernel_dir);
@@ -202,10 +202,22 @@ public class DiffMapper {
 			execGitCommitAll("upgrade to " + config.NEW_TAG, kernel_dir);
 
 			// git checkout -b diff_map_upgraded
-			execGitCreateBranch("diff_map_upgraded", kernel_dir);
+			execGitCheckout("diff_map_upgraded", kernel_dir, true);
 
 			// git rebase -s recursive -X theirs diff_map
 			execGitRebase("diff_map", kernel_dir);
+			
+			// git tag <new_tag>-mapped
+			execGitTag(config.NEW_TAG + "-mapped", kernel_dir);
+			
+			// git checkout <new_tag>-mapped
+			execGitCheckout(config.NEW_TAG + "-mapped", kernel_dir, false);
+			
+			// git branch -D diff_map
+			execGitDeleteBranch("diff_map", kernel_dir);
+			
+			// git branch -D diff_map_upgraded
+			execGitDeleteBranch("diff_map_upgraded", kernel_dir);
 		} catch (Exception e) {
 			println("[ERROR] Couldn't complete git cleanup!");
 			println(e.getMessage());
@@ -213,16 +225,25 @@ public class DiffMapper {
 		}
 	}
 
-	private void execGitCheckoutTag(String tag, File dir) throws IOException, InterruptedException {
-		Utils.execute(new String[] { "git", "checkout", tag }, dir, allowPrintStatements);
-	}
-
 	private void execGitClean(File dir) throws IOException, InterruptedException {
 		Utils.execute(new String[] { "git", "clean", "-xdfq" }, dir, allowPrintStatements);
 	}
-
-	private void execGitCreateBranch(String branchName, File dir) throws IOException, InterruptedException {
-		Utils.execute(new String[] { "git", "checkout", "-b", branchName }, dir, allowPrintStatements);
+	
+	private void execGitCheckout(String branchName, File dir, boolean create) throws IOException, InterruptedException {
+		if(create) {
+			Utils.execute(new String[] { "git", "checkout", "-b", branchName }, dir, allowPrintStatements);
+		} else {
+			Utils.execute(new String[] { "git", "checkout", branchName }, dir, allowPrintStatements);
+		}
+		
+	}
+	
+	private void execGitDeleteBranch(String branchName, File dir) throws IOException, InterruptedException {
+		Utils.execute(new String[] {"git", "branch", "-D", branchName}, dir, allowPrintStatements);
+	}
+	
+	private void execGitTag(String tagName, File dir) throws IOException, InterruptedException {
+		Utils.execute(new String[] {"git", "tag", tagName}, dir, allowPrintStatements);
 	}
 
 	private void execGitReset(String commit, File dir) throws IOException, InterruptedException {
