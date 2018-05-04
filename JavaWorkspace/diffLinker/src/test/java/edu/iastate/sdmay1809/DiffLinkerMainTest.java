@@ -36,8 +36,11 @@ public class DiffLinkerMainTest {
 		File workspace = testFolder.newFolder();
 		File setupWorkspace = Paths.get("resources", "testing", "DiffLinker", "testSingleInstance").toAbsolutePath()
 				.toFile();
-		Utils.execute(new String[] { "cp", "-R", ".", workspace.getAbsolutePath() }, setupWorkspace);
-
+		if(System.getProperty("os.name").contains("Windows")) {
+			Utils.execute(new String[] {"robocopy", setupWorkspace.getAbsolutePath(), workspace.getAbsolutePath(), "/s", "/e"}, setupWorkspace, false);
+		} else {
+			Utils.execute(new String[] { "cp", "-R", ".", workspace.getAbsolutePath() }, setupWorkspace, false);
+		}
 		String[] args = new String[] {
 				"-Ddiff_test_dir=" + Paths.get(workspace.getAbsolutePath(), "diffmap/").toString(),
 				"-Dkernel_dir=" + Paths.get(workspace.getAbsolutePath(), "kernel/").toString(),

@@ -2,29 +2,27 @@ image: dhanwada/lsap-pipeline:1.0.0
 
 Shared:
   script:
-    - (cd JavaWorkspace/shared; mvn install -B && cat target/site/jacoco/index.html)
+    - sh ./scripts/ci/install_shared.sh
 
 DiffMapper:
   script:
-    - (cd JavaWorkspace/shared; mvn install -B -Dmaven.test.skip=true)
-    - (cd JavaWorkspace/diffMapper; mvn install -B && cat target/site/jacoco/index.html)
+    - sh ./scripts/ci/install_shared_bypass.sh
+    - sh ./scripts/ci/install_diffMapper.sh
 
 DiffLinker:
   script:
-    - (cd JavaWorkspace/shared; mvn install -B -Dmaven.test.skip=true)
-    - (cd JavaWorkspace/diffLinker; mvn install -B && cat target/site/jacoco/index.html)
-    
+    - sh ./scripts/ci/install_shared_bypass.sh
+    - sh ./scripts/ci/install_diffLinker.sh
 RssReader:
   script:
-    - (cd JavaWorkspace/shared; mvn install -B -Dmaven.test.skip=true)
-    - (cd JavaWorkspace/rssReaderConcept; mvn install -B && cat target/site/jacoco/index.html)
-
+    - sh ./scripts/ci/install_shared_bypass.sh
+    - sh ./scripts/ci/install_rssReaderConcept.sh
 Patcher:
   script:
-    - (cd JavaWorkspace/shared; mvn install -B -Dmaven.test.skip=true)
-    - (cd JavaWorkspace/patchGeneration; mvn install -B && cat target/site/jacoco/index.html)
+    - sh ./scripts/ci/install_shared_bypass.sh
+    - sh ./scripts/ci/install_patchGeneration.sh
 
 DataTranslator:
   script:
-   - (cd JavaWorkspace/shared; mvn install -B -Dmaven.test.skip=true)
-   - (cd JavaWorkspace/dataTranslator; mvn install -B && cat target/site/jacoco/index.html)
+    - sh ./scripts/ci/install_shared_bypass.sh
+    - sh ./scripts/ci/install_dataTranslator.sh
