@@ -1,5 +1,6 @@
 package edu.iastate.sdmay1809;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.RandomAccessFile;
@@ -123,6 +124,12 @@ public class DiffLinker {
 		// println("Searching through: " + fileToSearch.toString());
 		// Need to capture comment data within a certain threshold of lines
 
+		String content = String.join("\n", Files.readAllLines(fileToSearch, Charset.forName("UTF-8")));
+		content.replaceAll("\\r\\n", "\n");
+		FileOutputStream contentStream = new FileOutputStream(fileToSearch.toFile(), false);
+		contentStream.write(content.getBytes(Charset.forName("UTF-8")));
+		contentStream.close();
+		
 		RandomAccessFile r = new RandomAccessFile(fileToSearch.toFile(), "r");
 
 		for (int i = 0; i < length; i++) {

@@ -37,10 +37,18 @@ public class DiffMapperMainTest {
 		// Setup Test Workspace!
 		File workspace = testFolder.newFolder();
 		File baseDir = Paths.get("resources", "testing", "DiffMapper", "runSingleInstance").toAbsolutePath().toFile();
-		Utils.execute(new String[] { "cp", "-R", ".", workspace.getAbsolutePath() }, baseDir);
+		if(System.getProperty("os.name").contains("Windows")) {
+			Utils.execute(new String[] {"robocopy", baseDir.getAbsolutePath(), workspace.getAbsolutePath(), "/s", "/e"}, baseDir, true);
+		} else {
+			Utils.execute(new String[] { "cp", "-R", ".", workspace.getAbsolutePath() }, baseDir, true);
+		}
 
 		// Git Setup!
-		Utils.execute(new String[] { "cp", "-R", ".notgit/", "kernel/.git/" }, workspace);
+		if(System.getProperty("os.name").contains("Windows")) {
+			Utils.execute(new String[] {"robocopy", ".notgit/", "kernel/.git/", "/s", "/e"}, workspace, true);
+		} else {
+			Utils.execute(new String[] { "cp", "-R", ".notgit/", "kernel/.git/" }, workspace, true);
+		}
 		
 		String[] args = new String[] {
 				"-Ddiff_test_dir=" + Paths.get(workspace.getAbsolutePath(), "diffmap/").toString(),
