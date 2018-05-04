@@ -9,7 +9,7 @@ public class InstanceParserV2 implements InstanceParser {
 	
 	public InstanceParserV2() {
 		this.outerGroupRegex = "(?:\\]|@)@+(?:\\[|@)";
-		this.innerGroupRegex = "(?:,?[a-z]{1}:|\\+)";
+		this.innerGroupRegex = "(?:,[a-z]{1}(?::|_)|\\+)";
 	}
 
 	@Override
@@ -20,8 +20,10 @@ public class InstanceParserV2 implements InstanceParser {
 	@Override
 	public JSONObject parseEntry(String instance) throws InvalidInstanceFormatException {
 		JSONObject inst = new JSONObject();
+		
 		String[] outerGroups = instance.split(outerGroupRegex);
-		String[] innerGroups = outerGroups[2].replaceAll("@", "/").split(innerGroupRegex);
+		String base = "," + outerGroups[2].replaceAll("@", "/");
+		String[] innerGroups = base.split(innerGroupRegex);
 		
 		try {
 			inst.put("status", outerGroups[0]);
@@ -32,7 +34,11 @@ public class InstanceParserV2 implements InstanceParser {
 			inst.put("length2", Integer.parseInt(innerGroups[2]));
 			inst.put("filename", innerGroups[1].split("\\/", 3)[2]);
 		} catch (Exception e) {
+			for(StackTraceElement s: e.getStackTrace()) {
+				System.err.println(s.toString());
+			}
 			throw new InvalidInstanceFormatException(e.getMessage());
+
 		}
 		
 		return inst;

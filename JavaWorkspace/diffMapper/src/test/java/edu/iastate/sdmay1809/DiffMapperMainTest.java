@@ -53,7 +53,7 @@ public class DiffMapperMainTest {
 		String[] args = new String[] {
 				"-Ddiff_test_dir=" + Paths.get(workspace.getAbsolutePath(), "diffmap/").toString(),
 				"-Dkernel_dir=" + Paths.get(workspace.getAbsolutePath(), "kernel/").toString(),
-				"-Dresult_dir=" + Paths.get(workspace.getAbsolutePath(), "diffmap", "results").toString(),
+				"-Dold_result_dir=" + Paths.get(workspace.getAbsolutePath(), "diffmap", "results").toString(),
 				"-Dold_tag=v3.19-rc1",
 				"-Dnew_tag=v3.20",
 				"-Dtypes.1=mutex"

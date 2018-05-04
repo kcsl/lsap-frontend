@@ -11,7 +11,12 @@ public class DiffConfig extends Config {
 	public String NEW_TAG;
 	public String DIFF_TEST_DIR;
 	public String KERNEL_DIR;
+	
+	@Deprecated
 	public String RESULT_DIR;
+	
+	public String OLD_RESULT_DIR;
+	public String NEW_RESULT_DIR;
 	public String[] TYPES;
 
 	@SuppressWarnings("unchecked")
@@ -22,7 +27,12 @@ public class DiffConfig extends Config {
 		NEW_TAG = (String) configOptions.get("new_tag");
 		DIFF_TEST_DIR = (String) configOptions.get("diff_test_dir");
 		KERNEL_DIR = (String) configOptions.get("kernel_dir");
+		
 		RESULT_DIR = (String) configOptions.get("result_dir");
+		
+		OLD_RESULT_DIR = (String) configOptions.get("old_result_dir");
+		NEW_RESULT_DIR = (String) configOptions.get("new_result_dir");
+		
 		Object types = configOptions.get("types");
 		if(types instanceof List) {
 			List<Object> list = (List<Object>) types;
@@ -44,6 +54,8 @@ public class DiffConfig extends Config {
 			configOptions.putIfAbsent("diff_test_dir", Paths.get(cwd, "diffmap").toString());
 			configOptions.putIfAbsent("kernel_dir", Paths.get(cwd, "kernel").toString());
 			configOptions.putIfAbsent("result_dir", Paths.get(cwd, "diffmap", "results").toString());
+			configOptions.putIfAbsent("old_result_dir", Paths.get(cwd, "diffmap", "old_results").toString());
+			configOptions.putIfAbsent("new_result_dir", Paths.get(cwd, "diffmap", "new_results").toString());
 			configOptions.putIfAbsent("types", Arrays.asList(new String[] { "mutex", "spin" }));
 		}
 		
@@ -79,8 +91,19 @@ public class DiffConfig extends Config {
 			return this;
 		}
 
+		@Deprecated
 		public Builder setResultDir(String result_dir) {
 			setConfig("result_dir", result_dir);
+			return this;
+		}
+		
+		public Builder setOldResultDir(String result_dir) {
+			setConfig("old_result_dir", result_dir);
+			return this;
+		}
+		
+		public Builder setNewResultDir(String result_dir) {
+			setConfig("new_result_dir", result_dir);
 			return this;
 		}
 

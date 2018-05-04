@@ -8,7 +8,6 @@ import java.io.IOException;
 
 import org.json.JSONObject;
 
-import edu.iastate.sdmay1809.shared.DiffConfig;
 import edu.iastate.sdmay1809.shared.InstanceTracker.InstanceParserManager;
 import edu.iastate.sdmay1809.shared.InstanceTracker.InstanceTracker;
 
@@ -20,12 +19,13 @@ public class DataBaseFileTranslator extends InstanceTracker {
 
 	String versionNum;
 	
-	public DataBaseFileTranslator(String sourceDirectory) {
+	public DataBaseFileTranslator(String sourceDirectory, String versionNum) {
 		super(sourceDirectory);
-		InstanceParserManager.put(new DatabaseObjectParser());
+		InstanceParserManager.clear();
+		InstanceParserManager.put(new DatabaseObjectParserV1());
+		InstanceParserManager.put(new DatabaseObjectParserV2());
 		File f = new File(sourceDirectory);
-		DiffConfig config = DiffConfig.builder(DiffConfig.Builder.class, Paths.get(f.getParentFile().getParent(), "config.json").toFile()).build();
-		versionNum = config.NEW_TAG.replaceAll("\\-|\\.", "");
+		this.versionNum = versionNum.replaceAll("\\-|\\.|v", "");
 	}
 	
 	@Override
@@ -68,9 +68,9 @@ public class DataBaseFileTranslator extends InstanceTracker {
 			try {
 				JSONObject cfg = new JSONObject();
 				JSONObject pcg = new JSONObject();
-				JSONObject instance = parseEntry(f.getName(), "dboparser");
+				JSONObject instance = parseEntry(f.getName());
 				instance.put("type", f.getParentFile().getName());
-				String pathTo = versionNum + "/" + instance.getString("type") + "/" + instance.getString("id") + "/";
+				String pathTo = versionNum + "/" + instance.getString("type") + "/" + instance.getString("instance_id") + "/";
 				instance.put("mpg", pathTo + "mpg.png");
 				File mpgCpyDir = new File(outputFile + "/" + pathTo + "mpg.png");
 				File mpgFromDir = new File(f.getAbsolutePath() + "/mpg.png");
@@ -99,7 +99,7 @@ public class DataBaseFileTranslator extends InstanceTracker {
 					}
 					String fixedType = graphType.equals("CFG") ? "cfg" : "pcg";
 					String dir = versionNum + "/" + instance.getString("type") + "/" +
-						instance.getString("id") + "/" + fixedType + "_" + uuid + ".png";
+						instance.getString("instance_id") + "/" + fixedType + "_" + uuid + ".png";
 					
 					File copyFile = new File(outputFile + "/" + dir);
 					
@@ -121,12 +121,9 @@ public class DataBaseFileTranslator extends InstanceTracker {
 				}
 				instance.put("cfg", cfg);
 				instance.put("pcg", pcg);
-				versionObject.put(instance.getString("id"), instance);
+				versionObject.put(instance.getString("instance_id"), instance);
 			} catch (Exception e) {
 				System.err.println("[ERROR] : Threw exception when parsing " + f.getName());
-				for(StackTraceElement s: e.getStackTrace()) {
-					System.err.println(s.toString());
-				}
 			}
 		}
 		return versionObject;

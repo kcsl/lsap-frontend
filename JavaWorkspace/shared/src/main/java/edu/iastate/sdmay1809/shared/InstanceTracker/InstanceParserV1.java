@@ -2,7 +2,7 @@ package edu.iastate.sdmay1809.shared.InstanceTracker;
 
 import org.json.JSONObject;
 
-class InstanceParserV1 implements InstanceParser {
+public class InstanceParserV1 implements InstanceParser {
 	
 	private String outerGroupRegex;
 	private String innerGroupRegex;

@@ -1,6 +1,6 @@
 {
-  "old_tag":"12.2-rc2",
-  "new_tag":"13.2-rc2",
+  "old_tag":"v12.2-rc2",
+  "new_tag":"v13.2-rc2",
   "diff_test_dir":"file_diff_test_dir",
   "kernel_dir":"file_kernel_dir",
   "result_dir":"file_result_dir",

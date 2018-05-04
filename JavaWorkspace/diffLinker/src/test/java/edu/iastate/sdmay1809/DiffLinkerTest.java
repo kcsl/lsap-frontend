@@ -45,8 +45,8 @@ public class DiffLinkerTest {
 				.setDiffTestDir(Paths.get(workspace.getAbsolutePath(), "diffmap/").toString())
 				.setKernelDir(Paths.get(workspace.getAbsolutePath(), "kernel/").toString()).setOldTag("v3.19-rc1")
 				.setNewTag("v4.13")
-				.setResultDir(Paths.get(workspace.getAbsolutePath(), "diffmap", "413_results").toString()).build();
-
+				.setNewResultDir(Paths.get(workspace.getAbsolutePath(), "diffmap", "413_results").toString()).build();
+		
 		DiffLinker dl = new DiffLinker(config, true, 10);
 
 		int linked = dl.run("newInstanceMap.json");
@@ -86,7 +86,8 @@ public class DiffLinkerTest {
 				.setDiffTestDir(Paths.get(workspace.getAbsolutePath(), "diffmap/").toString())
 				.setKernelDir(Paths.get(workspace.getAbsolutePath(), "kernel/").toString()).setOldTag("v3.19-rc1")
 				.setNewTag("v4.13")
-				.setResultDir(Paths.get(workspace.getAbsolutePath(), "diffmap", "413_results").toString()).build();
+				.setNewResultDir(Paths.get(workspace.getAbsolutePath(), "diffmap", "413_results").toString()).build();
+		
 
 		DiffLinker dl = new DiffLinker(config, true, 10);
 
@@ -122,8 +123,8 @@ public class DiffLinkerTest {
 				.setDiffTestDir(Paths.get(workspace.getAbsolutePath(), "diffmap/").toString())
 				.setKernelDir(Paths.get(workspace.getAbsolutePath(), "kernel/").toString()).setOldTag("v3.19-rc1")
 				.setNewTag("v4.13")
-				.setResultDir(Paths.get(workspace.getAbsolutePath(), "diffmap", "413_results").toString()).build();
-
+				.setNewResultDir(Paths.get(workspace.getAbsolutePath(), "diffmap", "413_results").toString()).build();
+		
 		DiffLinker dl = new DiffLinker(config, false, 10);
 
 		int linked = dl.run("newInstanceMap.json");
